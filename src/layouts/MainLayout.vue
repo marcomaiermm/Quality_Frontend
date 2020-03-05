@@ -1,5 +1,7 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout
+  view="lHh Lpr lFf"
+  >
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -10,19 +12,14 @@
           aria-label="Menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
-
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
     <q-drawer
-      v-model="leftDrawerOpen"
       show-if-above
-      bordered
+      v-model="leftDrawerOpen"
+      side="left"
+      elevated
       content-class="bg-grey-1"
     >
       <q-list>
@@ -30,10 +27,10 @@
           header
           class="text-grey-8"
         >
-          Essential Links
+          Tools
         </q-item-label>
-        <EssentialLink
-          v-for="link in essentialLinks"
+        <MenuItem
+          v-for="link in menuItems"
           :key="link.title"
           v-bind="link"
         />
@@ -43,58 +40,42 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <!--Footer-->
+    <q-footer elevated class="text-white text-right">
+      <q-toolbar>
+        <q-toolbar-title>
+          Allweier Präzisionsteile GmbH
+        </q-toolbar-title>
+      </q-toolbar>
+    </q-footer>
+
   </q-layout>
 </template>
 
 <script>
-import EssentialLink from 'components/EssentialLink'
+import MenuItem from 'components/MenuItem'
 
 export default {
   name: 'MainLayout',
 
   components: {
-    EssentialLink
+    MenuItem
   },
 
   data () {
     return {
       leftDrawerOpen: false,
-      essentialLinks: [
+      menuItems: [
         {
-          title: 'Docs',
-          caption: 'quasar.dev',
-          icon: 'school',
-          link: 'https://quasar.dev'
+          title: 'Dashboard',
+          icon: 'dashboard',
+          link: '/dashboard'
         },
         {
-          title: 'Github',
-          caption: 'github.com/quasarframework',
-          icon: 'code',
-          link: 'https://github.com/quasarframework'
-        },
-        {
-          title: 'Discord Chat Channel',
-          caption: 'chat.quasar.dev',
-          icon: 'chat',
-          link: 'https://chat.quasar.dev'
-        },
-        {
-          title: 'Forum',
-          caption: 'forum.quasar.dev',
-          icon: 'record_voice_over',
-          link: 'https://forum.quasar.dev'
-        },
-        {
-          title: 'Twitter',
-          caption: '@quasarframework',
-          icon: 'rss_feed',
-          link: 'https://twitter.quasar.dev'
-        },
-        {
-          title: 'Facebook',
-          caption: '@QuasarFramework',
-          icon: 'public',
-          link: 'https://facebook.quasar.dev'
+          title: 'Analyse',
+          icon: 'scatter_plot',
+          link: '/scatter'
         }
       ]
     }
