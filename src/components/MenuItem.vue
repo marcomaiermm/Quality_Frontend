@@ -2,14 +2,13 @@
   <q-item
     clickable
     tag="a"
-    target="_blank"
     :href="link"
   >
     <q-item-section
       v-if="icon"
       avatar
     >
-      <q-icon :name="icon" />
+      <q-icon :name="icon" class="mini-icon" />
     </q-item-section>
 
     <q-item-section>
@@ -47,3 +46,8 @@ export default {
   }
 }
 </script>
+
+<style lang="sass">
+.mini-icon
+  color: $secondary
+</style>
