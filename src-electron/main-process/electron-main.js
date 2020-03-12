@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeTheme } from 'electron'
+import { app, BrowserWindow, nativeTheme, screen } from 'electron'
 
 try {
   if (process.platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {
@@ -21,8 +21,9 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 600,
+    width: (screen.getPrimaryDisplay().size.width * (3 / 4)),
+    height: (screen.getPrimaryDisplay().size.height * (3 / 4)),
+    frame: false,
     useContentSize: true,
     webPreferences: {
       // Change from /quasar.conf.js > electron > nodeIntegration;
