@@ -5,7 +5,7 @@
             class="my-sticky-dynamic"
             title="Treats"
             dense
-            :data="tableData"
+            :data="parsedData"
             :columns="columns"
             :loading="loading"
             row-key="index"
@@ -22,7 +22,7 @@
                 <q-space ></q-space>
 
                 <div v-if="$q.screen.gt.xs" class="col full-width">
-                    <q-toggle v-model="visibleColumns" v-for="cols in vCols" :key="cols" :val="cols.val" :label="cols.label"></q-toggle>
+                    <q-toggle v-model="visibleColumns" v-for="(cols, idx) in vCols" :key="idx" :val="cols.val" :label="cols.label"></q-toggle>
                     <!--<q-toggle v-model="visibleColumns" val="fat" label="Fat"></q-toggle>
                     <q-toggle v-model="visibleColumns" val="carbs" label="Carbs"></q-toggle>
                     <q-toggle v-model="visibleColumns" val="protein" label="Protein"></q-toggle>
@@ -62,6 +62,8 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+import LineChart from './LineChart.vue'
 // we generate lots of rows here
 /*
 const seed = []
@@ -93,7 +95,6 @@ export default {
       errors: null,
       toggles: [],
       seed: [],
-      tableData: [],
       tableHead: [],
       pagination: {
         sortBy: 'desc',
@@ -110,7 +111,8 @@ export default {
   computed: {
     data () {
       return Object.freeze(this.tableData.slice(0, pageSize * (this.nextPage - 1)))
-    }
+    },
+    ...mapGetters('dataset', ['parsedData'])
   },
 
   methods: {
@@ -145,8 +147,8 @@ export default {
           this.disabledRefresh = false
           this.loadingButton = false
           this.errors = error
+          console.log(error)
         })
-      this.tableData = this.seed
       this.tableHead = Object.keys(this.seed[0])
       this.tableHead.forEach(element => {
         this.visibleColumns.push(element)
@@ -166,8 +168,10 @@ export default {
           }
         )
       })
-      console.log(this.vCols)
-    }
+      this.updateData(this.seed)
+      LineChart.methods.renderChart()
+    },
+    ...mapActions('dataset', ['updateData'])
   }
 }
 </script>
@@ -181,7 +185,6 @@ export default {
   .q-table__bottom,
   thead tr:first-child th /* bg color is important for th; just specify one */
     background-color: #fff
-
   thead tr th
     position: sticky
     z-index: 1

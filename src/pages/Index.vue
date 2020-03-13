@@ -1,6 +1,7 @@
 <template>
   <q-page class="flex flex-center">
     <DataTable />
+    <DataChart />
   </q-page>
 </template>
 
@@ -8,7 +9,8 @@
 export default {
   name: 'PageIndex',
   components: {
-    DataTable: () => import('../components/Table')
+    DataTable: () => import('../components/Table'),
+    DataChart: () => import('../components/LineChart')
   }
 }
 </script>

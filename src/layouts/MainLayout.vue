@@ -77,7 +77,7 @@ export default {
         {
           title: 'Dashboard',
           icon: 'dashboard',
-          link: '/dashboard'
+          link: '/'
         },
         {
           title: 'Analyse',
