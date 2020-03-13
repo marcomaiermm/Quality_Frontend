@@ -5,10 +5,11 @@
             class="my-sticky-dynamic"
             title="Treats"
             dense
-            :data="data"
+            :data="tableData"
             :columns="columns"
             :loading="loading"
             row-key="index"
+            no-data-label="I didn't find anything for you"
             :virtual-scroll-item-size="48"
             :virtual-scroll-sticky-size-start="48"
             :pagination.sync="pagination"
@@ -16,18 +17,18 @@
             :visible-columns="visibleColumns"
             >
             <template v-slot:top="">
-                <div class="col-2 q-table__title">Treats</div>
+                <div class="col-2 q-table__title">Stock</div>
 
                 <q-space ></q-space>
 
-                <div v-if="$q.screen.gt.xs" class="col">
-                    <q-toggle v-model="visibleColumns" val="calories" label="Calories"></q-toggle>
-                    <q-toggle v-model="visibleColumns" val="fat" label="Fat"></q-toggle>
+                <div v-if="$q.screen.gt.xs" class="col full-width">
+                    <q-toggle v-model="visibleColumns" v-for="cols in vCols" :key="cols" :val="cols.val" :label="cols.label"></q-toggle>
+                    <!--<q-toggle v-model="visibleColumns" val="fat" label="Fat"></q-toggle>
                     <q-toggle v-model="visibleColumns" val="carbs" label="Carbs"></q-toggle>
                     <q-toggle v-model="visibleColumns" val="protein" label="Protein"></q-toggle>
                     <q-toggle v-model="visibleColumns" val="sodium" label="Sodium"></q-toggle>
                     <q-toggle v-model="visibleColumns" val="calcium" label="Calcium"></q-toggle>
-                    <q-toggle v-model="visibleColumns" val="iron" label="Iron"></q-toggle>
+                    <q-toggle v-model="visibleColumns" val="iron" label="Iron"></q-toggle>-->
                 </div>
                     <q-select
                     v-else
@@ -61,110 +62,9 @@
 </template>
 
 <script>
-const seed = [
-  {
-    name: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6.0,
-    carbs: 24,
-    protein: 4.0,
-    sodium: 87,
-    calcium: '14%',
-    iron: '1%'
-  },
-  {
-    name: 'Ice cream sandwich',
-    calories: 237,
-    fat: 9.0,
-    carbs: 37,
-    protein: 4.3,
-    sodium: 129,
-    calcium: '8%',
-    iron: '1%'
-  },
-  {
-    name: 'Eclair',
-    calories: 262,
-    fat: 16.0,
-    carbs: 23,
-    protein: 6.0,
-    sodium: 337,
-    calcium: '6%',
-    iron: '7%'
-  },
-  {
-    name: 'Cupcake',
-    calories: 305,
-    fat: 3.7,
-    carbs: 67,
-    protein: 4.3,
-    sodium: 413,
-    calcium: '3%',
-    iron: '8%'
-  },
-  {
-    name: 'Gingerbread',
-    calories: 356,
-    fat: 16.0,
-    carbs: 49,
-    protein: 3.9,
-    sodium: 327,
-    calcium: '7%',
-    iron: '16%'
-  },
-  {
-    name: 'Jelly bean',
-    calories: 375,
-    fat: 0.0,
-    carbs: 94,
-    protein: 0.0,
-    sodium: 50,
-    calcium: '0%',
-    iron: '0%'
-  },
-  {
-    name: 'Lollipop',
-    calories: 392,
-    fat: 0.2,
-    carbs: 98,
-    protein: 0,
-    sodium: 38,
-    calcium: '0%',
-    iron: '2%'
-  },
-  {
-    name: 'Honeycomb',
-    calories: 408,
-    fat: 3.2,
-    carbs: 87,
-    protein: 6.5,
-    sodium: 562,
-    calcium: '0%',
-    iron: '45%'
-  },
-  {
-    name: 'Donut',
-    calories: 452,
-    fat: 25.0,
-    carbs: 51,
-    protein: 4.9,
-    sodium: 326,
-    calcium: '2%',
-    iron: '22%'
-  },
-  {
-    name: 'KitKat',
-    calories: 518,
-    fat: 26.0,
-    carbs: 65,
-    protein: 7,
-    sodium: 54,
-    calcium: '12%',
-    iron: '6%'
-  }
-]
-
 // we generate lots of rows here
+/*
+const seed = []
 let data = []
 for (let i = 0; i < 1000; i++) {
   data = data.concat(seed.slice(0).map(r => ({ ...r })))
@@ -172,53 +72,44 @@ for (let i = 0; i < 1000; i++) {
 data.forEach((row, index) => {
   row.index = index
 })
-
+*/
 // we are not going to change this array,
 // so why not freeze it to avoid Vue adding overhead
 // with state change detection
-Object.freeze(data)
+// Object.freeze(data)
 
 const pageSize = 50
 const nextPage = 2
-const lastPage = Math.ceil(data.length / pageSize)
+// const lastPage = Math.ceil(data.length / pageSize)
 export default {
   data () {
     return {
+      lastPage: 0,
+      pageSize,
       nextPage,
       loading: false,
       loadingButton: false,
       disabledRefresh: false,
+      errors: null,
+      toggles: [],
+      seed: [],
+      tableData: [],
+      tableHead: [],
       pagination: {
         sortBy: 'desc',
         descending: false,
         page: 0,
         rowsPerPage: 10
       },
-      visibleColumns: ['calories', 'desc', 'fat', 'carbs', 'protein', 'sodium', 'calcium', 'iron'],
-      columns: [
-        {
-          name: 'desc',
-          required: true,
-          label: 'Dessert (100g serving)',
-          align: 'left',
-          field: row => row.name,
-          format: val => `${val}`,
-          sortable: true
-        },
-        { name: 'calories', align: 'center', label: 'Calories', field: 'calories', sortable: true },
-        { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
-        { name: 'carbs', label: 'Carbs (g)', field: 'carbs', sortable: true },
-        { name: 'protein', label: 'Protein (g)', field: 'protein', sortable: true },
-        { name: 'sodium', label: 'Sodium (mg)', field: 'sodium', sortable: true },
-        { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
-        { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
-      ]
+      visibleColumns: [],
+      vCols: [],
+      columns: []
     }
   },
 
   computed: {
     data () {
-      return Object.freeze(data.slice(0, pageSize * (this.nextPage - 1)))
+      return Object.freeze(this.tableData.slice(0, pageSize * (this.nextPage - 1)))
     }
   },
 
@@ -226,7 +117,7 @@ export default {
     onScroll ({ to, ref }) {
       const lastIndex = this.data.length - 1
 
-      if (this.loading !== true && this.nextPage < lastPage && to === lastIndex) {
+      if (this.loading !== true && this.nextPage < this.lastPage && to === lastIndex) {
         this.loading = true
 
         setTimeout(() => {
@@ -241,10 +132,41 @@ export default {
     refreshData () {
       this.disabledRefresh = true
       this.loadingButton = true
-      setTimeout(() => {
-        this.loadingButton = false
-        this.disabledRefresh = false
-      }, 3000)
+      this.vCols = []
+      this.visibleColumns = []
+      this.columns = []
+      this.$axios.get('http://127.0.0.1:5000/data')
+        .then((response) => {
+          this.seed = JSON.parse(response.data)
+          this.loadingButton = false
+          this.disabledRefresh = false
+        })
+        .catch(error => {
+          this.disabledRefresh = false
+          this.loadingButton = false
+          this.errors = error
+        })
+      this.tableData = this.seed
+      this.tableHead = Object.keys(this.seed[0])
+      this.tableHead.forEach(element => {
+        this.visibleColumns.push(element)
+        this.columns.push(
+          {
+            name: element,
+            align: 'left',
+            label: element,
+            field: element,
+            sortable: true
+          }
+        )
+        this.vCols.push(
+          {
+            val: element,
+            label: element
+          }
+        )
+      })
+      console.log(this.vCols)
     }
   }
 }
