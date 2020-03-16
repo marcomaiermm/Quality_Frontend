@@ -15,7 +15,7 @@ const actions = {
 }
 
 const getters = {
-  parsedData: state => {
+  getData: state => {
     return state.parsedData
   }
 }

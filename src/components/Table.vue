@@ -1,90 +1,79 @@
 <template>
-    <div id="q-app">
-        <div class="q-pa-md">
-            <q-table
-            class="my-sticky-dynamic"
-            title="Treats"
+  <div id="q-app">
+    <!-- css spacing classes q-[p|m][t|r|b|l|a|x|y]-[none|auto|xs|sm|md|lg|xl]
+                                    type direction              size                      -->
+    <div class="q-mt-sm q-mr-md q-ml-md">
+      <q-table
+        class="my-sticky-dynamic"
+        title="Treats"
+        dense
+        :data="Data"
+        :columns="columns"
+        :loading="loading"
+        row-key="index"
+        no-data-label="I didn't find anything for you"
+        :virtual-scroll-item-size="48"
+        :virtual-scroll-sticky-size-start="48"
+        :pagination.sync="pagination"
+        :rows-per-page-options="[0]"
+        :visible-columns="visibleColumns"
+      >
+        <template v-slot:top="">
+          <div class="col-2 q-table__title">Stock</div>
+
+          <q-space></q-space>
+
+          <div v-if="$q.screen.gt.xs" class="col full-width">
+            <q-toggle
+              v-model="visibleColumns"
+              v-for="(cols, idx) in vCols"
+              :key="idx"
+              :val="cols.val"
+              :label="cols.label"
+            ></q-toggle>
+          </div>
+          <q-select
+            v-else
+            v-model="visibleColumns"
+            multiple
+            borderless
             dense
-            :data="parsedData"
-            :columns="columns"
-            :loading="loading"
-            row-key="index"
-            no-data-label="I didn't find anything for you"
-            :virtual-scroll-item-size="48"
-            :virtual-scroll-sticky-size-start="48"
-            :pagination.sync="pagination"
-            :rows-per-page-options="[0]"
-            :visible-columns="visibleColumns"
+            options-dense
+            :display-value="$q.lang.table.columns"
+            emit-value
+            map-options
+            :options="columns"
+            option-value="name"
+            style="min-width: 150px"
+          ></q-select>
+
+          <q-btn
+            dense
+            class="q-ml-md"
+            icon="refresh"
+            :loading="loadingButton"
+            @click="refreshData()"
+            :disable="disabledRefresh"
+          >
+            <q-tooltip content-class="bg-accent" anchor="top left"
+              >Aktualisieren</q-tooltip
             >
-            <template v-slot:top="">
-                <div class="col-2 q-table__title">Stock</div>
-
-                <q-space ></q-space>
-
-                <div v-if="$q.screen.gt.xs" class="col full-width">
-                    <q-toggle v-model="visibleColumns" v-for="(cols, idx) in vCols" :key="idx" :val="cols.val" :label="cols.label"></q-toggle>
-                    <!--<q-toggle v-model="visibleColumns" val="fat" label="Fat"></q-toggle>
-                    <q-toggle v-model="visibleColumns" val="carbs" label="Carbs"></q-toggle>
-                    <q-toggle v-model="visibleColumns" val="protein" label="Protein"></q-toggle>
-                    <q-toggle v-model="visibleColumns" val="sodium" label="Sodium"></q-toggle>
-                    <q-toggle v-model="visibleColumns" val="calcium" label="Calcium"></q-toggle>
-                    <q-toggle v-model="visibleColumns" val="iron" label="Iron"></q-toggle>-->
-                </div>
-                    <q-select
-                    v-else
-                    v-model="visibleColumns"
-                    multiple
-                    borderless
-                    dense
-                    options-dense
-                    :display-value="$q.lang.table.columns"
-                    emit-value
-                    map-options
-                    :options="columns"
-                    option-value="name"
-                    style="min-width: 150px"
-                    ></q-select>
-
-                    <q-btn
-                    dense
-                    class="q-ml-md"
-                    icon="refresh"
-                    :loading="loadingButton"
-                    @click="refreshData()"
-                    :disable="disabledRefresh"
-                    >
-                    <q-tooltip content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
-                    </q-btn>
-            </template>
-            </q-table>
-        </div>
+          </q-btn>
+        </template>
+      </q-table>
     </div>
+  </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import LineChart from './LineChart.vue'
-// we generate lots of rows here
-/*
-const seed = []
-let data = []
-for (let i = 0; i < 1000; i++) {
-  data = data.concat(seed.slice(0).map(r => ({ ...r })))
-}
-data.forEach((row, index) => {
-  row.index = index
-})
-*/
-// we are not going to change this array,
-// so why not freeze it to avoid Vue adding overhead
-// with state change detection
-// Object.freeze(data)
+import { mapGetters, mapActions } from "vuex";
+import * as d3 from "d3";
+// import LineChart from './LineChart.vue'
 
-const pageSize = 50
-const nextPage = 2
-// const lastPage = Math.ceil(data.length / pageSize)
+const pageSize = 50;
+const nextPage = 2;
 export default {
-  data () {
+  data() {
     return {
       lastPage: 0,
       pageSize,
@@ -97,7 +86,7 @@ export default {
       seed: [],
       tableHead: [],
       pagination: {
-        sortBy: 'desc',
+        sortBy: "desc",
         descending: false,
         page: 0,
         rowsPerPage: 10
@@ -105,75 +94,95 @@ export default {
       visibleColumns: [],
       vCols: [],
       columns: []
-    }
+    };
   },
 
   computed: {
-    data () {
-      return Object.freeze(this.tableData.slice(0, pageSize * (this.nextPage - 1)))
+    data() {
+      return Object.freeze(
+        this.tableData.slice(0, pageSize * (this.nextPage - 1))
+      );
     },
-    ...mapGetters('dataset', ['parsedData'])
+    ...mapGetters({ Data: "dataset/getData" })
   },
 
   methods: {
-    onScroll ({ to, ref }) {
-      const lastIndex = this.data.length - 1
+    onScroll({ to, ref }) {
+      const lastIndex = this.data.length - 1;
 
-      if (this.loading !== true && this.nextPage < this.lastPage && to === lastIndex) {
-        this.loading = true
+      if (
+        this.loading !== true &&
+        this.nextPage < this.lastPage &&
+        to === lastIndex
+      ) {
+        this.loading = true;
 
         setTimeout(() => {
-          this.nextPage++
+          this.nextPage++;
           this.$nextTick(() => {
-            ref.refresh()
-            this.loading = false
-          })
-        }, 500)
+            ref.refresh();
+            this.loading = false;
+          });
+        }, 500);
       }
     },
-    refreshData () {
-      this.disabledRefresh = true
-      this.loadingButton = true
-      this.vCols = []
-      this.visibleColumns = []
-      this.columns = []
-      this.$axios.get('http://127.0.0.1:5000/data')
-        .then((response) => {
-          this.seed = JSON.parse(response.data)
-          this.loadingButton = false
-          this.disabledRefresh = false
+    refreshData() {
+      this.disabledRefresh = true;
+      this.loadingButton = true;
+      this.vCols = [];
+      this.visibleColumns = [];
+      this.columns = [];
+      this.$axios
+        .get("http://127.0.0.1:5000/data")
+        .then(response => {
+          this.seed = JSON.parse(response.data);
+          // this.formatData();
+          this.updateData(this.seed);
+          this.drawTable();
+          this.loadingButton = false;
+          this.disabledRefresh = false;
         })
         .catch(error => {
-          this.disabledRefresh = false
-          this.loadingButton = false
-          this.errors = error
-          console.log(error)
-        })
-      this.tableHead = Object.keys(this.seed[0])
-      this.tableHead.forEach(element => {
-        this.visibleColumns.push(element)
-        this.columns.push(
-          {
-            name: element,
-            align: 'left',
-            label: element,
-            field: element,
-            sortable: true
-          }
-        )
-        this.vCols.push(
-          {
-            val: element,
-            label: element
-          }
-        )
-      })
-      this.updateData(this.seed)
-      LineChart.methods.renderChart()
+          this.disabledRefresh = false;
+          this.loadingButton = false;
+          this.errors = error;
+        });
     },
-    ...mapActions('dataset', ['updateData'])
+    drawTable() {
+      this.tableHead = Object.keys(this.Data[0]);
+      this.tableHead.forEach(element => {
+        this.visibleColumns.push(element);
+        this.columns.push({
+          name: element,
+          align: "left",
+          label: element,
+          field: element,
+          sortable: true
+        });
+        this.vCols.push({
+          val: element,
+          label: element
+        });
+      });
+      // LineChart.methods.testMethod(this.Data)
+    },
+    formatData() {
+      var parseTime = d3.timeParse("%d.%m.%Y");
+      this.seed.forEach(function(d) {
+        d.Date = parseTime(d.Date);
+        d.Close = +d.Close;
+      });
+    },
+    ...mapActions("dataset", ["updateData"])
+  },
+  mounted() {
+    if (this.Data.length > 0) {
+      this.drawTable();
+    } else {
+      this.refreshData();
+    }
   }
-}
+};
 </script>
 
 <style lang="sass">
