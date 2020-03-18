@@ -1,13 +1,14 @@
 <template>
-  <div id="q-app">
-    <div class="q-pa-md row items-start q-gutter-md">
-      <q-card class="line-card" bordered>
-        <q-card-section>
-          <div class="text-overline text-9">Line Chart</div>
-          <div class="text-subtitle1 q-mt-sm q-mb-xs">
-            Close Price
-          </div>
-          <!--<div class="text-caption text-grey"></div>
+  <div class="q-pa-md">
+    <q-card class="line-card" bordered>
+      <q-card-section>
+        <div class="text-overline text-9">
+          Line Chart
+        </div>
+        <div class="text-subtitle1 q-mt-sm q-mb-xs">
+          Close Price
+        </div>
+        <!--<div class="text-caption text-grey"></div>
         <svg
           :height="height"
           :width="width"
@@ -21,17 +22,16 @@
           <g transform="translate(50,50)">
           </g>
         </svg>-->
-          <!--<svg id="chart-visualisation"></svg>-->
-          <commit-chart
-            :width="w"
-            :height="h"
-            :chartData="datacollection"
-            :options="options"
-          >
-          </commit-chart>
-        </q-card-section>
-      </q-card>
-    </div>
+        <!--<svg id="chart-visualisation"></svg>-->
+        <commit-chart
+          :width="w"
+          :height="h"
+          :chartData="datacollection"
+          :options="options"
+        >
+        </commit-chart>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
@@ -42,6 +42,7 @@ import CommitChart from "./js/CommitChart.js";
 import { mapGetters } from "vuex";
 
 var moment = require("moment");
+
 export default {
   name: "LineChart",
   components: {
@@ -55,8 +56,8 @@ export default {
       datacollection: null,
       dataset: {},
       options: {},
-      h: 300,
-      w: 650
+      h: 400,
+      w: 1000
       // margin: { top: 30, right: 20, bottom: 30, left: 50 }
     };
   },
@@ -68,7 +69,6 @@ export default {
         this.dataset.push({ ...element });
       });
       this.fillData();
-      console.log(this.$data);
     }
   },
   methods: {
@@ -81,11 +81,11 @@ export default {
           {
             label: "Close",
             pointHoverBackgroundColor: "rgba(0, 119, 220, 0.6)",
-            borderColor: "rgba(2, 62, 115, 0.45)",
+            borderColor: "rgba(2, 62, 115, 0.8)",
             backgroundColor: "rgba(2, 62, 115, 0.1)",
             borderWidth: 1,
             pointHoverRadius: 5,
-            pointRadius: 0,
+            pointRadius: 2,
             lineTension: 0,
             fill: true,
             data: this.Data.map(function(d) {
@@ -104,15 +104,9 @@ export default {
               type: "time",
               time: {
                 displayFormats: {
-                  // millisecond: "DD.MM.YYYY",
-                  // second: "DD.MM.YYYY",
-                  // minute: "DD.MM.YYYY",
-                  // hour: "DD.MM.YYYY",
-                  // day: "DD.MM.YYYY",
-                  // week: "DD.MM.YYYY",
-                  month: "DD.MM.YYYY"
-                  // quarter: "DD.MM.YYYY",
-                  // year: "DD.MM.YYYY"
+                  day: "DD.MM.YY",
+                  month: "DD.MM.YY",
+                  year: "DD.MM.YY"
                 }
               },
               ticks: {
@@ -121,6 +115,13 @@ export default {
               },
               gridLines: {
                 display: false
+              }
+            }
+          ],
+          yAxes: [
+            {
+              ticks: {
+                beginAtZero: true
               }
             }
           ]
@@ -234,7 +235,7 @@ export default {
 <style lang="sass">
 .line-card
   width: 100%
-  max-width: 700px
+  max-width: 1000px
 .line
   fill: none
   stroke: steelblue

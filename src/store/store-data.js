@@ -1,24 +1,34 @@
 const state = {
-  parsedData: []
-}
+  parsedData: [],
+  parsedHistory: []
+};
 
 const mutations = {
-  updateData (state, payload) {
-    state.parsedData = payload
+  updateData(state, payload) {
+    state.parsedData = payload;
+  },
+  updateHistory(state, payload) {
+    state.parsedHistory = payload;
   }
-}
+};
 
 const actions = {
-  updateData ({ commit }, payload) {
-    commit('updateData', payload)
+  updateData({ commit }, payload) {
+    commit("updateData", payload);
+  },
+  updateHistory({ commit }, payload) {
+    commit("updateHistory", payload);
   }
-}
+};
 
 const getters = {
   getData: state => {
-    return state.parsedData
+    return state.parsedData;
+  },
+  getHistory: state => {
+    return state.parsedHistory;
   }
-}
+};
 
 export default {
   namespaced: true,
@@ -26,4 +36,4 @@ export default {
   mutations,
   actions,
   getters
-}
+};
