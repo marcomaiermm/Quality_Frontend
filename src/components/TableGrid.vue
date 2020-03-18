@@ -1,125 +1,29 @@
 <template>
-  <!-- css spacing classes q-[p|m][t|r|b|l|a|x|y]-[none|auto|xs|sm|md|lg|xl]
+  <div id="q-app">
+    <!-- css spacing classes q-[p|m][t|r|b|l|a|x|y]-[none|auto|xs|sm|md|lg|xl]
                                     type direction              size                      -->
-  <div class="q-mt-sm q-mr-md q-ml-md col">
-    <q-table
-      class="my-sticky-dynamic"
-      title="Treats"
-      :dense="$q.screen.lt.md"
-      :data="dataset"
-      :columns="columns"
-      :loading="loading"
-      :filter="filter"
-      row-key="index"
-      no-data-label="I didn't find anything for you"
-      :virtual-scroll-item-size="48"
-      :virtual-scroll-sticky-size-start="48"
-      :pagination.sync="pagination"
-      :rows-per-page-options="[0]"
-      :visible-columns="visibleColumns"
-      :sort-method="customSort"
-    >
-      <template v-slot:top="">
-        <div class="fit row wrap justify-between  content-start">
-          <div class="text-h6 col">Stock</div>
-          <div class="q-pa-xs col" style="min-width: 150px">
-            <q-input
-              filled
-              v-model="startDate"
-              mask="date"
-              :rules="['date']"
-              style="height: 50px"
-            >
-              <template v-slot:append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy
-                    ref="qDateProxy"
-                    transition-show="scale"
-                    transition-hide="scale"
-                  >
-                    <q-date
-                      v-model="startDate"
-                      today-btn
-                      @input="() => $refs.qDateProxy.hide()"
-                    ></q-date>
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
-          </div>
-          <div class="q-pa-xs col" style="min-width: 150px">
-            <q-input
-              filled
-              v-model="endDate"
-              mask="date"
-              :rules="['date']"
-              style="height: 50px"
-            >
-              <template v-slot:append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy
-                    ref="qDateProxy"
-                    transition-show="scale"
-                    transition-hide="scale"
-                  >
-                    <q-date
-                      v-model="endDate"
-                      today-btn
-                      @input="() => $refs.qDateProxy.hide()"
-                    ></q-date>
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
-          </div>
-          <!--
-          <div v-if="$q.screen.gt.xs" class="col full-width">
-            <q-toggle
-              v-model="visibleColumns"
-              v-for="(cols, idx) in vCols"
-              :key="idx"
-              :val="cols.val"
-              :label="cols.label"
-            ></q-toggle>
-          </div>
-          v-else
-          -->
-          <div class="col">
-            <q-btn
-              dense
-              class="q-ml-md"
-              icon="refresh"
-              :loading="loadingButton"
-              @click="refreshData()"
-              :disable="disabledRefresh"
-            >
-              <q-tooltip content-class="bg-accent" anchor="top left"
-                >Aktualisieren</q-tooltip
-              >
-            </q-btn>
-          </div>
-          <div class="col"></div>
-          <div class="col"></div>
-          <div class="col"></div>
-          <div class="col">
-            <q-select
-              v-model="visibleColumns"
-              multiple
-              outlined
-              dense
-              options-dense
-              :display-value="$q.lang.table.columns"
-              emit-value
-              map-options
-              :options="columns"
-              option-value="name"
-              options-cover
-              style="min-width: 150px"
-            ></q-select>
-          </div>
-        </div>
-      </template>
-    </q-table>
+    <q-card class="q-mt-sm q-mr-md q-ml-md">
+      <q-card-section class="q-pb-sm">
+        <code-tabs :tagParts="tagParts"></code-tabs>
+      </q-card-section>
+      <q-card-section>
+        <div class="text-h5 text-9">Stock Price</div>
+        <q-btn
+          dense
+          class="q-ml-md"
+          icon="refresh"
+          :loading="loadingButton"
+          @click="refreshData()"
+          :disable="disabledRefresh"
+        >
+          <q-tooltip content-class="bg-accent" anchor="top left"
+            >Aktualisieren</q-tooltip
+          >
+        </q-btn>
+        <q-grid :data="Data" :columns="columns" :columns_filter="true" flat>
+        </q-grid>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
@@ -130,19 +34,9 @@ import { date } from "quasar";
 // import LineChart from './LineChart.vue'
 const pageSize = 50;
 const nextPage = 2;
-// var today = date.formatDate((Date.now(), "YYYY.MM.DD"));
-var begin = new Date();
-begin.setMonth(begin.getMonth() - 1);
-begin = date.formatDate(begin, "YYYY.MM.DD");
-
-// var moment = require("moment");
 export default {
   data() {
     return {
-      startDate: begin,
-      endDate: date.formatDate(Date.now(), "YYYY.MM.DD"),
-      startDateCopy: "",
-      endDateCopy: "",
       lastPage: 0,
       pageSize,
       nextPage,
@@ -159,14 +53,19 @@ export default {
         sortBy: "desc",
         descending: false,
         page: 0,
-        rowsPerPage: 10
+        rowsPerPage: 5
       },
       visibleColumns: [],
       vCols: [],
       columns: []
     };
   },
-
+  props: {
+    tagParts: {
+      type: Object,
+      default: () => {}
+    }
+  },
   computed: {
     data() {
       return Object.freeze(
@@ -182,12 +81,6 @@ export default {
       newData.forEach(element => {
         this.dataset.push({ ...element });
       });
-    },
-    startDate: function(newDate, oldDate) {
-      this.startDateCopy = this.stringDate(newDate);
-    },
-    endDate: function(newDate, oldDate) {
-      this.endDateCopy = this.stringDate(newDate);
     }
   },
 
@@ -211,28 +104,14 @@ export default {
         }, 500);
       }
     },
-    stringDate(newDate) {
-      var copyOfDate = newDate.valueOf();
-      copyOfDate = date.formatDate(copyOfDate, "DD.MM.YYYY");
-      return copyOfDate;
-    },
-    // Funktion zum Aktualisieren der Daten. Hier wird ein asynchroner Axios get call zum Backend getätigt.
-    // Die daraus resultierenden Daten werden im store gespeichert
     refreshData() {
       this.disabledRefresh = true;
       this.loadingButton = true;
       this.vCols = [];
       this.visibleColumns = [];
       this.columns = [];
-      const dateBegin = this.stringDate(this.startDate);
-      const dateEnd = this.stringDate(this.endDate);
       this.$axios
-        .get("http://127.0.0.1:5000/data", {
-          params: {
-            start: this.stringDate(this.startDate),
-            end: this.stringDate(this.endDate)
-          }
-        })
+        .get("http://127.0.0.1:5000/data")
         .then(response => {
           this.seed = JSON.parse(response.data);
           // this.formatData();
@@ -249,12 +128,7 @@ export default {
         });
 
       this.$axios
-        .get("http://127.0.0.1:5000/histogram", {
-          params: {
-            start: dateBegin,
-            end: dateEnd
-          }
-        })
+        .get("http://127.0.0.1:5000/histogram")
         .then(response => {
           this.seed = JSON.parse(response.data);
           this.updateHistory(this.seed);
@@ -283,7 +157,6 @@ export default {
             label: element,
             type: "date",
             field: element,
-            format: val => `${val}`,
             sortable: true
           });
         } else {
@@ -361,7 +234,6 @@ export default {
     } else {
       this.refreshData();
     }
-    console.log(begin);
   }
 };
 </script>

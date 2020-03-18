@@ -1,13 +1,6 @@
 <template>
-  <q-item
-    clickable
-    tag="a"
-    :to="link"
-  >
-    <q-item-section
-      v-if="icon"
-      avatar
-    >
+  <q-item clickable tag="a" :to="link">
+    <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" class="mini-icon" />
     </q-item-section>
 
@@ -22,7 +15,7 @@
 
 <script>
 export default {
-  name: 'MenuItem',
+  name: "MenuItem",
   props: {
     title: {
       type: String,
@@ -31,20 +24,20 @@ export default {
 
     caption: {
       type: String,
-      default: ''
+      default: ""
     },
 
     link: {
       type: String,
-      default: '#'
+      default: "#"
     },
 
     icon: {
       type: String,
-      default: ''
+      default: ""
     }
   }
-}
+};
 </script>
 
 <style lang="sass">

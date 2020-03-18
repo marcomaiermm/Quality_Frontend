@@ -1,10 +1,9 @@
 <template>
-  <q-page class="flex flex-center">
-  </q-page>
+  <q-page class="flex flex-center"> </q-page>
 </template>
 
 <script>
 export default {
-  name: 'Scatter'
-}
+  name: "Scatter"
+};
 </script>
