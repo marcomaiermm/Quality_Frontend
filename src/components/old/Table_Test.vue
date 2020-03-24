@@ -10,8 +10,10 @@
       :columns="columns"
       :loading="loading"
       :filter="filter"
-      row-key="name"
+      row-key="index"
       no-data-label="I didn't find anything for you"
+      :virtual-scroll-item-size="48"
+      :virtual-scroll-sticky-size-start="48"
       :pagination.sync="pagination"
       :rows-per-page-options="[0]"
       :visible-columns="visibleColumns"
@@ -19,7 +21,7 @@
     >
       <template v-slot:top="">
         <div class="fit row wrap justify-between  content-start">
-          <div class="text-h6 col">Interne Reklamationen</div>
+          <div class="text-h6 col">Stock</div>
           <div class="q-pa-xs col" style="min-width: 150px">
             <q-input
               filled
@@ -27,8 +29,6 @@
               mask="date"
               :rules="['date']"
               style="height: 50px"
-              label="Von:"
-              stack-label
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
@@ -54,8 +54,6 @@
               mask="date"
               :rules="['date']"
               style="height: 50px"
-              label="Bis:"
-              stack-label
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
@@ -92,7 +90,7 @@
               class="q-ml-md"
               icon="refresh"
               :loading="loadingButton"
-              @click="refreshDataTable()"
+              @click="refreshData()"
               :disable="disabledRefresh"
             >
               <q-tooltip content-class="bg-accent" anchor="top left"
@@ -100,13 +98,7 @@
               >
             </q-btn>
           </div>
-          <div class="col">
-            <q-input dense v-model="filter" placeholder="Suche">
-              <template v-slot:append>
-                <q-icon name="search"></q-icon>
-              </template>
-            </q-input>
-          </div>
+          <div class="col"></div>
           <div class="col"></div>
           <div class="col"></div>
           <div class="col">
@@ -139,7 +131,7 @@ import { date } from "quasar";
 const pageSize = 50;
 const nextPage = 2;
 // var today = date.formatDate((Date.now(), "YYYY.MM.DD"));
-let begin = new Date();
+var begin = new Date();
 begin.setMonth(begin.getMonth() - 1);
 begin = date.formatDate(begin, "YYYY.MM.DD");
 
@@ -159,14 +151,14 @@ export default {
       filter: "",
       loadingButton: false,
       disabledRefresh: false,
-      errors: [],
+      errors: null,
       toggles: [],
       seed: [],
       tableHead: [],
       dataset: [],
       pagination: {
-        sortBy: "name",
-        descending: true,
+        sortBy: "desc",
+        descending: false,
         page: 0,
         rowsPerPage: 10
       },
@@ -183,8 +175,9 @@ export default {
       );
     },
     ...mapGetters({
+      Data: "dataset/getData",
       History: "dataset/getHistory",
-      Data: "dataset/getData"
+      Query: "dataset/getQuery"
     })
   },
 
@@ -201,14 +194,11 @@ export default {
     endDate: function(newDate, oldDate) {
       this.endDateCopy = this.stringDate(newDate);
     },
-    calls: function() {
-      if (this.calls === 2) {
-        this.loadingButton = false;
-        this.disabledRefresh = false;
-      }
+    Query: function(newData, oldData) {
+      console.log(this.Query);
     },
-    errors: function() {
-      if (this.errors.length > 0) {
+    calls: function() {
+      if (this.calls === 3) {
         this.loadingButton = false;
         this.disabledRefresh = false;
       }
@@ -237,13 +227,13 @@ export default {
       }
     },
     stringDate(newDate) {
-      let copyOfDate = newDate.valueOf();
+      var copyOfDate = newDate.valueOf();
       copyOfDate = date.formatDate(copyOfDate, "DD.MM.YYYY");
       return copyOfDate;
     },
     // Funktion zum Aktualisieren der Daten. Hier wird ein asynchroner Axios get call zum Backend getätigt.
     // Die daraus resultierenden Daten werden im store gespeichert
-    refreshDataTable() {
+    refreshData() {
       this.calls = 0;
       this.disabledRefresh = true;
       this.loadingButton = true;
@@ -253,7 +243,25 @@ export default {
       const dateBegin = this.stringDate(this.startDate);
       const dateEnd = this.stringDate(this.endDate);
       this.$axios
-        .get("http://192.168.8.218:5000/datatable", {
+        .get("http://192.168.8.218:5000/data", {
+          params: {
+            start: this.stringDate(this.startDate),
+            end: this.stringDate(this.endDate)
+          }
+        })
+        .then(response => {
+          this.seed = JSON.parse(response.data);
+          // this.formatData();
+          this.updateData(this.seed);
+          this.pushData();
+          this.drawTable();
+          this.calls += 1;
+        })
+        .catch(error => {
+          this.errors = error;
+        });
+      this.$axios
+        .get("http://192.168.8.218:5000/histogram", {
           params: {
             start: dateBegin,
             end: dateEnd
@@ -261,27 +269,26 @@ export default {
         })
         .then(response => {
           this.seed = JSON.parse(response.data);
-          this.updateData(this.seed);
-          this.pushData();
-          this.drawTable();
-          // Histogramm nachdem die Daten aus der Tabelle aus dem SQL per Abfrage gezogen wurden.
-          this.refreshHistogramData();
-          this.calls += 1;
-        })
-        .catch(error => {
-          this.errors.push(error);
-        });
-    },
-    refreshHistogramData() {
-      this.$axios
-        .get("http://192.168.8.218:5000/histogram")
-        .then(response => {
-          this.seed = JSON.parse(response.data);
           this.updateHistory(this.seed);
           this.calls += 1;
         })
         .catch(error => {
-          this.errors.push(error);
+          this.errors = error;
+        });
+      // TEST
+      this.$axios
+        .get("http://192.168.8.218:5000/q", {
+          params: {
+            start: dateBegin,
+            end: dateEnd
+          }
+        })
+        .then(response => {
+          this.updateQuery(JSON.parse(response.data));
+          this.calls += 1;
+        })
+        .catch(error => {
+          this.errors = error;
         });
     },
     pushData() {
@@ -295,7 +302,7 @@ export default {
       this.tableHead = Object.keys(this.dataset[0]);
       this.tableHead.forEach(element => {
         this.visibleColumns.push(element);
-        if (element === "Datum") {
+        if (element === "Date") {
           this.columns.push({
             name: element,
             align: "left",
@@ -323,7 +330,7 @@ export default {
     },
     formatData() {
       for (let i = 0; i < this.seed.length; i++) {
-        this.seed[i].Datum = Date.extractDate(this.seed[i].Datum, "DD.MM.YYYY");
+        this.seed[i].Date = date.extractDate(this.seed[i].Date, "DD.MM.YYYY");
       } /*
       this.seed.map(function(d) {
         return moment(d.Date, "DD-MM-YYYY");
@@ -351,12 +358,12 @@ export default {
           const x = descending ? b : a;
           const y = descending ? a : b;
 
-          if (sortBy === "Datum") {
-            const xx = x[sortBy]
+          if (sortBy === "Date") {
+            var xx = x[sortBy]
               .split(".")
               .reverse()
               .join("");
-            const yy = y[sortBy]
+            var yy = y[sortBy]
               .split(".")
               .reverse()
               .join("");
@@ -372,13 +379,13 @@ export default {
       }
       return data;
     },
-    ...mapActions("dataset", ["updateHistory", "updateData"])
+    ...mapActions("dataset", ["updateData", "updateHistory", "updateQuery"])
   },
   mounted() {
     if (this.Data.length > 0) {
       this.drawTable();
     } else {
-      this.refreshDataTable();
+      this.refreshData();
     }
   }
 };

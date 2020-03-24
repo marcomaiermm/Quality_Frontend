@@ -3,10 +3,11 @@
     <q-card class="hist-card" bordered>
       <q-card-section>
         <div class="text-overline text-9">Histogramm</div>
+        <!--
         <div class="text-subtitle1 q-mt-sm q-mb-xs">
           Häufung
         </div>
-        <!--<div class="text-caption text-grey"></div>
+        <div class="text-caption text-grey"></div>
         <svg
           :height="height"
           :width="width"
@@ -49,41 +50,49 @@ export default {
   },
   data() {
     return {
-      datacollection: null,
+      datacollection: {
+        labels: [],
+        datasets: []
+      },
+      fehler: [],
       dataset: {},
       options: {},
-      h: 400,
+      h: 200,
       w: 1000
       // margin: { top: 30, right: 20, bottom: 30, left: 50 }
     };
   },
   watch: {
     History: function(newData, oldData) {
-      this.dataset = [];
-      newData.forEach(element => {
-        this.dataset.push({ ...element });
-      });
+      this.datacollection = null;
       this.fillData();
     }
   },
   methods: {
     fillData() {
       this.datacollection = {
-        labels: this.History.map(function(d) {
-          return d.Klassengrenzen;
-        }),
-        datasets: [
-          {
-            label: "Gesamt",
-            pointHoverBackgroundColor: "rgba(0, 119, 220, 0.6)",
-            backgroundColor: "rgba(2, 62, 115, 0.8)",
-            hoverBackgroundColor: "rgba(2, 62, 115, 0.6)",
-            data: this.History.map(function(d) {
-              return d.Gesamt;
-            })
-          }
-        ]
+        labels: [],
+        datasets: []
       };
+
+      Object.keys(this.History[Object.keys(this.History)[0]]).forEach(key => {
+        this.datacollection.datasets.push({
+          label: key,
+          data: [],
+          backgroundColor: ""
+        });
+      });
+
+      Object.keys(this.History).forEach(key => {
+        this.datacollection.labels.push(key);
+        Object.keys(this.History[key]).forEach((innerKey, index) => {
+          this.datacollection.datasets[index].data.push(
+            this.History[key][innerKey]
+          );
+          this.datacollection.datasets[index].backgroundColor =
+            "rgba(2, 62, 115, 0.8)";
+        });
+      });
       this.options = {
         legend: {
           display: false
@@ -91,22 +100,49 @@ export default {
         scales: {
           xAxes: [
             {
+              stacked: true,
               ticks: {
                 // autoSkip: true,
-                maxTicksLimit: 10.1
+                maxTicksLimit: 20.1
+                // fontSize: 11
               },
               gridLines: {
-                display: false
+                display: true
               }
             }
           ],
           yAxes: [
             {
+              stacked: true,
+              id: "H",
               ticks: {
                 beginAtZero: true
+              },
+              gridLines: {
+                display: false
+              }
+            },
+            {
+              id: "P",
+              position: "right",
+              ticks: {
+                max: 1,
+                min: 0
               }
             }
           ]
+        },
+        plugins: {
+          zoom: {
+            zoom: {
+              enabled: true,
+              mode: "xy"
+            },
+            pan: {
+              enabled: true,
+              mode: "xy"
+            }
+          }
         }
       };
     }

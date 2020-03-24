@@ -182,7 +182,7 @@ export default {
       this.seed.map(function(d) {
         return moment(d.Date, "DD-MM-YYYY");
 
-        var parseTime = d3.timeParse("%d.%m.%Y");
+        let parseTime = d3.timeParse("%d.%m.%Y");
          this.seed.forEach(function(d) {
         d.Date = parseTime(d.Date);
         d.Close = +d.Close;
@@ -206,11 +206,11 @@ export default {
           const y = descending ? a : b;
 
           if (sortBy === "Date") {
-            var xx = x[sortBy]
+            const xx = x[sortBy]
               .split(".")
               .reverse()
               .join("");
-            var yy = y[sortBy]
+            const yy = y[sortBy]
               .split(".")
               .reverse()
               .join("");

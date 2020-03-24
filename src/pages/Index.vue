@@ -6,10 +6,7 @@
         <div class="col-xs-12 col flex">
           <DataTable />
         </div>
-        <div class="col-6">
-          <LineChart />
-        </div>
-        <div class="col-6">
+        <div class="col">
           <HistChart />
         </div>
       </div>
@@ -24,7 +21,7 @@ export default {
   name: "PageIndex",
   components: {
     DataTable: () => import("../components/Table"),
-    LineChart: () => import("../components/LineChart"),
+    // LineChart: () => import("../components/LineChart"),
     HistChart: () => import("../components/HistChart")
   },
   computed: {

@@ -75,7 +75,7 @@ export default {
     fillData() {
       this.datacollection = {
         labels: this.Data.map(function(d) {
-          return moment(d.Date, "DD-MM-YYYY");
+          return moment(d.Datum, "DD-MM-YYYY");
         }),
         datasets: [
           {
