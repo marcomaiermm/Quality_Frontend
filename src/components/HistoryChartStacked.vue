@@ -57,15 +57,16 @@ export default {
       fehler: [],
       dataset: {},
       options: {},
-      h: 200,
+      h: 400,
       w: 1000
       // margin: { top: 30, right: 20, bottom: 30, left: 50 }
     };
   },
   watch: {
     History: function(newData, oldData) {
-      this.datacollection = null;
-      this.fillData();
+      if (newData !== oldData) {
+        this.fillData();
+      }
     }
   },
   methods: {
@@ -97,17 +98,27 @@ export default {
         legend: {
           display: false
         },
+        animation: {
+          duration: 2000
+        },
+        tooltips: {
+          callbacks: {
+            afterBody: function(tooltipItem, data) {
+              return "";
+            }
+          }
+        },
         scales: {
           xAxes: [
             {
               stacked: true,
               ticks: {
-                // autoSkip: true,
-                maxTicksLimit: 20.1
-                // fontSize: 11
+                autoSkip: true,
+                maxTicksLimit: 20.1,
+                fontSize: 11
               },
               gridLines: {
-                display: true
+                display: false
               }
             }
           ],
@@ -119,15 +130,7 @@ export default {
                 beginAtZero: true
               },
               gridLines: {
-                display: false
-              }
-            },
-            {
-              id: "P",
-              position: "right",
-              ticks: {
-                max: 1,
-                min: 0
+                display: true
               }
             }
           ]
@@ -148,7 +151,9 @@ export default {
     }
   },
   mounted() {
-    this.fillData();
+    if (Object.keys(this.History).length > 0) {
+      this.fillData();
+    }
   }
 };
 </script>

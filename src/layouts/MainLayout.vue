@@ -75,13 +75,13 @@ export default {
       menuItems: [
         {
           title: "Dashboard",
-          icon: "dashboard",
+          icon: "mdi-home-analytics",
           link: "/"
         },
         {
           title: "Analyse",
-          icon: "scatter_plot",
-          link: "/scatter"
+          icon: "mdi-chart-bar",
+          link: "/analytics"
         }
       ]
     };

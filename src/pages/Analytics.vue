@@ -4,13 +4,13 @@
     <div class="q-pa-md">
       <div class="row q-col-gutter-md justify-between">
         <div class="col-xs-12 col flex">
-          <DataTable />
+          Test1
         </div>
         <div class="col-xs-6">
-          <HistChart />
+          Test2
         </div>
         <div class="col-xs-6">
-          <Pareto />
+          Test3
         </div>
       </div>
     </div>
@@ -18,17 +18,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-
 export default {
-  name: "PageIndex",
-  components: {
-    DataTable: () => import("../components/Table"),
-    Pareto: () => import("../components/ParetoChart"),
-    HistChart: () => import("../components/HistoryChartStacked")
-  },
-  computed: {
-    ...mapGetters({ Data: "dataset/getData" })
-  }
+  name: "Analytics"
 };
 </script>

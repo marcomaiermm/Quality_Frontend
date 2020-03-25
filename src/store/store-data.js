@@ -1,14 +1,22 @@
 const state = {
   parsedData: [],
-  parsedHistory: []
+  parsedHistory: [],
+  parsedHistoryDynamic: [],
+  parsedPareto: []
 };
 
 const mutations = {
   updateData(state, payload) {
     state.parsedData = payload;
   },
+  updateHistoryDynamic(state, payload) {
+    state.parsedHistoryDynamic = payload;
+  },
   updateHistory(state, payload) {
     state.parsedHistory = payload;
+  },
+  updatePareto(state, payload) {
+    state.parsedPareto = payload;
   }
 };
 
@@ -18,6 +26,12 @@ const actions = {
   },
   updateHistory({ commit }, payload) {
     commit("updateHistory", payload);
+  },
+  updateHistoryDynamic({ commit }, payload) {
+    commit("updateHistoryDynamic", payload);
+  },
+  updatePareto({ commit }, payload) {
+    commit("updatePareto", payload);
   }
 };
 
@@ -27,6 +41,12 @@ const getters = {
   },
   getHistory: state => {
     return state.parsedHistory;
+  },
+  getHistoryDynamic: state => {
+    return state.parsedHistoryDynamic;
+  },
+  getPareto: state => {
+    return state.parsedPareto;
   }
 };
 

@@ -311,6 +311,7 @@ export default {
             align: "left",
             label: element,
             field: element,
+            format: val => `${val}`,
             sortable: true
           });
         }
