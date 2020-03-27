@@ -57,11 +57,12 @@ export default {
       fehler: [],
       dataset: {},
       options: {},
-      h: 400,
+      h: 370,
       w: 1000
       // margin: { top: 30, right: 20, bottom: 30, left: 50 }
     };
   },
+  props: ["tab"],
   watch: {
     History: function(newData, oldData) {
       if (newData !== oldData) {
@@ -103,8 +104,12 @@ export default {
         },
         tooltips: {
           callbacks: {
-            afterBody: function(tooltipItem, data) {
-              return "";
+            footer: (tooltipItem, data) => {
+              let total = 0;
+              for (let i = 0; i < data.datasets.length; i++) {
+                total += data.datasets[i].data[tooltipItem[0].index];
+              }
+              return "Gesamt: " + total;
             }
           }
         },

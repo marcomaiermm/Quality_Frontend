@@ -1,12 +1,13 @@
 <template>
   <!-- css spacing classes q-[p|m][t|r|b|l|a|x|y]-[none|auto|xs|sm|md|lg|xl]
                                     type direction              size                      -->
-  <div class="q-mt-sm q-mr-md q-ml-md col">
+  <!--<div class="q-mt-sm q-mr-md q-ml-md col">-->
+  <div class="col">
     <q-table
       class="my-sticky-dynamic"
       title="Treats"
       :dense="$q.screen.lt.md"
-      :data="dataset"
+      :data="Dataset"
       :columns="columns"
       :loading="loading"
       :filter="filter"
@@ -19,7 +20,11 @@
     >
       <template v-slot:top="">
         <div class="fit row wrap justify-between  content-start">
-          <div class="text-h6 col">Interne Reklamationen</div>
+          <!--
+          <div class="text-h6 col">
+            {{ internal ? "Interne" : "Externe" }} Reklamationen
+          </div>
+          -->
           <div class="q-pa-xs col" style="min-width: 150px">
             <q-input
               filled
@@ -172,10 +177,12 @@ export default {
       },
       visibleColumns: [],
       vCols: [],
-      columns: []
+      columns: [],
+      cancelToken: null,
+      source: null
     };
   },
-
+  props: ["tab", "oldTab"],
   computed: {
     data() {
       return Object.freeze(
@@ -184,8 +191,25 @@ export default {
     },
     ...mapGetters({
       History: "dataset/getHistory",
-      Data: "dataset/getData"
-    })
+      Data: "dataset/getData",
+      KundenData: "dataset/getDataCustomer",
+      LieferantenData: "dataset/getDataSupplier"
+    }),
+    Dataset() {
+      let data = [];
+      switch (this.tab) {
+        case "intern":
+          data = this.Data;
+          break;
+        case "lieferant":
+          data = this.LieferantenData;
+          break;
+        case "kunde":
+          data = this.KundenData;
+          break;
+      }
+      return data;
+    }
   },
 
   watch: {
@@ -252,8 +276,27 @@ export default {
       this.columns = [];
       const dateBegin = this.stringDate(this.startDate);
       const dateEnd = this.stringDate(this.endDate);
+      let axiosUrl = "";
+
+      // axiosUrl = "http://192.168.8.218:5000/datatable/" + this.tab
+
+      switch (this.tab) {
+        case "intern":
+          axiosUrl = "http://192.168.8.218:5000/datatable/internal";
+          break;
+        case "lieferant":
+          axiosUrl = "http://192.168.8.218:5000/datatable/supplier";
+          break;
+        case "kunde":
+          axiosUrl = "http://192.168.8.218:5000/datatable/customer";
+          break;
+      }
+
+      this.cancelToken = this.$axios.CancelToken;
+      this.source = this.cancelToken.source();
       this.$axios
-        .get("http://192.168.8.218:5000/datatable", {
+        .get(axiosUrl, {
+          cancelToken: this.source.token,
           params: {
             start: dateBegin,
             end: dateEnd
@@ -261,15 +304,19 @@ export default {
         })
         .then(response => {
           this.seed = JSON.parse(response.data);
-          this.updateData(this.seed);
-          this.pushData();
+          this.storeData(this.seed);
           this.drawTable();
           // Histogramm nachdem die Daten aus der Tabelle aus dem SQL per Abfrage gezogen wurden.
           this.refreshHistogramData();
           this.calls += 1;
         })
         .catch(error => {
-          this.errors.push(error);
+          if (this.$axios.isCancel(error)) {
+            console.log("Request canceled", error.message);
+          } else {
+            // handle error
+            this.errors.push(error);
+          }
         });
     },
     refreshHistogramData() {
@@ -284,15 +331,28 @@ export default {
           this.errors.push(error);
         });
     },
-    pushData() {
+    storeData(data) {
+      switch (this.tab) {
+        case "intern":
+          this.updateData(data);
+          break;
+        case "lieferant":
+          this.updateDataSupplier(data);
+          break;
+        case "kunde":
+          this.updateDataCustomer(data);
+          break;
+      }
+      /*
       this.dataset = [];
       this.Data.forEach(element => {
         this.dataset.push({ ...element });
       });
+      */
     },
     drawTable() {
-      this.pushData();
-      this.tableHead = Object.keys(this.dataset[0]);
+      // this.pushData();
+      this.tableHead = Object.keys(this.Dataset[0]);
       this.tableHead.forEach(element => {
         this.visibleColumns.push(element);
         if (element === "Datum") {
@@ -373,13 +433,57 @@ export default {
       }
       return data;
     },
-    ...mapActions("dataset", ["updateHistory", "updateData"])
+    ...mapActions("dataset", [
+      "updateHistory",
+      "updateData",
+      "updateDataSupplier",
+      "updateDataCustomer"
+    ])
   },
   mounted() {
-    if (this.Data.length > 0) {
-      this.drawTable();
-    } else {
+    // IN WELCHEM TAB BIN ICH
+    // IM STORE NACH DATEN FÜR DEN TAB PRÜFEN
+    // WENN DATEN DA -> GLÜCKLICH SEIN
+    // WENN NICHT this.refreshDataTable()
+    /*
+    if (this.tab !== this.oldTab) {
       this.refreshDataTable();
+    } else {
+      if (this.Data.length > 0) {
+        this.drawTable();
+      } else {
+        this.refreshDataTable();
+      }
+    }
+    */
+    switch (this.tab) {
+      case "intern":
+        if (this.Data.length > 0) {
+          this.drawTable();
+        } else {
+          this.refreshDataTable();
+        }
+        break;
+      case "lieferant":
+        if (this.LieferantenData.length > 0) {
+          this.drawTable();
+        } else {
+          this.refreshDataTable();
+        }
+        break;
+      case "kunde":
+        if (this.KundenData.length > 0) {
+          this.drawTable();
+        } else {
+          this.refreshDataTable();
+        }
+        break;
+    }
+  },
+  beforeDestroy() {
+    console.log("OnB4Destroy");
+    if (this.source) {
+      this.source.cancel("Operation canceled by the user.");
     }
   }
 };

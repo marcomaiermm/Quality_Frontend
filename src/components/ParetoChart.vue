@@ -40,7 +40,7 @@ export default {
       },
       dataset: {},
       options: {},
-      h: 400,
+      h: 370,
       w: 1000
     };
   },
@@ -67,8 +67,6 @@ export default {
         dataSet.push(this.Pareto[element].Fehler);
         kumSet.push(this.Pareto[element].Kummuliert);
       });
-
-      console.log(kumSet);
 
       this.datacollection = {
         labels: Object.keys(this.Pareto),
@@ -99,6 +97,7 @@ export default {
           duration: 2000
         },
         tooltips: {
+          mode: "index",
           callbacks: {
             afterBody: function(tooltipItem, data) {
               return "";

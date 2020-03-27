@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 
 import dataset from "./store-data";
+import states from "./store-state";
 
 Vue.use(Vuex);
 
@@ -17,7 +18,8 @@ Vue.use(Vuex);
 export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      dataset
+      dataset,
+      states
     },
 
     // enable strict mode (adds overhead!)
