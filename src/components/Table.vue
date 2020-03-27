@@ -152,7 +152,6 @@ begin = date.formatDate(begin, "YYYY.MM.DD");
 export default {
   data() {
     return {
-      calls: 0,
       startDate: begin,
       endDate: date.formatDate(Date.now(), "YYYY.MM.DD"),
       startDateCopy: "",
@@ -182,7 +181,7 @@ export default {
       source: null
     };
   },
-  props: ["tab", "oldTab"],
+  props: ["tab"],
   computed: {
     data() {
       return Object.freeze(
@@ -224,12 +223,6 @@ export default {
     },
     endDate: function(newDate, oldDate) {
       this.endDateCopy = this.stringDate(newDate);
-    },
-    calls: function() {
-      if (this.calls === 2) {
-        this.loadingButton = false;
-        this.disabledRefresh = false;
-      }
     },
     errors: function() {
       if (this.errors.length > 0) {
@@ -278,19 +271,7 @@ export default {
       const dateEnd = this.stringDate(this.endDate);
       let axiosUrl = "";
 
-      // axiosUrl = "http://192.168.8.218:5000/datatable/" + this.tab
-
-      switch (this.tab) {
-        case "intern":
-          axiosUrl = "http://192.168.8.218:5000/datatable/internal";
-          break;
-        case "lieferant":
-          axiosUrl = "http://192.168.8.218:5000/datatable/supplier";
-          break;
-        case "kunde":
-          axiosUrl = "http://192.168.8.218:5000/datatable/customer";
-          break;
-      }
+      axiosUrl = "http://192.168.8.218:5000/datatable/" + this.tab;
 
       this.cancelToken = this.$axios.CancelToken;
       this.source = this.cancelToken.source();
@@ -306,9 +287,11 @@ export default {
           this.seed = JSON.parse(response.data);
           this.storeData(this.seed);
           this.drawTable();
-          // Histogramm nachdem die Daten aus der Tabelle aus dem SQL per Abfrage gezogen wurden.
-          this.refreshHistogramData();
-          this.calls += 1;
+          this.loadingButton = false;
+          this.disabledRefresh = false;
+          if (this.seed) {
+            this.$emit("dataChanged");
+          }
         })
         .catch(error => {
           if (this.$axios.isCancel(error)) {
@@ -317,18 +300,6 @@ export default {
             // handle error
             this.errors.push(error);
           }
-        });
-    },
-    refreshHistogramData() {
-      this.$axios
-        .get("http://192.168.8.218:5000/histogram")
-        .then(response => {
-          this.seed = JSON.parse(response.data);
-          this.updateHistory(this.seed);
-          this.calls += 1;
-        })
-        .catch(error => {
-          this.errors.push(error);
         });
     },
     storeData(data) {
@@ -343,12 +314,6 @@ export default {
           this.updateDataCustomer(data);
           break;
       }
-      /*
-      this.dataset = [];
-      this.Data.forEach(element => {
-        this.dataset.push({ ...element });
-      });
-      */
     },
     drawTable() {
       // this.pushData();

@@ -17,9 +17,7 @@
 
 <script>
 import CommitChartBar from "./js/CommitChartBar.js";
-// import { select } from 'd3-selection'
-// import * as d3 from 'd3'
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters } from "vuex";
 
 export default {
   name: "ParetoChart",
@@ -29,9 +27,11 @@ export default {
   computed: {
     ...mapGetters({
       Pareto: "dataset/getPareto",
-      Data: "dataset/getData"
+      ParetoCustomer: "dataset/getParetoCustomer",
+      ParetoSupplier: "dataset/getParetoSupplier"
     })
   },
+  props: ["tab"],
   data() {
     return {
       datacollection: {
@@ -44,32 +44,29 @@ export default {
       w: 1000
     };
   },
-  watch: {
-    Data: function(newData, oldData) {
-      if (newData !== oldData) {
-        this.refresh();
-      }
-      this.fillData();
-    }
-  },
   methods: {
-    refresh() {
-      this.$axios.get("http://192.168.8.218:5000/pareto").then(response => {
-        this.seed = JSON.parse(response.data);
-        this.updatePareto(this.seed);
-        this.fillData();
-      });
-    },
-    fillData() {
+    fillPareto() {
+      let dataPareto = [];
+      switch (this.tab) {
+        case "intern":
+          dataPareto = this.Pareto;
+          break;
+        case "lieferant":
+          dataPareto = this.ParetoSupplier;
+          break;
+        case "kunde":
+          dataPareto = this.ParetoCustomer;
+          break;
+      }
       const dataSet = [];
       const kumSet = [];
-      Object.keys(this.Pareto).forEach(element => {
-        dataSet.push(this.Pareto[element].Fehler);
-        kumSet.push(this.Pareto[element].Kummuliert);
+      Object.keys(dataPareto).forEach(element => {
+        dataSet.push(dataPareto[element].Fehler);
+        kumSet.push(dataPareto[element].Kummuliert);
       });
 
       this.datacollection = {
-        labels: Object.keys(this.Pareto),
+        labels: Object.keys(dataPareto),
         datasets: [
           {
             label: "Kummuliert",
@@ -140,13 +137,10 @@ export default {
           ]
         }
       };
-    },
-    ...mapActions("dataset", ["updatePareto"])
+    }
   },
   mounted() {
-    if (this.Data.length > 0) {
-      this.refresh();
-    }
+    this.fillPareto();
   }
 };
 </script>

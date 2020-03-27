@@ -3,8 +3,11 @@ const state = {
   parseDataCustomer: [],
   parseDataSupplier: [],
   parsedHistory: [],
-  parsedHistoryDynamic: [],
-  parsedPareto: []
+  parsedHistoryCustomer: [],
+  parsedHistorySupplier: [],
+  parsedPareto: [],
+  parsedParetoCustomer: [],
+  parsedParetoSupplier: []
 };
 
 const mutations = {
@@ -17,14 +20,23 @@ const mutations = {
   updateDataSupplier(state, payload) {
     state.parseDataSupplier = payload;
   },
-  updateHistoryDynamic(state, payload) {
-    state.parsedHistoryDynamic = payload;
-  },
   updateHistory(state, payload) {
     state.parsedHistory = payload;
   },
+  updateHistoryCustomer(state, payload) {
+    state.parsedHistoryCustomer = payload;
+  },
+  updateHistorySupplier(state, payload) {
+    state.parsedHistorySupplier = payload;
+  },
   updatePareto(state, payload) {
     state.parsedPareto = payload;
+  },
+  updateParetoCustomer(state, payload) {
+    state.parsedParetoCustomer = payload;
+  },
+  updateParetoSupplier(state, payload) {
+    state.parsedParetoSupplier = payload;
   }
 };
 
@@ -41,11 +53,20 @@ const actions = {
   updateHistory({ commit }, payload) {
     commit("updateHistory", payload);
   },
-  updateHistoryDynamic({ commit }, payload) {
-    commit("updateHistoryDynamic", payload);
+  updateHistoryCustomer({ commit }, payload) {
+    commit("updateHistoryCustomer", payload);
+  },
+  updateHistorySupplier({ commit }, payload) {
+    commit("updateHistorySupplier", payload);
   },
   updatePareto({ commit }, payload) {
     commit("updatePareto", payload);
+  },
+  updateParetoCustomer({ commit }, payload) {
+    commit("updateParetoCustomer", payload);
+  },
+  updateParetoSupplier({ commit }, payload) {
+    commit("updateParetoSupplier", payload);
   }
 };
 
@@ -62,11 +83,20 @@ const getters = {
   getHistory: state => {
     return state.parsedHistory;
   },
-  getHistoryDynamic: state => {
-    return state.parsedHistoryDynamic;
+  getHistoryCustomer: state => {
+    return state.parsedHistoryCustomer;
+  },
+  getHistorySupplier: state => {
+    return state.parsedHistorySupplier;
   },
   getPareto: state => {
     return state.parsedPareto;
+  },
+  getParetoCustomer: state => {
+    return state.parsedParetoCustomer;
+  },
+  getParetoSupplier: state => {
+    return state.parsedParetoSupplier;
   }
 };
 

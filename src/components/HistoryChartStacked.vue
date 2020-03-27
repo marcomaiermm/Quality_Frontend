@@ -3,25 +3,6 @@
     <q-card class="hist-card" bordered>
       <q-card-section>
         <div class="text-overline text-9">Histogramm</div>
-        <!--
-        <div class="text-subtitle1 q-mt-sm q-mb-xs">
-          Häufung
-        </div>
-        <div class="text-caption text-grey"></div>
-        <svg
-          :height="height"
-          :width="width"
-        >
-        </svg>
-        <svg
-        class="chart"
-        :width="width"
-        :height="height"
-        >
-          <g transform="translate(50,50)">
-          </g>
-        </svg>-->
-        <!--<svg id="chart-visualisation"></svg>-->
         <commit-chart-bar
           :width="w"
           :height="h"
@@ -36,8 +17,6 @@
 
 <script>
 import CommitChartBar from "./js/CommitChartBar.js";
-// import { select } from 'd3-selection'
-// import * as d3 from 'd3'
 import { mapGetters } from "vuex";
 
 export default {
@@ -46,7 +25,11 @@ export default {
     CommitChartBar
   },
   computed: {
-    ...mapGetters({ History: "dataset/getHistory" })
+    ...mapGetters({
+      History: "dataset/getHistory",
+      HistoryCustomer: "dataset/getHistoryCustomer",
+      HistorySupplier: "dataset/getHistorySupplier"
+    })
   },
   data() {
     return {
@@ -63,21 +46,27 @@ export default {
     };
   },
   props: ["tab"],
-  watch: {
-    History: function(newData, oldData) {
-      if (newData !== oldData) {
-        this.fillData();
-      }
-    }
-  },
+
   methods: {
     fillData() {
       this.datacollection = {
         labels: [],
         datasets: []
       };
+      let dataHistory = [];
+      switch (this.tab) {
+        case "intern":
+          dataHistory = this.History;
+          break;
+        case "lieferant":
+          dataHistory = this.HistorySupplier;
+          break;
+        case "kunde":
+          dataHistory = this.HistoryCustomer;
+          break;
+      }
 
-      Object.keys(this.History[Object.keys(this.History)[0]]).forEach(key => {
+      Object.keys(dataHistory[Object.keys(dataHistory)[0]]).forEach(key => {
         this.datacollection.datasets.push({
           label: key,
           data: [],
@@ -85,11 +74,11 @@ export default {
         });
       });
 
-      Object.keys(this.History).forEach(key => {
+      Object.keys(dataHistory).forEach(key => {
         this.datacollection.labels.push(key);
-        Object.keys(this.History[key]).forEach((innerKey, index) => {
+        Object.keys(dataHistory[key]).forEach((innerKey, index) => {
           this.datacollection.datasets[index].data.push(
-            this.History[key][innerKey]
+            dataHistory[key][innerKey]
           );
           this.datacollection.datasets[index].backgroundColor =
             "rgba(2, 62, 115, 0.8)";
@@ -156,7 +145,22 @@ export default {
     }
   },
   mounted() {
-    if (Object.keys(this.History).length > 0) {
+    let data = [];
+    switch (this.tab) {
+      case "intern":
+        data = this.History;
+        break;
+      case "lieferant":
+        data = this.HistorySupplier;
+        break;
+      case "kunde":
+        data = this.HistoryCustomer;
+        break;
+    }
+    if (
+      typeof Object.keys(data) !== "undefined" &&
+      Object.keys(data).length > 0
+    ) {
       this.fillData();
     }
   }

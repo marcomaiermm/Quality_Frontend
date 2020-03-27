@@ -1,5 +1,4 @@
 <template>
-  <!--<q-page class="flex flex-center">-->
   <div class="q-app">
     <div class="q-pa-md">
       <q-tabs
@@ -28,29 +27,37 @@
         ></q-tab>
       </q-tabs>
       <div class="row q-gutter">
-        <!--<div class="row q-col-gutter-md justify-between">
-        <button @click="internal = true">Internal</button>
-        <button @click="internal = false">External</button>
-        -->
-
         <q-tab-panels class="col-12" v-model="tab" animated>
           <q-tab-panel name="intern">
-            <DataTable :tab="tab" :oldTab="oldTab" v-bind:key="tab" />
+            <DataTable
+              :tab="tab"
+              :oldTab="oldTab"
+              v-bind:key="tab"
+              @dataChanged="getData()"
+            />
           </q-tab-panel>
           <q-tab-panel name="lieferant">
-            <DataTable :tab="tab" :oldTab="oldTab" v-bind:key="tab" />
+            <DataTable
+              :tab="tab"
+              :oldTab="oldTab"
+              v-bind:key="tab"
+              @dataChanged="getData()"
+            />
           </q-tab-panel>
           <q-tab-panel name="kunde">
-            <DataTable :tab="tab" :oldTab="oldTab" v-bind:key="tab" />
+            <DataTable
+              :tab="tab"
+              :oldTab="oldTab"
+              v-bind:key="tab"
+              @dataChanged="getData()"
+            />
           </q-tab-panel>
         </q-tab-panels>
-
-        <!--<DataTable v-else :internal="false" /> <DataTable v-if="internal == false" :internal="false" />-->
         <div class="col-xs-6">
-          <HistChart :tab="tab" v-bind:key="tab" />
+          <HistChart :tab="tab" v-bind:key="tab" ref="histChart" />
         </div>
         <div class="col-xs-6">
-          <Pareto :tab="tab" v-bind:key="tab" />
+          <Pareto :tab="tab" v-bind:key="tab" ref="paretoChart" />
         </div>
       </div>
     </div>
@@ -68,7 +75,15 @@ export default {
     HistChart: () => import("../components/HistoryChartStacked")
   },
   computed: {
-    ...mapGetters({ Tab: "states/getTab" })
+    ...mapGetters({
+      Tab: "states/getTab",
+      History: "dataset/getHistory",
+      HistoryCustomer: "dataset/getHistoryCustomer",
+      HistorySupplier: "dataset/getHistorySupplier",
+      Pareto: "dataset/getPareto",
+      ParetoCustomer: "dataset/getParetoCustomer",
+      ParetoSupplier: "dataset/getParetoSupplier"
+    })
   },
   data() {
     return {
@@ -76,19 +91,58 @@ export default {
       oldTab: "intern"
     };
   },
-  /*
-  watch: {
-    tab: function(newData, oldData) {
-      this.oldTab = oldData;
-      this.updateTab(newData);
-    }
-  },
-  */
   methods: {
     ...mapActions("states", ["updateTab"]),
+    ...mapActions("dataset", [
+      "updateHistory",
+      "updateHistoryCustomer",
+      "updateHistorySupplier",
+      "updatePareto",
+      "updateParetoCustomer",
+      "updateParetoSupplier"
+    ]),
     setTab(tab) {
       this.tab = tab;
       this.updateTab(tab);
+    },
+    getData() {
+      this.$axios.get("http://192.168.8.218:5000/histogram").then(response => {
+        const seed = JSON.parse(response.data);
+        this.getDataHistory(seed);
+      });
+
+      this.$axios.get("http://192.168.8.218:5000/pareto").then(response => {
+        const seed = JSON.parse(response.data);
+        this.getDataPareto(seed);
+      });
+    },
+    getDataHistory(seed) {
+      switch (this.tab) {
+        case "intern":
+          this.updateHistory(seed);
+          break;
+        case "lieferant":
+          this.updateHistorySupplier(seed);
+          break;
+        case "kunde":
+          this.updateHistoryCustomer(seed);
+          break;
+      }
+      this.$refs.histChart.fillData();
+      this.$refs.paretoChart.fillPareto();
+    },
+    getDataPareto(seed) {
+      switch (this.tab) {
+        case "intern":
+          this.updatePareto(seed);
+          break;
+        case "lieferant":
+          this.updateParetoSupplier(seed);
+          break;
+        case "kunde":
+          this.updateParetoCustomer(seed);
+          break;
+      }
     }
   },
   mounted() {
