@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable tag="a" :to="link">
+  <q-item clickable tag="a" :to="link" active-class="my-menu-link">
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" class="mini-icon" />
     </q-item-section>
@@ -41,6 +41,9 @@ export default {
 </script>
 
 <style lang="sass">
+.menu-link
+  color: white
+  background: #F2C037
 .mini-icon
   color: $secondary
 </style>

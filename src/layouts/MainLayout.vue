@@ -36,7 +36,12 @@
         />
         <p />
         <q-separator />
-        <MenuItem v-for="link in menuItems" :key="link.title" v-bind="link" />
+        <MenuItem
+          v-for="link in menuItems"
+          :key="link.title"
+          v-bind="link"
+          :active="link === link.title"
+        />
       </q-list>
     </q-drawer>
 

@@ -28,6 +28,7 @@
           <div class="q-pa-xs col" style="min-width: 150px">
             <q-input
               filled
+              dense
               v-model="startDate"
               mask="date"
               :rules="['date']"
@@ -55,6 +56,7 @@
           <div class="q-pa-xs col" style="min-width: 150px">
             <q-input
               filled
+              dense
               v-model="endDate"
               mask="date"
               :rules="['date']"
@@ -94,15 +96,23 @@
           <div class="col">
             <q-btn
               dense
-              class="q-ml-md"
+              class="q-ml-xs"
               icon="refresh"
               :loading="loadingButton"
               @click="refreshDataTable()"
               :disable="disabledRefresh"
             >
-              <q-tooltip content-class="bg-accent" anchor="top left"
-                >Aktualisieren</q-tooltip
-              >
+              <q-tooltip content-class="bg-accent" anchor="top left">
+                Aktualisieren
+              </q-tooltip>
+            </q-btn>
+          </div>
+          <div class="col">
+            <q-btn dense flat class="q-ml-xs" icon="filter_list">
+              <q-tooltip content-class="bg-accent" anchor="top left">
+                Filter
+              </q-tooltip>
+              <FilterMenu :tab="tab" />
             </q-btn>
           </div>
           <div class="col">
@@ -126,8 +136,8 @@
               map-options
               :options="columns"
               option-value="name"
-              options-cover
               style="min-width: 150px"
+              label="Ausblenden"
             ></q-select>
           </div>
         </div>
@@ -150,6 +160,9 @@ begin = date.formatDate(begin, "YYYY.MM.DD");
 
 // var moment = require("moment");
 export default {
+  components: {
+    FilterMenu: () => import("../components/FilterMenu")
+  },
   data() {
     return {
       startDate: begin,
@@ -163,6 +176,7 @@ export default {
       filter: "",
       loadingButton: false,
       disabledRefresh: false,
+      uniqueMachines: [],
       errors: [],
       toggles: [],
       seed: [],
@@ -189,10 +203,12 @@ export default {
       );
     },
     ...mapGetters({
+      MenuTab: "states/getMenuTab",
       History: "dataset/getHistory",
       Data: "dataset/getData",
       KundenData: "dataset/getDataCustomer",
-      LieferantenData: "dataset/getDataSupplier"
+      LieferantenData: "dataset/getDataSupplier",
+      FilterMaschine: "dataset/getFilterMachines"
     }),
     Dataset() {
       let data = [];
@@ -280,7 +296,9 @@ export default {
           cancelToken: this.source.token,
           params: {
             start: dateBegin,
-            end: dateEnd
+            end: dateEnd,
+            machines: JSON.stringify(this.FilterMaschine),
+            table: this.MenuTab
           }
         })
         .then(response => {
@@ -302,6 +320,7 @@ export default {
           }
         });
     },
+    uniques() {},
     storeData(data) {
       switch (this.tab) {
         case "intern":

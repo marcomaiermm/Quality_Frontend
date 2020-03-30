@@ -7,7 +7,8 @@ const state = {
   parsedHistorySupplier: [],
   parsedPareto: [],
   parsedParetoCustomer: [],
-  parsedParetoSupplier: []
+  parsedParetoSupplier: [],
+  parsedFilterMachines: []
 };
 
 const mutations = {
@@ -37,6 +38,9 @@ const mutations = {
   },
   updateParetoSupplier(state, payload) {
     state.parsedParetoSupplier = payload;
+  },
+  updateFilterMachines(state, payload) {
+    state.parsedFilterMachines = payload;
   }
 };
 
@@ -67,6 +71,9 @@ const actions = {
   },
   updateParetoSupplier({ commit }, payload) {
     commit("updateParetoSupplier", payload);
+  },
+  updateFilterMachines({ commit }, payload) {
+    commit("updateFilterMachines", payload);
   }
 };
 
@@ -97,6 +104,9 @@ const getters = {
   },
   getParetoSupplier: state => {
     return state.parsedParetoSupplier;
+  },
+  getFilterMachines: state => {
+    return state.parsedFilterMachines;
   }
 };
 
