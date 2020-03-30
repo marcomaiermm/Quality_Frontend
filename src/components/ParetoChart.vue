@@ -27,8 +27,8 @@ export default {
   computed: {
     ...mapGetters({
       Pareto: "dataset/getPareto",
-      ParetoCustomer: "dataset/getParetoCustomer",
-      ParetoSupplier: "dataset/getParetoSupplier"
+      ParetoAll: "dataset/getParetoAll",
+      ParetoExtern: "dataset/getParetoExtern"
     })
   },
   props: ["tab"],
@@ -51,11 +51,11 @@ export default {
         case "intern":
           dataPareto = this.Pareto;
           break;
-        case "lieferant":
-          dataPareto = this.ParetoSupplier;
+        case "extern":
+          dataPareto = this.ParetoExtern;
           break;
-        case "kunde":
-          dataPareto = this.ParetoCustomer;
+        case "all":
+          dataPareto = this.ParetoAll;
           break;
       }
       const dataSet = [];

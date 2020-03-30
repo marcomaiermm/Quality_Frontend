@@ -27,8 +27,8 @@ export default {
   computed: {
     ...mapGetters({
       History: "dataset/getHistory",
-      HistoryCustomer: "dataset/getHistoryCustomer",
-      HistorySupplier: "dataset/getHistorySupplier"
+      HistoryAll: "dataset/getHistoryAll",
+      HistoryExtern: "dataset/getHistoryExtern"
     })
   },
   data() {
@@ -58,12 +58,15 @@ export default {
         case "intern":
           dataHistory = this.History;
           break;
-        case "lieferant":
-          dataHistory = this.HistorySupplier;
+        case "extern":
+          dataHistory = this.HistoryExtern;
           break;
-        case "kunde":
-          dataHistory = this.HistoryCustomer;
+        case "all":
+          dataHistory = this.HistoryAll;
           break;
+      }
+      if (Object.keys(dataHistory).length === 0) {
+        return;
       }
 
       Object.keys(dataHistory[Object.keys(dataHistory)[0]]).forEach(key => {
@@ -150,13 +153,14 @@ export default {
       case "intern":
         data = this.History;
         break;
-      case "lieferant":
-        data = this.HistorySupplier;
+      case "extern":
+        data = this.HistoryExtern;
         break;
-      case "kunde":
-        data = this.HistoryCustomer;
+      case "all":
+        data = this.HistoryAll;
         break;
     }
+
     if (
       typeof Object.keys(data) !== "undefined" &&
       Object.keys(data).length > 0

@@ -16,14 +16,14 @@
           @click="setTab('intern')"
         ></q-tab>
         <q-tab
-          name="lieferant"
-          label="Lieferanten Reklamationen"
-          @click="setTab('lieferant')"
+          name="extern"
+          label="Externe Reklamationen"
+          @click="setTab('extern')"
         ></q-tab>
         <q-tab
-          name="kunde"
-          label="Kunden Reklamationen"
-          @click="setTab('kunde')"
+          name="all"
+          label="Gesamte Reklamationen"
+          @click="setTab('all')"
         ></q-tab>
       </q-tabs>
       <div class="row q-gutter">
@@ -36,7 +36,7 @@
               @dataChanged="getData()"
             />
           </q-tab-panel>
-          <q-tab-panel name="lieferant">
+          <q-tab-panel name="extern">
             <DataTable
               :tab="tab"
               :oldTab="oldTab"
@@ -44,7 +44,7 @@
               @dataChanged="getData()"
             />
           </q-tab-panel>
-          <q-tab-panel name="kunde">
+          <q-tab-panel name="all">
             <DataTable
               :tab="tab"
               :oldTab="oldTab"
@@ -78,11 +78,11 @@ export default {
     ...mapGetters({
       Tab: "states/getTab",
       History: "dataset/getHistory",
-      HistoryCustomer: "dataset/getHistoryCustomer",
-      HistorySupplier: "dataset/getHistorySupplier",
+      HistoryAll: "dataset/getHistoryAll",
+      HistoryExtern: "dataset/getHistoryExtern",
       Pareto: "dataset/getPareto",
-      ParetoCustomer: "dataset/getParetoCustomer",
-      ParetoSupplier: "dataset/getParetoSupplier"
+      ParetoAll: "dataset/getParetoAll",
+      ParetoExtern: "dataset/getParetoExtern"
     })
   },
   data() {
@@ -95,11 +95,11 @@ export default {
     ...mapActions("states", ["updateTab"]),
     ...mapActions("dataset", [
       "updateHistory",
-      "updateHistoryCustomer",
-      "updateHistorySupplier",
+      "updateHistoryAll",
+      "updateHistoryExtern",
       "updatePareto",
-      "updateParetoCustomer",
-      "updateParetoSupplier"
+      "updateParetoAll",
+      "updateParetoExtern"
     ]),
     setTab(tab) {
       this.tab = tab;
@@ -121,28 +121,28 @@ export default {
         case "intern":
           this.updateHistory(seed);
           break;
-        case "lieferant":
-          this.updateHistorySupplier(seed);
+        case "extern":
+          this.updateHistoryExtern(seed);
           break;
-        case "kunde":
-          this.updateHistoryCustomer(seed);
+        case "all":
+          this.updateHistoryAll(seed);
           break;
       }
       this.$refs.histChart.fillData();
-      this.$refs.paretoChart.fillPareto();
     },
     getDataPareto(seed) {
       switch (this.tab) {
         case "intern":
           this.updatePareto(seed);
           break;
-        case "lieferant":
-          this.updateParetoSupplier(seed);
+        case "extern":
+          this.updateParetoExtern(seed);
           break;
-        case "kunde":
-          this.updateParetoCustomer(seed);
+        case "all":
+          this.updateParetoAll(seed);
           break;
       }
+      this.$refs.paretoChart.fillPareto();
     }
   },
   mounted() {

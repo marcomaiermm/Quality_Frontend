@@ -3,7 +3,13 @@
     <div class="row no-wrap q-pa-md q-gutter-sm">
       <div class="column q-gutter-sm">
         <div class="text-h6 q-mb-md">Filtereinstellungen</div>
-        <div class="q-gutter-md" v-if="tab == 'lieferant' || tab == 'kunde'">
+        <div class="q-gutter-md" v-if="tab == 'extern'">
+          <q-radio
+            v-model="filterOption"
+            val="all_extern"
+            dense
+            label="Gesamt"
+          ></q-radio>
           <q-radio
             v-model="filterOption"
             val="lieferant"
@@ -15,12 +21,6 @@
             val="kunde"
             dense
             label="Kunde"
-          ></q-radio>
-          <q-radio
-            v-model="filterOption"
-            val="all"
-            dense
-            label="Gesamt"
           ></q-radio>
         </div>
         <div class="q-gutter">
@@ -50,6 +50,7 @@
           push
           size="sm"
           @click="updateOption()"
+          v-close-popup
         ></q-btn>
       </div>
     </div>
@@ -65,7 +66,7 @@ export default {
     return {
       modelMachines: null,
       uniqueMachines: [],
-      filterOption: "lieferant"
+      filterOption: "all_extern"
     };
   },
   computed: {
@@ -75,8 +76,11 @@ export default {
         case "intern":
           data = [...new Set(this.Data.map(item => item.MACHINE_NO))];
           break;
-        case "lieferant":
-          data = [...new Set(this.DataSupplier.map(item => item.MACHINE_NO))];
+        case "extern":
+          data = [...new Set(this.DataExtern.map(item => item.MACHINE_NO))];
+          break;
+        case "all":
+          data = [...new Set(this.DataAll.map(item => item.MACHINE_NO))];
           break;
       }
       return data;
@@ -84,25 +88,32 @@ export default {
 
     ...mapGetters({
       Data: "dataset/getData",
-      DataCustomer: "dataset/getDataCustomer",
-      DataSupplier: "dataset/getDataSupplier"
+      DataExtern: "dataset/getDataExtern",
+      DataAll: "dataset/getDataAll"
     })
   },
   methods: {
     updateOption() {
-      this.updateMenuTab(this.filterOption);
+      switch (this.tab) {
+        case "intern":
+          this.updateMenuTab("intern");
+          break;
+        case "extern":
+          this.updateMenuTab(this.filterOption);
+          break;
+        case "all":
+          this.updateMenuTab("all");
+          break;
+      }
+
       this.updateFilterMachines(this.modelMachines);
     },
     ...mapActions("states", ["updateMenuTab"]),
     ...mapActions("dataset", ["updateFilterMachines"])
   },
   mounted() {
-    this.filterOption = this.tab;
+    this.filterOption = "all_extern";
+    this.updateMenuTab(this.filterOption);
   }
-  /*
-              this.uniqueMachines = [
-              ...new Set(this.seed.map(item => item.MACHINE_NO))
-            ];
-            */
 };
 </script>

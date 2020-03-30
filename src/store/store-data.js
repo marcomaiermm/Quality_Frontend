@@ -1,13 +1,13 @@
 const state = {
   parsedData: [],
-  parseDataCustomer: [],
-  parseDataSupplier: [],
+  parseDataExtern: [],
+  parseDataAll: [],
   parsedHistory: [],
-  parsedHistoryCustomer: [],
-  parsedHistorySupplier: [],
+  parsedHistoryExtern: [],
+  parsedHistoryAll: [],
   parsedPareto: [],
-  parsedParetoCustomer: [],
-  parsedParetoSupplier: [],
+  parsedParetoExtern: [],
+  parsedParetoAll: [],
   parsedFilterMachines: []
 };
 
@@ -15,29 +15,29 @@ const mutations = {
   updateData(state, payload) {
     state.parsedData = payload;
   },
-  updateDataCustomer(state, payload) {
-    state.parseDataCustomer = payload;
+  updateDataExtern(state, payload) {
+    state.parseDataExtern = payload;
   },
-  updateDataSupplier(state, payload) {
-    state.parseDataSupplier = payload;
+  updateDataAll(state, payload) {
+    state.parseDataAll = payload;
   },
   updateHistory(state, payload) {
     state.parsedHistory = payload;
   },
-  updateHistoryCustomer(state, payload) {
-    state.parsedHistoryCustomer = payload;
+  updateHistoryExtern(state, payload) {
+    state.parsedHistoryExtern = payload;
   },
-  updateHistorySupplier(state, payload) {
-    state.parsedHistorySupplier = payload;
+  updateHistoryAll(state, payload) {
+    state.parsedHistoryAll = payload;
   },
   updatePareto(state, payload) {
     state.parsedPareto = payload;
   },
-  updateParetoCustomer(state, payload) {
-    state.parsedParetoCustomer = payload;
+  updateParetoExtern(state, payload) {
+    state.parsedParetoExtern = payload;
   },
-  updateParetoSupplier(state, payload) {
-    state.parsedParetoSupplier = payload;
+  updateParetoAll(state, payload) {
+    state.parsedParetoAll = payload;
   },
   updateFilterMachines(state, payload) {
     state.parsedFilterMachines = payload;
@@ -48,29 +48,29 @@ const actions = {
   updateData({ commit }, payload) {
     commit("updateData", payload);
   },
-  updateDataCustomer({ commit }, payload) {
-    commit("updateDataCustomer", payload);
+  updateDataExtern({ commit }, payload) {
+    commit("updateDataExtern", payload);
   },
-  updateDataSupplier({ commit }, payload) {
-    commit("updateDataSupplier", payload);
+  updateDataAll({ commit }, payload) {
+    commit("updateDataAll", payload);
   },
   updateHistory({ commit }, payload) {
     commit("updateHistory", payload);
   },
-  updateHistoryCustomer({ commit }, payload) {
-    commit("updateHistoryCustomer", payload);
+  updateHistoryExtern({ commit }, payload) {
+    commit("updateHistoryExtern", payload);
   },
-  updateHistorySupplier({ commit }, payload) {
-    commit("updateHistorySupplier", payload);
+  updateHistoryAll({ commit }, payload) {
+    commit("updateHistoryAll", payload);
   },
   updatePareto({ commit }, payload) {
     commit("updatePareto", payload);
   },
-  updateParetoCustomer({ commit }, payload) {
-    commit("updateParetoCustomer", payload);
+  updateParetoExtern({ commit }, payload) {
+    commit("updateParetoExtern", payload);
   },
-  updateParetoSupplier({ commit }, payload) {
-    commit("updateParetoSupplier", payload);
+  updateParetoAll({ commit }, payload) {
+    commit("updateParetoAll", payload);
   },
   updateFilterMachines({ commit }, payload) {
     commit("updateFilterMachines", payload);
@@ -81,29 +81,29 @@ const getters = {
   getData: state => {
     return state.parsedData;
   },
-  getDataCustomer: state => {
-    return state.parseDataCustomer;
+  getDataExtern: state => {
+    return state.parseDataExtern;
   },
-  getDataSupplier: state => {
-    return state.parseDataSupplier;
+  getDataAll: state => {
+    return state.parseDataAll;
   },
   getHistory: state => {
     return state.parsedHistory;
   },
-  getHistoryCustomer: state => {
-    return state.parsedHistoryCustomer;
+  getHistoryExtern: state => {
+    return state.parsedHistoryExtern;
   },
-  getHistorySupplier: state => {
-    return state.parsedHistorySupplier;
+  getHistoryAll: state => {
+    return state.parsedHistoryAll;
   },
   getPareto: state => {
     return state.parsedPareto;
   },
-  getParetoCustomer: state => {
-    return state.parsedParetoCustomer;
+  getParetoExtern: state => {
+    return state.parsedParetoExtern;
   },
-  getParetoSupplier: state => {
-    return state.parsedParetoSupplier;
+  getParetoAll: state => {
+    return state.parsedParetoAll;
   },
   getFilterMachines: state => {
     return state.parsedFilterMachines;

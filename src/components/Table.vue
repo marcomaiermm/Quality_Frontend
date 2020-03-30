@@ -206,8 +206,8 @@ export default {
       MenuTab: "states/getMenuTab",
       History: "dataset/getHistory",
       Data: "dataset/getData",
-      KundenData: "dataset/getDataCustomer",
-      LieferantenData: "dataset/getDataSupplier",
+      DataAll: "dataset/getDataAll",
+      DataExtern: "dataset/getDataExtern",
       FilterMaschine: "dataset/getFilterMachines"
     }),
     Dataset() {
@@ -216,11 +216,11 @@ export default {
         case "intern":
           data = this.Data;
           break;
-        case "lieferant":
-          data = this.LieferantenData;
+        case "extern":
+          data = this.DataExtern;
           break;
-        case "kunde":
-          data = this.KundenData;
+        case "all":
+          data = this.DataAll;
           break;
       }
       return data;
@@ -228,12 +228,14 @@ export default {
   },
 
   watch: {
+    /*
     Data: function(newData, oldData) {
       this.dataset = [];
       newData.forEach(element => {
         this.dataset.push({ ...element });
       });
     },
+    */
     startDate: function(newDate, oldDate) {
       this.startDateCopy = this.stringDate(newDate);
     },
@@ -288,7 +290,6 @@ export default {
       let axiosUrl = "";
 
       axiosUrl = "http://192.168.8.218:5000/datatable/" + this.tab;
-
       this.cancelToken = this.$axios.CancelToken;
       this.source = this.cancelToken.source();
       this.$axios
@@ -302,14 +303,19 @@ export default {
           }
         })
         .then(response => {
-          this.seed = JSON.parse(response.data);
+          if (response.data !== "[]") {
+            this.seed = JSON.parse(response.data);
+          } else {
+            this.seed = [];
+          }
+
           this.storeData(this.seed);
-          this.drawTable();
           this.loadingButton = false;
           this.disabledRefresh = false;
           if (this.seed) {
             this.$emit("dataChanged");
           }
+          this.drawTable();
         })
         .catch(error => {
           if (this.$axios.isCancel(error)) {
@@ -326,11 +332,11 @@ export default {
         case "intern":
           this.updateData(data);
           break;
-        case "lieferant":
-          this.updateDataSupplier(data);
+        case "extern":
+          this.updateDataExtern(data);
           break;
-        case "kunde":
-          this.updateDataCustomer(data);
+        case "all":
+          this.updateDataAll(data);
           break;
       }
     },
@@ -405,9 +411,6 @@ export default {
               .split(".")
               .reverse()
               .join("");
-            // string sort date
-            // return x[sortBy] > y[sortBy] ? 1 : x[sortBy] < y[sortBy] ? -1 : 0;
-            // return x[sortBy].localeCompare(y[sortBy]);
             return xx < yy ? -1 : xx > yy ? 1 : 0;
           } else {
             // numeric sort
@@ -420,8 +423,8 @@ export default {
     ...mapActions("dataset", [
       "updateHistory",
       "updateData",
-      "updateDataSupplier",
-      "updateDataCustomer"
+      "updateDataExtern",
+      "updateDataAll"
     ])
   },
   mounted() {
@@ -429,17 +432,7 @@ export default {
     // IM STORE NACH DATEN FÜR DEN TAB PRÜFEN
     // WENN DATEN DA -> GLÜCKLICH SEIN
     // WENN NICHT this.refreshDataTable()
-    /*
-    if (this.tab !== this.oldTab) {
-      this.refreshDataTable();
-    } else {
-      if (this.Data.length > 0) {
-        this.drawTable();
-      } else {
-        this.refreshDataTable();
-      }
-    }
-    */
+
     switch (this.tab) {
       case "intern":
         if (this.Data.length > 0) {
@@ -448,15 +441,15 @@ export default {
           this.refreshDataTable();
         }
         break;
-      case "lieferant":
-        if (this.LieferantenData.length > 0) {
+      case "extern":
+        if (this.DataExtern.length > 0) {
           this.drawTable();
         } else {
           this.refreshDataTable();
         }
         break;
-      case "kunde":
-        if (this.KundenData.length > 0) {
+      case "all":
+        if (this.DataAll.length > 0) {
           this.drawTable();
         } else {
           this.refreshDataTable();
