@@ -9,7 +9,7 @@
       :dense="$q.screen.lt.md"
       :data="Dataset"
       :columns="columns"
-      :loading="loading"
+      :loading="loadingButton"
       :filter="filter"
       row-key="name"
       no-data-label="I didn't find anything for you"
@@ -20,11 +20,6 @@
     >
       <template v-slot:top="">
         <div class="fit row wrap justify-between  content-start">
-          <!--
-          <div class="text-h6 col">
-            {{ internal ? "Interne" : "Externe" }} Reklamationen
-          </div>
-          -->
           <div class="q-pa-xs col" style="min-width: 150px">
             <q-input
               filled
@@ -81,6 +76,24 @@
               </template>
             </q-input>
           </div>
+          <div class="col">
+            <q-select
+              v-model="weekNumber"
+              dense
+              outlined
+              label="Kalenderwoche"
+              :options="calendarWeeks"
+            >
+              <template v-slot:append>
+                <q-icon
+                  v-if="weekNumber !== null"
+                  class="cursor-pointer"
+                  name="clear"
+                  @click.stop="weekNumber = null"
+                >
+                </q-icon> </template
+            ></q-select>
+          </div>
           <!--
           <div v-if="$q.screen.gt.xs" class="col full-width">
             <q-toggle
@@ -96,18 +109,21 @@
           <div class="col">
             <q-btn
               dense
+              flat
               class="q-ml-xs"
               icon="refresh"
               :loading="loadingButton"
               @click="refreshDataTable()"
               :disable="disabledRefresh"
             >
-              <q-tooltip content-class="bg-accent" anchor="top left">
+              <q-tooltip
+                v-if="!disabledRefresh"
+                content-class="bg-accent"
+                anchor="top left"
+              >
                 Aktualisieren
               </q-tooltip>
             </q-btn>
-          </div>
-          <div class="col">
             <q-btn dense flat class="q-ml-xs" icon="filter_list">
               <q-tooltip content-class="bg-accent" anchor="top left">
                 Filter
@@ -115,6 +131,7 @@
               <FilterMenu :tab="tab" />
             </q-btn>
           </div>
+          <div class="col"></div>
           <div class="col">
             <q-input dense v-model="filter" placeholder="Suche">
               <template v-slot:append>
@@ -169,6 +186,8 @@ export default {
       endDate: date.formatDate(Date.now(), "YYYY.MM.DD"),
       startDateCopy: "",
       endDateCopy: "",
+      calendarWeeks: [],
+      weekNumber: null,
       lastPage: 0,
       pageSize,
       nextPage,
@@ -186,7 +205,7 @@ export default {
         sortBy: "name",
         descending: true,
         page: 0,
-        rowsPerPage: 10
+        rowsPerPage: 20
       },
       visibleColumns: [],
       vCols: [],
@@ -236,6 +255,19 @@ export default {
       });
     },
     */
+    weekNumber: function(newWeek, oldWeek) {
+      if (this.weekNumber) {
+        const startDate = this.getDateOfWeek(
+          this.weekNumber,
+          new Date().getFullYear()
+        );
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 6);
+
+        this.startDate = date.formatDate(startDate, "YYYY.MM.DD");
+        this.endDate = date.formatDate(endDate, "YYYY.MM.DD");
+      }
+    },
     startDate: function(newDate, oldDate) {
       this.startDateCopy = this.stringDate(newDate);
     },
@@ -420,6 +452,30 @@ export default {
       }
       return data;
     },
+    getDateOfWeek(w, y) {
+      const date = new Date(y, 0, 1 + (w - 1) * 7);
+      date.setDate(date.getDate() + (1 - date.getDay())); // 0 - Sonntag, 1 - Montag etc
+      return date;
+    },
+    getWeekNumber(d) {
+      // Copy date so don't modify original
+      d = new Date(+d);
+      d.setHours(0, 0, 0);
+      // Set to nearest Thursday: current date + 4 - current day number
+      // Make Sunday's day number 7
+      d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+      // Get first day of year
+      var yearStart = new Date(d.getFullYear(), 0, 1);
+      // Calculate full weeks to nearest Thursday
+      var weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+      // Return array of year and week number
+      return [d.getFullYear(), weekNo];
+    },
+    weeksInYear(year) {
+      var d = new Date(year, 11, 31);
+      var week = this.getWeekNumber(d)[1];
+      return week === 1 ? this.getWeekNumber(d.setDate(24))[1] : week;
+    },
     ...mapActions("dataset", [
       "updateHistory",
       "updateData",
@@ -456,6 +512,14 @@ export default {
         }
         break;
     }
+  },
+  created() {
+    const currentYear = new Date().getFullYear();
+    const weeks = [];
+    for (let i = 1; i <= this.weeksInYear(currentYear); i++) {
+      weeks.push(i);
+    }
+    this.calendarWeeks = weeks;
   },
   beforeDestroy() {
     console.log("OnB4Destroy");

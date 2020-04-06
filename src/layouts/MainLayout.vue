@@ -1,7 +1,7 @@
 <template>
   <q-layout view="hHh Lpr fFf">
     <q-header elevated>
-      <q-bar class="q-electron-drag">
+      <q-bar class="q-electron-drag q-pr-none">
         <q-btn
           flat
           dense
@@ -10,12 +10,16 @@
           aria-label="Menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
+        <div class="noselect">Quality Tools</div>
         <q-space />
-        <div>Quality Tools</div>
-        <q-space />
-        <q-btn dense flat icon="minimize" @click="minimize"></q-btn>
-        <q-btn dense flat icon="crop_square" @click="maximize"></q-btn>
-        <q-btn dense flat icon="close" @click="closeApp"></q-btn>
+        <q-btn class="frame-btn" flat icon="minimize" @click="minimize"></q-btn>
+        <q-btn
+          class="frame-btn"
+          flat
+          icon="crop_square"
+          @click="maximize"
+        ></q-btn>
+        <q-btn class="frame-btn" flat icon="close" @click="closeApp"></q-btn>
       </q-bar>
     </q-header>
 
@@ -53,12 +57,9 @@
 
     <!--Footer-->
     <q-footer>
-      <q-bar elevated>
-        <q-space />
-        <div class="text-white">
-          Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}
-        </div>
-      </q-bar>
+      <div class="copyright-text">
+        Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}
+      </div>
     </q-footer>
   </q-layout>
 </template>
@@ -87,6 +88,11 @@ export default {
           title: "Analyse",
           icon: "mdi-chart-bar",
           link: "/analytics"
+        },
+        {
+          title: "PartsPerMillion",
+          icon: "mdi-percent",
+          link: "/ppm"
         }
       ]
     };
@@ -120,10 +126,15 @@ export default {
 };
 </script>
 
-<style>
-.menu-img-aw {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
+<style style lang="sass">
+.copyright-text
+  text-align: right
+  padding: 3px
+  font-size: 11px
+.frame-btn
+  border-radius: 0px
+.menu-img-aw
+  display: block
+  margin-left: auto
+  margin-right: auto
 </style>

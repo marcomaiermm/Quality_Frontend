@@ -8,7 +8,8 @@ const state = {
   parsedPareto: [],
   parsedParetoExtern: [],
   parsedParetoAll: [],
-  parsedFilterMachines: []
+  parsedFilterMachines: [],
+  parsedPPM: []
 };
 
 const mutations = {
@@ -41,6 +42,9 @@ const mutations = {
   },
   updateFilterMachines(state, payload) {
     state.parsedFilterMachines = payload;
+  },
+  updatePPM(state, payload) {
+    state.parsedPPM = payload;
   }
 };
 
@@ -74,6 +78,9 @@ const actions = {
   },
   updateFilterMachines({ commit }, payload) {
     commit("updateFilterMachines", payload);
+  },
+  updatePPM({ commit }, payload) {
+    commit("updatePPM", payload);
   }
 };
 
@@ -107,6 +114,9 @@ const getters = {
   },
   getFilterMachines: state => {
     return state.parsedFilterMachines;
+  },
+  getPPM: state => {
+    return state.parsedPPM;
   }
 };
 

@@ -95,9 +95,14 @@ export default {
         },
         tooltips: {
           mode: "index",
+          position: "nearest",
           callbacks: {
-            afterBody: function(tooltipItem, data) {
-              return "";
+            label: function(tooltipItem, data) {
+              if (tooltipItem.datasetIndex === 0) {
+                return "Kummuliert: " + tooltipItem.yLabel + "%";
+              } else {
+                return "Reklamationen: " + tooltipItem.yLabel;
+              }
             }
           }
         },
@@ -130,8 +135,11 @@ export default {
               id: "P",
               position: "right",
               ticks: {
-                max: 1,
-                min: 0
+                max: 100,
+                min: 0,
+                callback: function(value) {
+                  return value + "%";
+                }
               }
             }
           ]
