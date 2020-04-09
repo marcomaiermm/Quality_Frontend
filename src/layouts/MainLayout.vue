@@ -85,9 +85,9 @@ export default {
           link: "/"
         },
         {
-          title: "Analyse",
+          title: "DefectCollectionCard",
           icon: "mdi-chart-bar",
-          link: "/analytics"
+          link: "/defectcollectioncard"
         },
         {
           title: "PartsPerMillion",

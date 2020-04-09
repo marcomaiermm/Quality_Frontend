@@ -3,6 +3,7 @@ import Vuex from "vuex";
 
 import dataset from "./store-data";
 import states from "./store-state";
+import defectCollection from "./store-defect-collection-card";
 
 Vue.use(Vuex);
 
@@ -19,7 +20,8 @@ export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
       dataset,
-      states
+      states,
+      defectCollection
     },
 
     // enable strict mode (adds overhead!)

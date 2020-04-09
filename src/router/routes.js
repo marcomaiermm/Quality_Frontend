@@ -1,21 +1,27 @@
 const routes = [
-  {
-    path: "/",
-    component: () => import("layouts/MainLayout.vue"),
-    children: [
-      { path: "", component: () => import("pages/Index.vue") },
-      { path: "analytics", component: () => import("pages/Analytics.vue") },
-      { path: "ppm", component: () => import("pages/PartsPerMillion.vue") }
-    ]
-  }
+    {
+        path: "/",
+        component: () => import("layouts/MainLayout.vue"),
+        children: [
+            { path: "", component: () => import("pages/Index.vue") },
+            {
+                path: "defectcollectioncard",
+                component: () => import("pages/DefectCollectionCard.vue")
+            },
+            {
+                path: "ppm",
+                component: () => import("pages/PartsPerMillion.vue")
+            }
+        ]
+    }
 ];
 
 // Always leave this as last one
 if (process.env.MODE !== "ssr") {
-  routes.push({
-    path: "*",
-    component: () => import("pages/Error404.vue")
-  });
+    routes.push({
+        path: "*",
+        component: () => import("pages/Error404.vue")
+    });
 }
 
 export default routes;

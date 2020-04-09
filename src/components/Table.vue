@@ -1,6 +1,6 @@
 <template>
   <!-- css spacing classes q-[p|m][t|r|b|l|a|x|y]-[none|auto|xs|sm|md|lg|xl]
-                                    type direction              size                      -->
+  type direction              size-->
   <!--<div class="q-mt-sm q-mr-md q-ml-md col">-->
   <div class="col">
     <q-table
@@ -18,8 +18,8 @@
       :visible-columns="visibleColumns"
       :sort-method="customSort"
     >
-      <template v-slot:top="">
-        <div class="fit row wrap justify-between  content-start">
+      <template v-slot:top>
+        <div class="fit row wrap justify-between content-start">
           <div class="q-pa-xs col" style="min-width: 150px">
             <q-input
               filled
@@ -90,9 +90,9 @@
                   class="cursor-pointer"
                   name="clear"
                   @click.stop="weekNumber = null"
-                >
-                </q-icon> </template
-            ></q-select>
+                ></q-icon>
+              </template>
+            </q-select>
           </div>
           <!--
           <div v-if="$q.screen.gt.xs" class="col full-width">
@@ -120,14 +120,13 @@
                 v-if="!disabledRefresh"
                 content-class="bg-accent"
                 anchor="top left"
+                >Aktualisieren</q-tooltip
               >
-                Aktualisieren
-              </q-tooltip>
             </q-btn>
             <q-btn dense flat class="q-ml-xs" icon="filter_list">
-              <q-tooltip content-class="bg-accent" anchor="top left">
-                Filter
-              </q-tooltip>
+              <q-tooltip content-class="bg-accent" anchor="top left"
+                >Filter</q-tooltip
+              >
               <FilterMenu :tab="tab" />
             </q-btn>
           </div>
@@ -532,7 +531,6 @@ export default {
 
 <style lang="sass">
 .my-sticky-dynamic
-  /* height or max-height is important */
   height: 410px
 
   .q-table__top,
@@ -542,9 +540,7 @@ export default {
   thead tr th
     position: sticky
     z-index: 1
-  /* this will be the loading indicator */
   thead tr:last-child th
-    /* height of all previous header rows */
     top: 48px
   thead tr:first-child th
     top: 0
