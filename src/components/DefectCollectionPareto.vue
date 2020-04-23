@@ -4,12 +4,12 @@
       <q-card-section>
         <div class="text-overline text-9">Pareto Merkmale</div>
         <commit-chart-bar
+          chart-id="canvas-pareto"
           :width="w"
           :height="h"
           :chartData="datacollection"
           :options="options"
-        >
-        </commit-chart-bar>
+        ></commit-chart-bar>
       </q-card-section>
     </q-card>
   </div>
@@ -41,6 +41,12 @@ export default {
     })
   },
   methods: {
+    printChart() {
+      const canvasEle = document.getElementById("canvas-pareto");
+      const htmlString =
+        "<br><img src='" + canvasEle.toDataURL("image/jpg") + "' />";
+      return htmlString;
+    },
     fillPareto() {
       let dataPareto = [];
       dataPareto = this.Pareto;

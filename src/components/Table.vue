@@ -33,16 +33,8 @@
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy
-                    ref="qDateProxy"
-                    transition-show="scale"
-                    transition-hide="scale"
-                  >
-                    <q-date
-                      v-model="startDate"
-                      today-btn
-                      @input="() => $refs.qDateProxy.hide()"
-                    ></q-date>
+                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                    <q-date v-model="startDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
                   </q-popup-proxy>
                 </q-icon>
               </template>
@@ -61,16 +53,8 @@
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy
-                    ref="qDateProxy"
-                    transition-show="scale"
-                    transition-hide="scale"
-                  >
-                    <q-date
-                      v-model="endDate"
-                      today-btn
-                      @input="() => $refs.qDateProxy.hide()"
-                    ></q-date>
+                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                    <q-date v-model="endDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
                   </q-popup-proxy>
                 </q-icon>
               </template>
@@ -81,6 +65,7 @@
               v-model="weekNumber"
               dense
               outlined
+              square
               label="Kalenderwoche"
               :options="calendarWeeks"
             >
@@ -120,13 +105,10 @@
                 v-if="!disabledRefresh"
                 content-class="bg-accent"
                 anchor="top left"
-                >Aktualisieren</q-tooltip
-              >
+              >Aktualisieren</q-tooltip>
             </q-btn>
             <q-btn dense flat class="q-ml-xs" icon="filter_list">
-              <q-tooltip content-class="bg-accent" anchor="top left"
-                >Filter</q-tooltip
-              >
+              <q-tooltip content-class="bg-accent" anchor="top left">Filter</q-tooltip>
               <FilterMenu :tab="tab" />
             </q-btn>
           </div>
@@ -226,7 +208,7 @@ export default {
       Data: "dataset/getData",
       DataAll: "dataset/getDataAll",
       DataExtern: "dataset/getDataExtern",
-      FilterMaschine: "dataset/getFilterMachines"
+      Filter: "dataset/getFilter"
     }),
     Dataset() {
       let data = [];
@@ -329,7 +311,10 @@ export default {
           params: {
             start: dateBegin,
             end: dateEnd,
-            machines: JSON.stringify(this.FilterMaschine),
+            machines: JSON.stringify(this.Filter.machines),
+            orders: JSON.stringify(this.Filter.orders),
+            parts: JSON.stringify(this.Filter.parts),
+            process: JSON.stringify(this.Filter.process),
             table: this.MenuTab
           }
         })
@@ -487,7 +472,6 @@ export default {
     // IM STORE NACH DATEN FÜR DEN TAB PRÜFEN
     // WENN DATEN DA -> GLÜCKLICH SEIN
     // WENN NICHT this.refreshDataTable()
-
     switch (this.tab) {
       case "intern":
         if (this.Data.length > 0) {

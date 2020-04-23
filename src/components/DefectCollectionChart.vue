@@ -4,12 +4,12 @@
       <q-card-section>
         <div class="text-overline text-9">Reklamationen ppm</div>
         <commit-chart-bar
+          chart-id="canvas-history"
           :width="w"
           :height="h"
           :chartData="datacollection"
           :options="options"
-        >
-        </commit-chart-bar>
+        ></commit-chart-bar>
       </q-card-section>
     </q-card>
   </div>
@@ -42,6 +42,12 @@ export default {
     })
   },
   methods: {
+    printChart() {
+      const canvasEle = document.getElementById("canvas-history");
+      const htmlString =
+        "<br><img src='" + canvasEle.toDataURL("image/jpg") + "' />";
+      return htmlString;
+    },
     fillData() {
       let chartData = [];
       const dataset = [];

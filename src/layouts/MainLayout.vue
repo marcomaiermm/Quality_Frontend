@@ -88,11 +88,6 @@ export default {
           title: "DefectCollectionCard",
           icon: "mdi-chart-bar",
           link: "/defectcollectioncard"
-        },
-        {
-          title: "PartsPerMillion",
-          icon: "mdi-percent",
-          link: "/ppm"
         }
       ]
     };
