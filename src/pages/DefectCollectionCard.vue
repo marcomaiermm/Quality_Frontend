@@ -276,7 +276,7 @@ export default {
                         <style>
                           html,
                           body {
-                            margin: 0;
+                            margin: 0;   
                             padding: 0;
                             font-family: "Roboto", -apple-system, "San Francisco", "Segoe UI",
                               "Helvetica Neue", sans-serif;
@@ -286,6 +286,7 @@ export default {
                           * {
                             box-sizing: border-box;
                             -moz-box-sizing: border-box;
+                            position: relative;
                           }
                           table {
                             table-layout: fixed;
@@ -331,17 +332,23 @@ export default {
                             background: #fff;
                             width: 21cm;
                             min-height: 29.7cm;
+                            /*
+                            background-image: url('data:image/png;base64,${this.base64Bg}'); 
+                            background-size: contain;
+                            */
+                          }
+                          .padded {
                             padding-left: 2cm;
                             padding-top: 2cm;
                             padding-right: 2cm;
                             padding-bottom: 2cm;
-                            background-image: url('data:image/png;base64,${this.base64Bg}'); 
-                            background-size: contain;
                           }
                           @page {
                             orphans: 4;
                             widows: 2;
                             size: A4 portrait;
+                          }
+                          @padded {
                             margin-left: 2cm;
                             margin-top: 2cm;
                             margin-right: 2cm;
@@ -374,6 +381,11 @@ export default {
                           table {
                             page-break-inside: avoid;
                           }
+                          .bg {
+                            pointer-events: none;
+                            position: absolute;
+                            width: 100%
+                          }
                           @media screen {
                             div.page-break::before {
                               content: "";
@@ -398,8 +410,10 @@ export default {
                             html,
                             body {
                               background-color: #fff;
+                              /*
                               background-image: url('data:image/png;base64,${this.base64Bg}') !important;
                               background-size: contain !important; 
+                              */
                             }
                             .page {
                               width: initial !important;
@@ -422,27 +436,37 @@ export default {
                           }
                         </style>
                         <body class="document">
-                          <div id="background">
-                            <div class="page">
-                              <h3>Zusammenfassung für ${this.Dataset.Name}</h3>
-                              <p>${this.htmlTableSummary}</p>
-                            </div>
 
                             <div class="page">
-                              <h3>Reklamationen ppm pro Kalenderwoche</h3>
-                              <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgBar}'/>
+                              <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                              <div class="padded">
+                                <h3>Zusammenfassung für ${this.Dataset.Name}</h3>
+                                <p>${this.htmlTableSummary}</p>
                               </div>
                             </div>
 
                             <div class="page">
-                              <h3>Pareto ppm</h3>
-                              <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgPareto}'/>
+                              <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                              <div class="padded">
+                                <h3>Reklamationen ppm pro Kalenderwoche</h3>
+                                <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgBar}'/></p>
                               </div>
                             </div>
 
                             <div class="page">
-                              <h3>Detailansicht Merkmal Reklamationen pro KW</h3>
-                              <p>${this.htmlTableFeatures}</p>
+                              <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                              <div class="padded">
+                                <h3>Pareto ppm</h3>
+                                <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgPareto}'/>
+                              </div>
+                            </div>
+
+                            <div class="page">
+                              <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                              <div class="padded">
+                                <h3>Detailansicht Merkmal Reklamationen pro KW</h3>
+                                <p>${this.htmlTableFeatures}</p>
+                              </div>
                             </div>
                           </div>
                         </body>
