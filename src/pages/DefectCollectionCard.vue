@@ -102,7 +102,9 @@ export default {
       base64Bg: "",
       htmlTableFeatures: "",
       htmlTableSummary: "",
-      errors: []
+      errors: [],
+      cancelToken: null,
+      source: null
     };
   },
   methods: {
@@ -215,10 +217,13 @@ export default {
     refreshData() {
       this.save = true;
       this.loading = true;
+      this.cancelToken = this.$axios.CancelToken;
+      this.source = this.cancelToken.source();
       this.updateDefectCollectionCard([]);
       this.updateSummary([]);
       this.$axios
         .get("http://192.168.8.218:5000/defectcollectioncard", {
+          cancelToken: this.source.token,
           params: {
             year: this.textYear,
             search: this.textSearch,
@@ -232,6 +237,14 @@ export default {
           const pareto = JSON.parse(seed.Pareto);
           const summary = JSON.parse(seed.Zusammenfassung);
 
+          // Byte64 Images und HTML Tabellen
+          this.svgBar = seed.bar;
+          this.svgPareto = seed.pareto;
+          this.base64Bg = seed.bg;
+          this.htmlTableFeatures = seed.features;
+          this.htmlTableSummary = seed.summary;
+          this.reportDoc();
+
           this.updateDataset(seed);
           this.updateDefectCollectionCard(defectCollectionCard);
           this.updateSummary(summary);
@@ -239,7 +252,6 @@ export default {
           this.updatePareto(pareto);
 
           this.loading = false;
-          this.callBase64SVG();
           this.$refs.chart.fillData();
           this.$refs.pareto.fillPareto();
         })
@@ -253,6 +265,7 @@ export default {
             this.errors.push(error);
           }
         });
+      this.save = false;
     },
     reportDoc() {
       // const bgImg = document.getElementById("reportbg").src;
@@ -440,7 +453,7 @@ export default {
                             <div class="page">
                               <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
                               <div class="padded">
-                                <h3>Zusammenfassung für ${this.Dataset.Name}</h3>
+                                <h3 contenteditable="true">Zusammenfassung für ${this.Dataset.Name}</h3>
                                 <p>${this.htmlTableSummary}</p>
                               </div>
                             </div>
@@ -448,7 +461,7 @@ export default {
                             <div class="page">
                               <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
                               <div class="padded">
-                                <h3>Reklamationen ppm pro Kalenderwoche</h3>
+                                <h3 contenteditable="true">Reklamationen ppm pro Kalenderwoche</h3>
                                 <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgBar}'/></p>
                               </div>
                             </div>
@@ -456,7 +469,7 @@ export default {
                             <div class="page">
                               <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
                               <div class="padded">
-                                <h3>Pareto ppm</h3>
+                                <h3 contenteditable="true">Pareto ppm</h3>
                                 <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgPareto}'/>
                               </div>
                             </div>
@@ -464,7 +477,7 @@ export default {
                             <div class="page">
                               <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
                               <div class="padded">
-                                <h3>Detailansicht Merkmal Reklamationen pro KW</h3>
+                                <h3 contenteditable="true">Detailansicht Merkmal Reklamationen pro KW</h3>
                                 <p>${this.htmlTableFeatures}</p>
                               </div>
                             </div>
@@ -472,24 +485,6 @@ export default {
                         </body>
                         </html>
                         `;
-    },
-    callBase64SVG() {
-      this.$axios
-        .get("http://192.168.8.218:5000/svgdefectcollection")
-        .then(response => {
-          const seed = response.data;
-          this.svgBar = seed.bar;
-          this.svgPareto = seed.pareto;
-          this.base64Bg = seed.bg;
-          this.htmlTableFeatures = seed.features;
-          this.htmlTableSummary = seed.summary;
-          this.save = false;
-          this.reportDoc();
-        })
-        .catch(error => {
-          this.errors.push(error);
-          this.save = false;
-        });
     },
     showNotification() {
       this.$q.notify({
@@ -505,6 +500,12 @@ export default {
       "updatePareto",
       "updateSummary"
     ])
+  },
+  mounted() {},
+  beforeDestroy() {
+    if (this.source) {
+      this.source.cancel("Operation canceled by the user.");
+    }
   }
 };
 </script>

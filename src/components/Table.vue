@@ -9,7 +9,7 @@
       :dense="$q.screen.lt.md"
       :data="Dataset"
       :columns="columns"
-      :loading="loadingButton"
+      :loading="loading"
       :filter="filter"
       row-key="name"
       no-data-label="I didn't find anything for you"
@@ -97,15 +97,11 @@
               flat
               class="q-ml-xs"
               icon="refresh"
-              :loading="loadingButton"
-              @click="refreshDataTable()"
-              :disable="disabledRefresh"
+              :loading="loading"
+              @click="update()"
+              :disable="loading"
             >
-              <q-tooltip
-                v-if="!disabledRefresh"
-                content-class="bg-accent"
-                anchor="top left"
-              >Aktualisieren</q-tooltip>
+              <q-tooltip v-if="!loading" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
             </q-btn>
             <q-btn dense flat class="q-ml-xs" icon="filter_list">
               <q-tooltip content-class="bg-accent" anchor="top left">Filter</q-tooltip>
@@ -147,11 +143,9 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import { date } from "quasar";
-// import * as d3 from "d3";
-// import LineChart from './LineChart.vue'
+
 const pageSize = 50;
 const nextPage = 2;
-// var today = date.formatDate((Date.now(), "YYYY.MM.DD"));
 let begin = new Date();
 begin.setMonth(begin.getMonth() - 1);
 begin = date.formatDate(begin, "YYYY.MM.DD");
@@ -174,8 +168,6 @@ export default {
       nextPage,
       loading: false,
       filter: "",
-      loadingButton: false,
-      disabledRefresh: false,
       uniqueMachines: [],
       errors: [],
       toggles: [],
@@ -190,9 +182,7 @@ export default {
       },
       visibleColumns: [],
       vCols: [],
-      columns: [],
-      cancelToken: null,
-      source: null
+      columns: []
     };
   },
   props: ["tab"],
@@ -228,14 +218,6 @@ export default {
   },
 
   watch: {
-    /*
-    Data: function(newData, oldData) {
-      this.dataset = [];
-      newData.forEach(element => {
-        this.dataset.push({ ...element });
-      });
-    },
-    */
     weekNumber: function(newWeek, oldWeek) {
       if (this.weekNumber) {
         const startDate = this.getDateOfWeek(
@@ -258,12 +240,25 @@ export default {
     errors: function() {
       if (this.errors.length > 0) {
         this.loadingButton = false;
-        this.disabledRefresh = false;
       }
     }
   },
 
   methods: {
+    update(event) {
+      this.loading = true;
+      const args = {
+        start: this.stringDate(this.startDate),
+        end: this.stringDate(this.endDate),
+        machines: JSON.stringify(this.Filter.machines),
+        orders: JSON.stringify(this.Filter.orders),
+        parts: JSON.stringify(this.Filter.parts),
+        process: JSON.stringify(this.Filter.process),
+        tab: this.tab,
+        table: this.MenuTab
+      };
+      this.$emit("refreshEmmit", args);
+    },
     onScroll({ to, ref }) {
       const lastIndex = this.data.length - 1;
 
@@ -278,8 +273,7 @@ export default {
           this.nextPage++;
           this.$nextTick(() => {
             ref.refresh();
-            this.disabledRefresh = false;
-            this.loadingButton = false;
+            this.loading = false;
           });
         }, 500);
       }
@@ -293,54 +287,11 @@ export default {
     // Die daraus resultierenden Daten werden im store gespeichert
     refreshDataTable() {
       this.calls = 0;
-      this.disabledRefresh = true;
-      this.loadingButton = true;
       this.vCols = [];
       this.visibleColumns = [];
       this.columns = [];
-      const dateBegin = this.stringDate(this.startDate);
-      const dateEnd = this.stringDate(this.endDate);
-      let axiosUrl = "";
 
-      axiosUrl = "http://192.168.8.218:5000/datatable/" + this.tab;
-      this.cancelToken = this.$axios.CancelToken;
-      this.source = this.cancelToken.source();
-      this.$axios
-        .get(axiosUrl, {
-          cancelToken: this.source.token,
-          params: {
-            start: dateBegin,
-            end: dateEnd,
-            machines: JSON.stringify(this.Filter.machines),
-            orders: JSON.stringify(this.Filter.orders),
-            parts: JSON.stringify(this.Filter.parts),
-            process: JSON.stringify(this.Filter.process),
-            table: this.MenuTab
-          }
-        })
-        .then(response => {
-          if (response.data !== "[]") {
-            this.seed = JSON.parse(response.data);
-          } else {
-            this.seed = [];
-          }
-
-          this.storeData(this.seed);
-          this.loadingButton = false;
-          this.disabledRefresh = false;
-          if (this.seed) {
-            this.$emit("dataChanged");
-          }
-          this.drawTable();
-        })
-        .catch(error => {
-          if (this.$axios.isCancel(error)) {
-            console.log("Request canceled", error.message);
-          } else {
-            // handle error
-            this.errors.push(error);
-          }
-        });
+      this.drawTable();
     },
     uniques() {},
     storeData(data) {
@@ -357,7 +308,6 @@ export default {
       }
     },
     drawTable() {
-      // this.pushData();
       this.tableHead = Object.keys(this.Dataset[0]);
       this.tableHead.forEach(element => {
         this.visibleColumns.push(element);
@@ -386,21 +336,12 @@ export default {
           label: element
         });
       });
-      // LineChart.methods.testMethod(this.Data)
+      this.loading = false;
     },
     formatData() {
       for (let i = 0; i < this.seed.length; i++) {
         this.seed[i].Datum = Date.extractDate(this.seed[i].Datum, "DD.MM.YYYY");
-      } /*
-      this.seed.map(function(d) {
-        return moment(d.Date, "DD-MM-YYYY");
-
-        var parseTime = d3.timeParse("%d.%m.%Y");
-         this.seed.forEach(function(d) {
-        d.Date = parseTime(d.Date);
-        d.Close = +d.Close;
-
-      }); */
+      }
     },
     filterText(value, search) {
       return (
@@ -477,21 +418,21 @@ export default {
         if (this.Data.length > 0) {
           this.drawTable();
         } else {
-          this.refreshDataTable();
+          this.update();
         }
         break;
       case "extern":
         if (this.DataExtern.length > 0) {
           this.drawTable();
         } else {
-          this.refreshDataTable();
+          this.update();
         }
         break;
       case "all":
         if (this.DataAll.length > 0) {
           this.drawTable();
         } else {
-          this.refreshDataTable();
+          this.update();
         }
         break;
     }
@@ -503,14 +444,54 @@ export default {
       weeks.push(i);
     }
     this.calendarWeeks = weeks;
-  },
-  beforeDestroy() {
-    console.log("OnB4Destroy");
-    if (this.source) {
-      this.source.cancel("Operation canceled by the user.");
-    }
   }
 };
+
+/*
+      const dateBegin = this.stringDate(this.startDate);
+      const dateEnd = this.stringDate(this.endDate);
+      let axiosUrl = "";
+
+      axiosUrl = "http://192.168.8.218:5000/datatable/" + this.tab;
+      this.cancelToken = this.$axios.CancelToken;
+      this.source = this.cancelToken.source();
+      this.$axios
+        .get(axiosUrl, {
+          cancelToken: this.source.token,
+          params: {
+            start: dateBegin,
+            end: dateEnd,
+            machines: JSON.stringify(this.Filter.machines),
+            orders: JSON.stringify(this.Filter.orders),
+            parts: JSON.stringify(this.Filter.parts),
+            process: JSON.stringify(this.Filter.process),
+            table: this.MenuTab
+          }
+        })
+        .then(response => {
+          if (response.data !== "[]") {
+            this.seed = JSON.parse(response.data);
+          } else {
+            this.seed = [];
+          }
+
+          this.storeData(this.seed);
+          this.loadingButton = false;
+          this.disabledRefresh = false;
+          if (this.seed) {
+            this.$emit("dataChanged");
+          }
+          this.drawTable();
+        })
+        .catch(error => {
+          if (this.$axios.isCancel(error)) {
+            console.log("Request canceled", error.message);
+          } else {
+            // handle error
+            this.errors.push(error);
+          }
+        });
+        */
 </script>
 
 <style lang="sass">
@@ -529,3 +510,4 @@ export default {
   thead tr:first-child th
     top: 0
 </style>
+
