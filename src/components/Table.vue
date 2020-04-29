@@ -1,6 +1,6 @@
 <template>
   <!-- css spacing classes q-[p|m][t|r|b|l|a|x|y]-[none|auto|xs|sm|md|lg|xl]
-                                    type direction              size                      -->
+  type direction              size-->
   <!--<div class="q-mt-sm q-mr-md q-ml-md col">-->
   <div class="col">
     <q-table
@@ -9,7 +9,7 @@
       :dense="$q.screen.lt.md"
       :data="Dataset"
       :columns="columns"
-      :loading="loadingButton"
+      :loading="load"
       :filter="filter"
       row-key="name"
       no-data-label="I didn't find anything for you"
@@ -18,8 +18,8 @@
       :visible-columns="visibleColumns"
       :sort-method="customSort"
     >
-      <template v-slot:top="">
-        <div class="fit row wrap justify-between  content-start">
+      <template v-slot:top>
+        <div class="fit row wrap justify-between content-start">
           <div class="q-pa-xs col" style="min-width: 150px">
             <q-input
               filled
@@ -33,16 +33,8 @@
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy
-                    ref="qDateProxy"
-                    transition-show="scale"
-                    transition-hide="scale"
-                  >
-                    <q-date
-                      v-model="startDate"
-                      today-btn
-                      @input="() => $refs.qDateProxy.hide()"
-                    ></q-date>
+                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                    <q-date v-model="startDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
                   </q-popup-proxy>
                 </q-icon>
               </template>
@@ -61,16 +53,8 @@
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy
-                    ref="qDateProxy"
-                    transition-show="scale"
-                    transition-hide="scale"
-                  >
-                    <q-date
-                      v-model="endDate"
-                      today-btn
-                      @input="() => $refs.qDateProxy.hide()"
-                    ></q-date>
+                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                    <q-date v-model="endDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
                   </q-popup-proxy>
                 </q-icon>
               </template>
@@ -81,6 +65,7 @@
               v-model="weekNumber"
               dense
               outlined
+              square
               label="Kalenderwoche"
               :options="calendarWeeks"
             >
@@ -90,9 +75,9 @@
                   class="cursor-pointer"
                   name="clear"
                   @click.stop="weekNumber = null"
-                >
-                </q-icon> </template
-            ></q-select>
+                ></q-icon>
+              </template>
+            </q-select>
           </div>
           <!--
           <div v-if="$q.screen.gt.xs" class="col full-width">
@@ -112,22 +97,14 @@
               flat
               class="q-ml-xs"
               icon="refresh"
-              :loading="loadingButton"
-              @click="refreshDataTable()"
-              :disable="disabledRefresh"
+              :loading="load"
+              @click="update()"
+              :disable="load"
             >
-              <q-tooltip
-                v-if="!disabledRefresh"
-                content-class="bg-accent"
-                anchor="top left"
-              >
-                Aktualisieren
-              </q-tooltip>
+              <q-tooltip v-if="!load" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
             </q-btn>
             <q-btn dense flat class="q-ml-xs" icon="filter_list">
-              <q-tooltip content-class="bg-accent" anchor="top left">
-                Filter
-              </q-tooltip>
+              <q-tooltip content-class="bg-accent" anchor="top left">Filter</q-tooltip>
               <FilterMenu :tab="tab" />
             </q-btn>
           </div>
@@ -166,11 +143,9 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import { date } from "quasar";
-// import * as d3 from "d3";
-// import LineChart from './LineChart.vue'
+
 const pageSize = 50;
 const nextPage = 2;
-// var today = date.formatDate((Date.now(), "YYYY.MM.DD"));
 let begin = new Date();
 begin.setMonth(begin.getMonth() - 1);
 begin = date.formatDate(begin, "YYYY.MM.DD");
@@ -193,8 +168,6 @@ export default {
       nextPage,
       loading: false,
       filter: "",
-      loadingButton: false,
-      disabledRefresh: false,
       uniqueMachines: [],
       errors: [],
       toggles: [],
@@ -209,12 +182,10 @@ export default {
       },
       visibleColumns: [],
       vCols: [],
-      columns: [],
-      cancelToken: null,
-      source: null
+      columns: []
     };
   },
-  props: ["tab"],
+  props: ["tab", "load"],
   computed: {
     data() {
       return Object.freeze(
@@ -227,7 +198,7 @@ export default {
       Data: "dataset/getData",
       DataAll: "dataset/getDataAll",
       DataExtern: "dataset/getDataExtern",
-      FilterMaschine: "dataset/getFilterMachines"
+      Filter: "dataset/getFilter"
     }),
     Dataset() {
       let data = [];
@@ -247,14 +218,6 @@ export default {
   },
 
   watch: {
-    /*
-    Data: function(newData, oldData) {
-      this.dataset = [];
-      newData.forEach(element => {
-        this.dataset.push({ ...element });
-      });
-    },
-    */
     weekNumber: function(newWeek, oldWeek) {
       if (this.weekNumber) {
         const startDate = this.getDateOfWeek(
@@ -277,28 +240,40 @@ export default {
     errors: function() {
       if (this.errors.length > 0) {
         this.loadingButton = false;
-        this.disabledRefresh = false;
       }
     }
   },
 
   methods: {
+    update(event) {
+      // this.loading = true;
+      const args = {
+        start: this.stringDate(this.startDate),
+        end: this.stringDate(this.endDate),
+        machines: JSON.stringify(this.Filter.machines),
+        orders: JSON.stringify(this.Filter.orders),
+        parts: JSON.stringify(this.Filter.parts),
+        process: JSON.stringify(this.Filter.process),
+        tab: this.tab,
+        table: this.MenuTab
+      };
+      this.$emit("refreshEmmit", args);
+    },
     onScroll({ to, ref }) {
       const lastIndex = this.data.length - 1;
 
       if (
-        this.loading !== true &&
+        this.load !== true &&
         this.nextPage < this.lastPage &&
         to === lastIndex
       ) {
-        this.loading = true;
+        this.load = true;
 
         setTimeout(() => {
           this.nextPage++;
           this.$nextTick(() => {
             ref.refresh();
-            this.disabledRefresh = false;
-            this.loadingButton = false;
+            // this.loading = false;
           });
         }, 500);
       }
@@ -312,51 +287,11 @@ export default {
     // Die daraus resultierenden Daten werden im store gespeichert
     refreshDataTable() {
       this.calls = 0;
-      this.disabledRefresh = true;
-      this.loadingButton = true;
       this.vCols = [];
       this.visibleColumns = [];
       this.columns = [];
-      const dateBegin = this.stringDate(this.startDate);
-      const dateEnd = this.stringDate(this.endDate);
-      let axiosUrl = "";
 
-      axiosUrl = "http://192.168.8.218:5000/datatable/" + this.tab;
-      this.cancelToken = this.$axios.CancelToken;
-      this.source = this.cancelToken.source();
-      this.$axios
-        .get(axiosUrl, {
-          cancelToken: this.source.token,
-          params: {
-            start: dateBegin,
-            end: dateEnd,
-            machines: JSON.stringify(this.FilterMaschine),
-            table: this.MenuTab
-          }
-        })
-        .then(response => {
-          if (response.data !== "[]") {
-            this.seed = JSON.parse(response.data);
-          } else {
-            this.seed = [];
-          }
-
-          this.storeData(this.seed);
-          this.loadingButton = false;
-          this.disabledRefresh = false;
-          if (this.seed) {
-            this.$emit("dataChanged");
-          }
-          this.drawTable();
-        })
-        .catch(error => {
-          if (this.$axios.isCancel(error)) {
-            console.log("Request canceled", error.message);
-          } else {
-            // handle error
-            this.errors.push(error);
-          }
-        });
+      this.drawTable();
     },
     uniques() {},
     storeData(data) {
@@ -373,7 +308,6 @@ export default {
       }
     },
     drawTable() {
-      // this.pushData();
       this.tableHead = Object.keys(this.Dataset[0]);
       this.tableHead.forEach(element => {
         this.visibleColumns.push(element);
@@ -402,21 +336,12 @@ export default {
           label: element
         });
       });
-      // LineChart.methods.testMethod(this.Data)
+      // this.loading = false;
     },
     formatData() {
       for (let i = 0; i < this.seed.length; i++) {
         this.seed[i].Datum = Date.extractDate(this.seed[i].Datum, "DD.MM.YYYY");
-      } /*
-      this.seed.map(function(d) {
-        return moment(d.Date, "DD-MM-YYYY");
-
-        var parseTime = d3.timeParse("%d.%m.%Y");
-         this.seed.forEach(function(d) {
-        d.Date = parseTime(d.Date);
-        d.Close = +d.Close;
-
-      }); */
+      }
     },
     filterText(value, search) {
       return (
@@ -488,27 +413,26 @@ export default {
     // IM STORE NACH DATEN FÜR DEN TAB PRÜFEN
     // WENN DATEN DA -> GLÜCKLICH SEIN
     // WENN NICHT this.refreshDataTable()
-
     switch (this.tab) {
       case "intern":
         if (this.Data.length > 0) {
           this.drawTable();
         } else {
-          this.refreshDataTable();
+          this.update();
         }
         break;
       case "extern":
         if (this.DataExtern.length > 0) {
           this.drawTable();
         } else {
-          this.refreshDataTable();
+          this.update();
         }
         break;
       case "all":
         if (this.DataAll.length > 0) {
           this.drawTable();
         } else {
-          this.refreshDataTable();
+          this.update();
         }
         break;
     }
@@ -520,19 +444,58 @@ export default {
       weeks.push(i);
     }
     this.calendarWeeks = weeks;
-  },
-  beforeDestroy() {
-    console.log("OnB4Destroy");
-    if (this.source) {
-      this.source.cancel("Operation canceled by the user.");
-    }
   }
 };
+
+/*
+      const dateBegin = this.stringDate(this.startDate);
+      const dateEnd = this.stringDate(this.endDate);
+      let axiosUrl = "";
+
+      axiosUrl = "http://192.168.8.218:5000/datatable/" + this.tab;
+      this.cancelToken = this.$axios.CancelToken;
+      this.source = this.cancelToken.source();
+      this.$axios
+        .get(axiosUrl, {
+          cancelToken: this.source.token,
+          params: {
+            start: dateBegin,
+            end: dateEnd,
+            machines: JSON.stringify(this.Filter.machines),
+            orders: JSON.stringify(this.Filter.orders),
+            parts: JSON.stringify(this.Filter.parts),
+            process: JSON.stringify(this.Filter.process),
+            table: this.MenuTab
+          }
+        })
+        .then(response => {
+          if (response.data !== "[]") {
+            this.seed = JSON.parse(response.data);
+          } else {
+            this.seed = [];
+          }
+
+          this.storeData(this.seed);
+          this.loadingButton = false;
+          this.disabledRefresh = false;
+          if (this.seed) {
+            this.$emit("dataChanged");
+          }
+          this.drawTable();
+        })
+        .catch(error => {
+          if (this.$axios.isCancel(error)) {
+            console.log("Request canceled", error.message);
+          } else {
+            // handle error
+            this.errors.push(error);
+          }
+        });
+        */
 </script>
 
 <style lang="sass">
 .my-sticky-dynamic
-  /* height or max-height is important */
   height: 410px
 
   .q-table__top,
@@ -542,10 +505,9 @@ export default {
   thead tr th
     position: sticky
     z-index: 1
-  /* this will be the loading indicator */
   thead tr:last-child th
-    /* height of all previous header rows */
     top: 48px
   thead tr:first-child th
     top: 0
 </style>
+

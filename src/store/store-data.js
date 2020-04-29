@@ -8,7 +8,12 @@ const state = {
   parsedPareto: [],
   parsedParetoExtern: [],
   parsedParetoAll: [],
-  parsedFilterMachines: [],
+  parsedFilter: {
+    machines: [],
+    orders: [],
+    process: [],
+    parts: []
+  },
   parsedPPM: []
 };
 
@@ -40,8 +45,8 @@ const mutations = {
   updateParetoAll(state, payload) {
     state.parsedParetoAll = payload;
   },
-  updateFilterMachines(state, payload) {
-    state.parsedFilterMachines = payload;
+  updateFilter(state, payload) {
+    state.parsedFilter = payload;
   },
   updatePPM(state, payload) {
     state.parsedPPM = payload;
@@ -76,8 +81,8 @@ const actions = {
   updateParetoAll({ commit }, payload) {
     commit("updateParetoAll", payload);
   },
-  updateFilterMachines({ commit }, payload) {
-    commit("updateFilterMachines", payload);
+  updateFilter({ commit }, payload) {
+    commit("updateFilter", payload);
   },
   updatePPM({ commit }, payload) {
     commit("updatePPM", payload);
@@ -112,8 +117,8 @@ const getters = {
   getParetoAll: state => {
     return state.parsedParetoAll;
   },
-  getFilterMachines: state => {
-    return state.parsedFilterMachines;
+  getFilter: state => {
+    return state.parsedFilter;
   },
   getPPM: state => {
     return state.parsedPPM;

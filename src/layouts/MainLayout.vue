@@ -85,14 +85,9 @@ export default {
           link: "/"
         },
         {
-          title: "Analyse",
+          title: "DefectCollectionCard",
           icon: "mdi-chart-bar",
-          link: "/analytics"
-        },
-        {
-          title: "PartsPerMillion",
-          icon: "mdi-percent",
-          link: "/ppm"
+          link: "/defectcollectioncard"
         }
       ]
     };

@@ -2,8 +2,14 @@
   <div class="q-pa-md">
     <q-card class="hist-card" bordered>
       <q-card-section>
-        <div class="text-overline text-9">Histogram</div>
-        <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
+        <div class="text-overline text-9">Pareto Merkmale</div>
+        <commit-chart-bar
+          chart-id="canvas-pareto"
+          :width="w"
+          :height="h"
+          :chartData="datacollection"
+          :options="options"
+        ></commit-chart-bar>
       </q-card-section>
     </q-card>
   </div>
@@ -11,19 +17,11 @@
 
 <script>
 import CommitChartBar from "./js/CommitChartBar.js";
-// import { select } from 'd3-selection'
-// import * as d3 from 'd3'
-import { mapGetters, mapActions } from "vuex";
-
+import { mapGetters } from "vuex";
 export default {
-  name: "Histogram",
+  name: "DefectCollectionPareto",
   components: {
     CommitChartBar
-  },
-  computed: {
-    ...mapGetters({
-      Data: "dataset/getHistoryDynamic"
-    })
   },
   data() {
     return {
@@ -33,40 +31,34 @@ export default {
       },
       dataset: {},
       options: {},
-      h: 400,
+      h: 370,
       w: 1000
     };
   },
-  watch: {
-    Data: function(newData, oldData) {
-      if (newData !== oldData) {
-        this.refresh();
-      }
-      this.fillData();
-    }
+  computed: {
+    ...mapGetters({
+      Pareto: "defectCollection/getPareto"
+    })
   },
   methods: {
-    refresh() {
-      this.$axios
-        .get("http://pc0547.allweier.lcl:5000/pareto")
-        .then(response => {
-          this.seed = JSON.parse(response.data);
-          this.updatePareto(this.seed);
-          this.fillData();
-        });
+    printChart() {
+      const canvasEle = document.getElementById("canvas-pareto");
+      const htmlString =
+        "<br><img src='" + canvasEle.toDataURL("image/jpg") + "' />";
+      return htmlString;
     },
-    fillData() {
+    fillPareto() {
+      let dataPareto = [];
+      dataPareto = this.Pareto;
       const dataSet = [];
       const kumSet = [];
-      Object.keys(this.Pareto).forEach(element => {
-        dataSet.push(this.Pareto[element].Fehler);
-        kumSet.push(this.Pareto[element].Kummuliert);
+      Object.keys(dataPareto).forEach(element => {
+        dataSet.push(dataPareto[element].Gesamt);
+        kumSet.push(dataPareto[element].Kummuliert);
       });
 
-      console.log(kumSet);
-
       this.datacollection = {
-        labels: Object.keys(this.Pareto),
+        labels: Object.keys(dataPareto),
         datasets: [
           {
             label: "Kummuliert",
@@ -94,9 +86,15 @@ export default {
           duration: 2000
         },
         tooltips: {
+          mode: "index",
+          position: "nearest",
           callbacks: {
-            afterBody: function(tooltipItem, data) {
-              return "";
+            label: function(tooltipItem, data) {
+              if (tooltipItem.datasetIndex === 0) {
+                return "Kummuliert: " + tooltipItem.yLabel + "%";
+              } else {
+                return "Reklamationen: " + tooltipItem.yLabel;
+              }
             }
           }
         },
@@ -129,20 +127,20 @@ export default {
               id: "P",
               position: "right",
               ticks: {
-                max: 1,
-                min: 0
+                max: 100,
+                min: 0,
+                callback: function(value) {
+                  return value + "%";
+                }
               }
             }
           ]
         }
       };
-    },
-    ...mapActions("dataset", ["updatePareto"])
+    }
   },
   mounted() {
-    if (this.Data.length > 0) {
-      this.refresh();
-    }
+    this.fillPareto();
   }
 };
 </script>

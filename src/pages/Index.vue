@@ -10,21 +10,9 @@
         narrow-indicator
         align="center"
       >
-        <q-tab
-          name="intern"
-          label="Interne Reklamationen"
-          @click="setTab('intern')"
-        ></q-tab>
-        <q-tab
-          name="extern"
-          label="Externe Reklamationen"
-          @click="setTab('extern')"
-        ></q-tab>
-        <q-tab
-          name="all"
-          label="Gesamte Reklamationen"
-          @click="setTab('all')"
-        ></q-tab>
+        <q-tab name="intern" label="Interne Reklamationen" @click="setTab('intern')"></q-tab>
+        <q-tab name="extern" label="Externe Reklamationen" @click="setTab('extern')"></q-tab>
+        <q-tab name="all" label="Gesamte Reklamationen" @click="setTab('all')"></q-tab>
       </q-tabs>
       <div class="row q-gutter">
         <q-tab-panels class="col-12" v-model="tab" animated>
@@ -32,24 +20,30 @@
             <DataTable
               :tab="tab"
               :oldTab="oldTab"
+              :load="loading"
               v-bind:key="tab"
-              @dataChanged="getData()"
+              @refreshEmmit="onClickRefresh"
+              ref="dataTableIntern"
             />
           </q-tab-panel>
           <q-tab-panel name="extern">
             <DataTable
               :tab="tab"
               :oldTab="oldTab"
+              :load="loading"
               v-bind:key="tab"
-              @dataChanged="getData()"
+              @refreshEmmit="onClickRefresh"
+              ref="dataTableExtern"
             />
           </q-tab-panel>
           <q-tab-panel name="all">
             <DataTable
               :tab="tab"
               :oldTab="oldTab"
+              :load="loading"
               v-bind:key="tab"
-              @dataChanged="getData()"
+              @refreshEmmit="onClickRefresh"
+              ref="dataTableAll"
             />
           </q-tab-panel>
         </q-tab-panels>
@@ -62,6 +56,16 @@
       </div>
     </div>
   </div>
+  <!--
+            <DataTable
+              :tab="tab"
+              :oldTab="oldTab"
+              v-bind:key="tab"
+              @dataChanged="getData()"
+              @testEmmit="onClickTest"
+              ref="dataTableIntern"
+            />
+  -->
 </template>
 
 <script>
@@ -76,22 +80,31 @@ export default {
   },
   computed: {
     ...mapGetters({
+      MenuTab: "states/getMenuTab",
       Tab: "states/getTab",
       History: "dataset/getHistory",
       HistoryAll: "dataset/getHistoryAll",
       HistoryExtern: "dataset/getHistoryExtern",
       Pareto: "dataset/getPareto",
       ParetoAll: "dataset/getParetoAll",
-      ParetoExtern: "dataset/getParetoExtern"
+      ParetoExtern: "dataset/getParetoExtern",
+      Config: "config/getCfg"
     })
   },
   data() {
     return {
       tab: "intern",
-      oldTab: "intern"
+      oldTab: "intern",
+      cancelToken: null,
+      source: null,
+      loading: false
     };
   },
   methods: {
+    onClickRefresh(value) {
+      this.getData(value);
+    },
+    ...mapActions("config", ["updateConfig"]),
     ...mapActions("states", ["updateTab"]),
     ...mapActions("dataset", [
       "updateHistory",
@@ -99,54 +112,90 @@ export default {
       "updateHistoryExtern",
       "updatePareto",
       "updateParetoAll",
-      "updateParetoExtern"
+      "updateParetoExtern",
+      "updateData",
+      "updateDataExtern",
+      "updateDataAll"
     ]),
     setTab(tab) {
       this.tab = tab;
       this.updateTab(tab);
+      if (this.source) {
+        this.source.cancel("Operation canceled by the user.");
+      }
     },
-    getData() {
-      this.$axios.get("http://192.168.8.218:5000/histogram").then(response => {
-        const seed = JSON.parse(response.data);
-        this.getDataHistory(seed);
-      });
-
-      this.$axios.get("http://192.168.8.218:5000/pareto").then(response => {
-        const seed = JSON.parse(response.data);
-        this.getDataPareto(seed);
-      });
+    getData(parameter) {
+      this.cancelToken = this.$axios.CancelToken;
+      this.source = this.cancelToken.source();
+      this.loading = true;
+      this.$axios
+        .get("http://pc0547.allweier.lcl:5000/datatable", {
+          cancelToken: this.source.token,
+          params: parameter
+        })
+        .then(response => {
+          const seed = response.data;
+          this.update(seed);
+        })
+        .catch(error => {
+          if (this.$axios.isCancel(error)) {
+            console.log("Request canceled", error.message);
+          }
+          this.loading = false;
+        });
     },
-    getDataHistory(seed) {
+    update(seed) {
+      const data = JSON.parse(seed.table);
+      const history = JSON.parse(seed.history);
+      const pareto = JSON.parse(seed.pareto);
       switch (this.tab) {
         case "intern":
-          this.updateHistory(seed);
+          this.updateData(data);
+          this.updateHistory(history);
+          this.updatePareto(pareto);
+          this.$refs.dataTableIntern.refreshDataTable();
           break;
         case "extern":
-          this.updateHistoryExtern(seed);
+          this.updateDataExtern(data);
+          this.updateHistoryExtern(history);
+          this.updateParetoExtern(pareto);
+          this.$refs.dataTableExtern.refreshDataTable();
           break;
         case "all":
-          this.updateHistoryAll(seed);
+          this.updateDataAll(data);
+          this.updateHistoryAll(history);
+          this.updateParetoAll(pareto);
+          this.$refs.dataTableAll.refreshDataTable();
           break;
       }
       this.$refs.histChart.fillData();
-    },
-    getDataPareto(seed) {
-      switch (this.tab) {
-        case "intern":
-          this.updatePareto(seed);
-          break;
-        case "extern":
-          this.updateParetoExtern(seed);
-          break;
-        case "all":
-          this.updateParetoAll(seed);
-          break;
-      }
       this.$refs.paretoChart.fillPareto();
+      this.loading = false;
     }
   },
-  mounted() {
-    this.tab = this.Tab;
+  created() {
+    // Als erstes die config Daten aus der Datenbank laden (Maschinen, Aufträge, etc.)
+    // und in den Store schreiben
+    if (Object.keys(this.Config).length === 0) {
+      const config = {};
+      this.$axios.get("http://pc0547.allweier.lcl:5000/cfg").then(response => {
+        const seed = response.data;
+
+        Object.keys(seed).forEach(element => {
+          const set = JSON.parse(seed[element]);
+          const key = Object.keys(set[0]);
+          config[element] = Object.values(set)
+            .map(item => item[key])
+            .sort();
+        });
+        this.updateConfig(config);
+      });
+    }
+  },
+  beforeDestroy() {
+    if (this.source) {
+      this.source.cancel("Operation canceled by the user.");
+    }
   }
 };
 </script>
