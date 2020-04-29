@@ -3,13 +3,7 @@
     <q-card class="hist-card" bordered>
       <q-card-section>
         <div class="text-overline text-9">Histogram</div>
-        <commit-chart-bar
-          :width="w"
-          :height="h"
-          :chartData="datacollection"
-          :options="options"
-        >
-        </commit-chart-bar>
+        <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
       </q-card-section>
     </q-card>
   </div>
@@ -53,11 +47,13 @@ export default {
   },
   methods: {
     refresh() {
-      this.$axios.get("http://192.168.8.218:5000/pareto").then(response => {
-        this.seed = JSON.parse(response.data);
-        this.updatePareto(this.seed);
-        this.fillData();
-      });
+      this.$axios
+        .get("http://pc0547.allweier.lcl:5000/pareto")
+        .then(response => {
+          this.seed = JSON.parse(response.data);
+          this.updatePareto(this.seed);
+          this.fillData();
+        });
     },
     fillData() {
       const dataSet = [];

@@ -1,86 +1,42 @@
 <template>
   <q-menu>
-    <div class="row no-wrap q-pa-md q-gutter-sm">
-      <div class="column q-gutter-sm">
+    <div class="row no-wrap q-pa-md q-gutter-xs">
+      <div class="column q-gutter-md">
         <div class="text-h6 q-mb-md">Filtereinstellungen</div>
-        <div class="q-gutter-md" v-if="tab == 'extern'">
+        <div class="q-gutter-xs" v-if="tab == 'extern'">
           <q-radio v-model="filterOption" val="all_extern" dense label="Gesamt"></q-radio>
           <q-radio v-model="filterOption" val="lieferant" dense label="Lieferant"></q-radio>
           <q-radio v-model="filterOption" val="kunde" dense label="Kunde"></q-radio>
         </div>
         <div class="q-gutter-xs">
-          <q-select
-            v-model="modelMachines"
-            multiple
-            dense
-            outlined
-            use-input
-            label="Maschinen"
-            :options="Dataset.machines"
-          >
-            <template v-slot:append>
-              <q-icon
-                v-if="modelMachines !== null"
-                class="cursor-pointer"
-                name="clear"
-                @click.stop="modelMachines = null"
-              ></q-icon>
-            </template>
-          </q-select>
-          <q-select
-            v-model="modelOrders"
-            multiple
-            dense
-            outlined
-            use-input
-            label="Auftrag"
-            :options="Dataset.orders"
-          >
-            <template v-slot:append>
-              <q-icon
-                v-if="modelOrders !== null"
-                class="cursor-pointer"
-                name="clear"
-                @click.stop="modelOrders = null"
-              ></q-icon>
-            </template>
-          </q-select>
-          <q-select
-            v-model="modelParts"
-            multiple
-            dense
-            outlined
-            use-input
-            label="Teil"
-            :options="Dataset.parts"
-          >
-            <template v-slot:append>
-              <q-icon
-                v-if="modelParts !== null"
-                class="cursor-pointer"
-                name="clear"
-                @click.stop="modelParts = null"
-              ></q-icon>
-            </template>
-          </q-select>
-          <q-select
-            v-model="modelProcess"
-            multiple
-            dense
-            outlined
-            use-input
-            label="Vorgang"
-            :options="Dataset.process"
-          >
-            <template v-slot:append>
-              <q-icon
-                v-if="modelProcess !== null"
-                class="cursor-pointer"
-                name="clear"
-                @click.stop="modelProcess = null"
-              ></q-icon>
-            </template>
-          </q-select>
+          <FilterSelect
+            :stringOptions="Dataset.parts"
+            :type="'Material'"
+            :multipleselect="true"
+            @onClickUpdate="updateOption"
+            ref="selectParts"
+          />
+          <FilterSelect
+            :stringOptions="Dataset.orders"
+            :type="'Auftrag'"
+            :multipleselect="true"
+            @onClickUpdate="updateOption"
+            ref="selectOrders"
+          />
+          <FilterSelect
+            :stringOptions="Dataset.process"
+            :type="'Vorgang'"
+            :multipleselect="true"
+            @onClickUpdate="updateOption"
+            ref="selectProcess"
+          />
+          <FilterSelect
+            :stringOptions="Dataset.machines"
+            :type="'Maschine'"
+            :multipleselect="true"
+            @onClickUpdate="updateOption"
+            ref="selectMachines"
+          />
         </div>
         <q-btn
           color="primary"
@@ -100,6 +56,9 @@ import { mapGetters, mapActions } from "vuex";
 export default {
   name: "FilterMenu",
   props: ["tab"],
+  components: {
+    FilterSelect: () => import("../components/FilterSelect")
+  },
   data() {
     return {
       modelMachines: [],
@@ -111,53 +70,32 @@ export default {
     };
   },
   computed: {
-    Dataset: function() {
+    Dataset() {
       const data = {
         machines: [],
         orders: [],
         process: [],
         parts: []
       };
-      switch (this.tab) {
-        case "intern":
-          data.machines = [...new Set(this.Data.map(item => item.MACHINE_NO))];
-          data.orders = [...new Set(this.Data.map(item => item.ORDER_ID))];
-          data.process = [...new Set(this.Data.map(item => item.PROCESS_ID))];
-          data.parts = [...new Set(this.Data.map(item => item.TEILE_NR))];
-          break;
-        case "extern":
-          data.machines = [
-            ...new Set(this.DataExtern.map(item => item.MACHINE_NO))
-          ];
-          data.orders = [
-            ...new Set(this.DataExtern.map(item => item.ORDER_ID))
-          ];
-          data.process = [
-            ...new Set(this.DataExtern.map(item => item.PROCESS_ID))
-          ];
-          data.parts = [...new Set(this.DataExtern.map(item => item.TEILE_NR))];
-          break;
-        case "all":
-          data.machines = [
-            ...new Set(this.DataAll.map(item => item.MACHINE_NO))
-          ];
-          data.orders = [...new Set(this.DataAll.map(item => item.ORDER_ID))];
-          data.process = [
-            ...new Set(this.DataAll.map(item => item.PROCESS_ID))
-          ];
-          data.parts = [...new Set(this.DataAll.map(item => item.TEILE_NR))];
-          break;
+      if (this.Config) {
+        data.machines = this.Config.machines;
+        data.orders = this.Config.orders;
+        data.process = this.Config.process;
+        data.parts = this.Config.parts;
       }
       return data;
     },
-
     ...mapGetters({
       Data: "dataset/getData",
       DataExtern: "dataset/getDataExtern",
-      DataAll: "dataset/getDataAll"
+      DataAll: "dataset/getDataAll",
+      Config: "config/getCfg"
     })
   },
   methods: {
+    onClickUpdate() {
+      this.updateOption();
+    },
     updateOption() {
       switch (this.tab) {
         case "intern":
@@ -171,10 +109,10 @@ export default {
           break;
       }
       const filter = {
-        machines: this.modelMachines,
-        orders: this.modelOrders,
-        process: this.modelProcess,
-        parts: this.modelParts
+        machines: this.$refs.selectMachines.emitModel(),
+        orders: this.$refs.selectOrders.emitModel(),
+        process: this.$refs.selectProcess.emitModel(),
+        parts: this.$refs.selectParts.emitModel()
       };
       this.updateFilter(filter);
     },

@@ -3,28 +3,27 @@
     <!--<img id="reportbg" v-show="false" src="../assets/report-bg.png" />-->
     <div class="q-pa-md q-gutter-xs">
       <div class="row q-gutter-md justify-right">
-        <q-input v-model="textYear" dense square outlined label="Jahr" @keyup="numericYear">
-          <template v-slot:append>
-            <q-icon class="cursor-pointer" name="clear" @click.stop="textYear = ''"></q-icon>
-          </template>
-        </q-input>
-        <q-input v-model="textSearch" dense square outlined label="Suche" @keyup="upperCaseSearch">
-          <template v-slot:append>
-            <q-icon class="cursor-pointer" name="clear" @click.stop="textSearch = ''"></q-icon>
-          </template>
-        </q-input>
-        <q-radio dense v-model="option" val="machine" label="Maschine"></q-radio>
-        <q-radio dense v-model="option" val="part" label="Teil"></q-radio>
-        <q-radio dense v-model="option" val="order" label="Auftrag"></q-radio>
+        <q-btn dense flat icon="tune" @click="persistent = true">
+          <q-tooltip content-class="bg-accent" anchor="top left">Auswahl</q-tooltip>
+        </q-btn>
+
+        <q-dialog v-model="persistent" persistent transition-show="scale" transition-hide="scale">
+          <FilterMenu :savedConfig="configOption" @saveConfigEmit="saveConfig" />
+        </q-dialog>
+
+        <q-btn dense flat :disable="false" class="q-ml-xs" icon="refresh" @click="refreshData()">
+          <q-tooltip content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
+        </q-btn>
         <q-btn
           dense
           flat
-          :disable="DisableButton"
+          :disable="DisableSave"
           class="q-ml-xs"
-          icon="refresh"
-          @click="refreshData()"
-        ></q-btn>
-        <q-btn dense flat :disable="save" class="q-ml-xs" icon="save" @click="createPdf()"></q-btn>
+          icon="save"
+          @click="createReport()"
+        >
+          <q-tooltip content-class="bg-accent" anchor="top left">Report speichern...</q-tooltip>
+        </q-btn>
       </div>
       <q-separator></q-separator>
       <div class="features">
@@ -52,15 +51,16 @@
 </template>
 
 <script>
-import HTML2pdf from "html2pdf.js";
 import { mapGetters, mapActions } from "vuex";
+// import { Platform } from "quasar";
 export default {
   name: "DefectCollectionCard",
   components: {
     DefectCollectionTable: () => import("../components/DefectCollectionTable"),
     DefectCollectionPareto: () =>
       import("../components/DefectCollectionPareto"),
-    DefectCollectionChart: () => import("../components/DefectCollectionChart")
+    DefectCollectionChart: () => import("../components/DefectCollectionChart"),
+    FilterMenu: () => import("../components/FilterMenuDCC")
   },
   watch: {
     option() {
@@ -81,6 +81,13 @@ export default {
         return true;
       }
     },
+    DisableSave() {
+      if (Object.keys(this.Dataset).length > 0) {
+        return false;
+      } else {
+        return true;
+      }
+    },
     ...mapGetters({
       Dataset: "defectCollection/getDataset",
       Chart: "defectCollection/getChart",
@@ -91,11 +98,14 @@ export default {
   },
   data() {
     return {
+      persistent: false,
+      configOption: {},
+      model: "intern",
       textSearch: "",
       textYear: "",
       option: "machine",
-      loading: false,
       save: true,
+      loading: false,
       pdfDoc: "",
       svgBar: "",
       svgPareto: "",
@@ -108,100 +118,57 @@ export default {
     };
   },
   methods: {
-    createPdf() {
-      /*
-      const opt = {
-        margin: 0,
-        filename: "Report.pdf",
-        image: { type: "svg" },
-        html2canvas: { scale: 1.5, logging: true, allowTaint: false },
-        jsPDF: { unit: "cm", format: "a4", orientation: "portrait" }
-      };
-      HTML2pdf()
-        .set(opt)
-        .from(this.pdfDoc)
-        .save();
-      */
-      const { dialog, app } = require("electron").remote;
-      const fs = require("fs");
+    saveConfig(value) {
+      this.configOption = value;
+    },
+    createReport() {
+      this.reportDoc();
+      if (this.$q.platform.is.electron) {
+        const { dialog, app } = require("electron").remote;
+        const fs = require("fs");
 
-      const options = {
-        title: "Speichern unter...",
-        defaultPath: app.getPath("documents"),
-        filters: [
-          { name: "All Files", extensions: ["*"] },
-          { name: "Html", extensions: ["html"] }
-        ],
-        properties: ["openFile"]
-      };
-      dialog
-        .showSaveDialog(null, options)
-        .then(result => {
-          const filename = result.filePath;
-          if (filename === undefined) {
-            alert("Kein Name eingegeben.");
-            return;
-          }
-          fs.writeFile(filename, this.pdfDoc, err => {
-            if (err) {
-              alert("an error ocurred with file creation " + err.message);
+        const options = {
+          title: "Speichern unter...",
+          defaultPath:
+            app.getPath("documents") + "/Report-" + new Date().getTime(),
+          filters: [
+            { name: "All Files", extensions: ["*"] },
+            { name: "Html", extensions: ["html"] }
+          ],
+          properties: ["openFile"]
+        };
+
+        dialog
+          .showSaveDialog(null, options)
+          .then(result => {
+            const filename = result.filePath;
+            if (filename === undefined) {
+              alert("Kein Name eingegeben.");
               return;
             }
-            alert("WE CREATED YOUR FILE SUCCESFULLY");
+            fs.writeFile(filename, this.pdfDoc, err => {
+              if (err) {
+                if (err.code !== "ENOENT") {
+                  alert("Fehler: " + err.message);
+                  return;
+                }
+                return;
+              }
+              alert("Datei erfolgreich gespeichert");
+            });
+          })
+          .catch(err => {
+            alert(err);
           });
-          alert("we End");
-        })
-        .catch(err => {
-          alert(err);
-        });
-    },
-    saveCharts() {
-      const chartHistory = this.$refs.chart.printChart();
-      const chartPareto = this.$refs.pareto.printChart();
-      // const element = document.createElement("a");
-      let typ = "";
-      // const win = window.open("", "Print", "height=600,width=800");
-      switch (this.option) {
-        case "machine":
-          typ = "Maschine";
-          break;
-        case "part":
-          typ = "Teil";
-          break;
-        case "order":
-          typ = "Auftrag";
-          break;
-        default:
-          break;
+      } else {
+        const blob = new Blob([this.pdfDoc], { type: "text/html" });
+        const download = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = download;
+        a.download = "Report-" + new Date().getTime();
+        document.body.appendChild(a);
+        a.click();
       }
-      const content =
-        "<div style='font-size:18px'>Fehlersammelkarte von " +
-        typ +
-        " " +
-        this.Dataset.Name +
-        "</div>" +
-        "<div>Reklamationen ppm</div>" +
-        chartHistory +
-        "<div>Pareto Merkmale</div>" +
-        chartPareto;
-      const opt = {
-        margin: 0,
-        filename: "save.pdf",
-        image: { type: "jpg", quality: 1 },
-        html2canvas: {
-          scale: 1.5,
-          letterRendering: true,
-          width: 1100,
-          height: 800
-        },
-        jsPDF: {
-          orientation: "l"
-        }
-      };
-      HTML2pdf()
-        .set(opt)
-        .from(content)
-        .save();
     },
     numericYear() {
       // Alle nicht numerische chars entfernen \D ist regex und eine "kurze" char Klasse für alle non-digits
@@ -222,12 +189,17 @@ export default {
       this.updateDefectCollectionCard([]);
       this.updateSummary([]);
       this.$axios
-        .get("http://192.168.8.218:5000/defectcollectioncard", {
+        .get("http://pc0547.allweier.lcl:5000/defectcollectioncard", {
           cancelToken: this.source.token,
           params: {
-            year: this.textYear,
-            search: this.textSearch,
-            option: this.option
+            year: this.configOption.year,
+            weeks: JSON.stringify(this.configOption.weeks),
+            parts: JSON.stringify(this.configOption.parts),
+            orders: JSON.stringify(this.configOption.orders),
+            process: JSON.stringify(this.configOption.process),
+            machines: JSON.stringify(this.configOption.machines),
+            customer: JSON.stringify(this.configOption.customer),
+            tab: this.configOption.tab
           }
         })
         .then(response => {
@@ -243,7 +215,7 @@ export default {
           this.base64Bg = seed.bg;
           this.htmlTableFeatures = seed.features;
           this.htmlTableSummary = seed.summary;
-          this.reportDoc();
+          // this.reportDoc();
 
           this.updateDataset(seed);
           this.updateDefectCollectionCard(defectCollectionCard);
@@ -252,6 +224,7 @@ export default {
           this.updatePareto(pareto);
 
           this.loading = false;
+          this.save = false;
           this.$refs.chart.fillData();
           this.$refs.pareto.fillPareto();
         })
@@ -261,14 +234,13 @@ export default {
           } else {
             this.showNotification();
             this.loading = false;
+            this.save = false;
             // handle error
             this.errors.push(error);
           }
         });
-      this.save = false;
     },
     reportDoc() {
-      // const bgImg = document.getElementById("reportbg").src;
       this.pdfDoc = `
                         <!DOCTYPE html>
                         <html>
@@ -352,7 +324,7 @@ export default {
                           }
                           .padded {
                             padding-left: 2cm;
-                            padding-top: 2cm;
+                            padding-top: 2.5cm;
                             padding-right: 2cm;
                             padding-bottom: 2cm;
                           }
@@ -363,7 +335,7 @@ export default {
                           }
                           @padded {
                             margin-left: 2cm;
-                            margin-top: 2cm;
+                            margin-top: 2.5cm;
                             margin-right: 2cm;
                             margin-bottom: 2cm;
                           }
@@ -463,12 +435,6 @@ export default {
                               <div class="padded">
                                 <h3 contenteditable="true">Reklamationen ppm pro Kalenderwoche</h3>
                                 <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgBar}'/></p>
-                              </div>
-                            </div>
-
-                            <div class="page">
-                              <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
-                              <div class="padded">
                                 <h3 contenteditable="true">Pareto ppm</h3>
                                 <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgPareto}'/>
                               </div>

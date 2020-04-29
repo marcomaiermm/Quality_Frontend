@@ -17,17 +17,10 @@
     <template v-slot:top>
       <div
         v-show="dataset.length > 0 && table == 'features'"
-        class="col-2 q-table__title noselect"
-      >
-        Fehlersammelkarte für {{ subject }}
-      </div>
+        class="col q-table__title noselect"
+      >Fehlersammelkarte für {{ subject }}.</div>
       <q-space></q-space>
-      <q-input
-        v-if="table == 'features'"
-        dense
-        v-model="filter"
-        placeholder="Suche"
-      >
+      <q-input v-if="table == 'features'" dense v-model="filter" placeholder="Suche">
         <template v-slot:append>
           <q-icon name="search"></q-icon>
         </template>
@@ -102,12 +95,12 @@ export default {
 .q-table__top,
 .q-table__bottom,
 thead tr:first-child th
-    background-color: #fff
+  background-color: #fff
 thead tr th
-    position: sticky
-    z-index: 1
+  position: sticky
+  z-index: 1
 thead tr:last-child th
-    top: 48px
+  top: 48px
 thead tr:first-child th
-    top: 0
+  top: 0
 </style>

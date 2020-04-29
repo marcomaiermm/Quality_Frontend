@@ -20,6 +20,7 @@
             <DataTable
               :tab="tab"
               :oldTab="oldTab"
+              :load="loading"
               v-bind:key="tab"
               @refreshEmmit="onClickRefresh"
               ref="dataTableIntern"
@@ -29,6 +30,7 @@
             <DataTable
               :tab="tab"
               :oldTab="oldTab"
+              :load="loading"
               v-bind:key="tab"
               @refreshEmmit="onClickRefresh"
               ref="dataTableExtern"
@@ -38,6 +40,7 @@
             <DataTable
               :tab="tab"
               :oldTab="oldTab"
+              :load="loading"
               v-bind:key="tab"
               @refreshEmmit="onClickRefresh"
               ref="dataTableAll"
@@ -84,7 +87,8 @@ export default {
       HistoryExtern: "dataset/getHistoryExtern",
       Pareto: "dataset/getPareto",
       ParetoAll: "dataset/getParetoAll",
-      ParetoExtern: "dataset/getParetoExtern"
+      ParetoExtern: "dataset/getParetoExtern",
+      Config: "config/getCfg"
     })
   },
   data() {
@@ -92,13 +96,15 @@ export default {
       tab: "intern",
       oldTab: "intern",
       cancelToken: null,
-      source: null
+      source: null,
+      loading: false
     };
   },
   methods: {
     onClickRefresh(value) {
       this.getData(value);
     },
+    ...mapActions("config", ["updateConfig"]),
     ...mapActions("states", ["updateTab"]),
     ...mapActions("dataset", [
       "updateHistory",
@@ -123,7 +129,7 @@ export default {
       this.source = this.cancelToken.source();
       this.loading = true;
       this.$axios
-        .get("http://192.168.8.218:5000/datatable", {
+        .get("http://pc0547.allweier.lcl:5000/datatable", {
           cancelToken: this.source.token,
           params: parameter
         })
@@ -135,6 +141,7 @@ export default {
           if (this.$axios.isCancel(error)) {
             console.log("Request canceled", error.message);
           }
+          this.loading = false;
         });
     },
     update(seed) {
@@ -166,7 +173,25 @@ export default {
       this.loading = false;
     }
   },
-  mounted() {},
+  created() {
+    // Als erstes die config Daten aus der Datenbank laden (Maschinen, Aufträge, etc.)
+    // und in den Store schreiben
+    if (Object.keys(this.Config).length === 0) {
+      const config = {};
+      this.$axios.get("http://pc0547.allweier.lcl:5000/cfg").then(response => {
+        const seed = response.data;
+
+        Object.keys(seed).forEach(element => {
+          const set = JSON.parse(seed[element]);
+          const key = Object.keys(set[0]);
+          config[element] = Object.values(set)
+            .map(item => item[key])
+            .sort();
+        });
+        this.updateConfig(config);
+      });
+    }
+  },
   beforeDestroy() {
     if (this.source) {
       this.source.cancel("Operation canceled by the user.");

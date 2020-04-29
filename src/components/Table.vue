@@ -9,7 +9,7 @@
       :dense="$q.screen.lt.md"
       :data="Dataset"
       :columns="columns"
-      :loading="loading"
+      :loading="load"
       :filter="filter"
       row-key="name"
       no-data-label="I didn't find anything for you"
@@ -97,11 +97,11 @@
               flat
               class="q-ml-xs"
               icon="refresh"
-              :loading="loading"
+              :loading="load"
               @click="update()"
-              :disable="loading"
+              :disable="load"
             >
-              <q-tooltip v-if="!loading" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
+              <q-tooltip v-if="!load" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
             </q-btn>
             <q-btn dense flat class="q-ml-xs" icon="filter_list">
               <q-tooltip content-class="bg-accent" anchor="top left">Filter</q-tooltip>
@@ -185,7 +185,7 @@ export default {
       columns: []
     };
   },
-  props: ["tab"],
+  props: ["tab", "load"],
   computed: {
     data() {
       return Object.freeze(
@@ -246,7 +246,7 @@ export default {
 
   methods: {
     update(event) {
-      this.loading = true;
+      // this.loading = true;
       const args = {
         start: this.stringDate(this.startDate),
         end: this.stringDate(this.endDate),
@@ -263,17 +263,17 @@ export default {
       const lastIndex = this.data.length - 1;
 
       if (
-        this.loading !== true &&
+        this.load !== true &&
         this.nextPage < this.lastPage &&
         to === lastIndex
       ) {
-        this.loading = true;
+        this.load = true;
 
         setTimeout(() => {
           this.nextPage++;
           this.$nextTick(() => {
             ref.refresh();
-            this.loading = false;
+            // this.loading = false;
           });
         }, 500);
       }
@@ -336,7 +336,7 @@ export default {
           label: element
         });
       });
-      this.loading = false;
+      // this.loading = false;
     },
     formatData() {
       for (let i = 0; i < this.seed.length; i++) {
