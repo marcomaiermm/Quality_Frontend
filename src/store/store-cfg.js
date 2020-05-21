@@ -1,5 +1,7 @@
 const state = {
-  config: {}
+  config: {
+    year: ""
+  }
 };
 
 const mutations = {

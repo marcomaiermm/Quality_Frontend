@@ -3,7 +3,20 @@
     <q-card-section>
       <div class="row no-wrap q-pa-md q-gutter-xs">
         <div class="column q-gutter-md">
-          <div class="text-h6 q-mb-md">Auswahl</div>
+          <div class="row">
+            <div class="col text-h6">Auswahl</div>
+            <div class="col">
+              <q-toggle
+                :label="lanModel"
+                icon="g_translate"
+                color="primary"
+                false-value="de"
+                true-value="en"
+                v-model="lanModel"
+                keep-color
+              ></q-toggle>
+            </div>
+          </div>
           <div class="q-gutter-xs col">
             <q-btn-toggle
               v-model="model"
@@ -11,21 +24,21 @@
               unelevated
               spread
               :options="[
-              {label: 'Intern', value: 'intern'},
-              {label: 'Extern', value: 'extern'}
+                { label: 'Intern', value: 'intern' },
+                { label: 'Extern', value: 'extern' }
               ]"
             ></q-btn-toggle>
 
             <div class="row">
-              <q-input
+              <q-select
                 v-model="textYear"
+                :options="yearOptions"
                 dense
                 square
                 outlined
                 maxlength="4"
                 style="width: 250px"
                 label="Jahr"
-                @keyup="numericYear"
               >
                 <template v-slot:append>
                   <q-icon
@@ -35,7 +48,7 @@
                     @click.stop="textYear = ''"
                   ></q-icon>
                 </template>
-              </q-input>
+              </q-select>
 
               <q-input
                 v-model="textFromWeek"
@@ -104,7 +117,7 @@
               ref="selectMachines"
             />
             <FilterSelect
-              v-show="model==='extern'"
+              v-show="model === 'extern'"
               :stringOptions="Config.customer"
               :multipleselect="false"
               :type="'Kunde'"
@@ -112,7 +125,14 @@
             />
           </div>
           <q-card-actions align="center">
-            <q-btn label="OK" color="primary" class="full-width" v-close-popup @click="emitOptions"></q-btn>
+            <q-btn
+              label="OK"
+              color="primary"
+              class="full-width"
+              v-close-popup
+              @click="emitOptions"
+              :disabled="disabled"
+            ></q-btn>
           </q-card-actions>
         </div>
       </div>
@@ -127,17 +147,30 @@ export default {
   name: "FilterMenuDDC",
   props: ["tab"],
   components: {
-    FilterSelect: () => import("../components/FilterSelect")
+    FilterSelect: () => import("../FilterSelect")
   },
   data() {
     return {
       model: "intern",
+      disabled: true,
+      lanModel: "de",
       modelYearWeek: "year",
+      yearOptions: [],
       textYear: "",
       textFromWeek: "",
       textToWeek: ""
     };
   },
+  watch: {
+    textYear(newVal, oldVal) {
+      if (this.textYear === "") {
+        this.disabled = true;
+      } else {
+        this.disabled = false;
+      }
+    }
+  },
+
   computed: {
     ...mapGetters({
       Config: "config/getCfg"
@@ -153,7 +186,8 @@ export default {
         orders: this.$refs.selectOrders.emitModel(),
         process: this.$refs.selectProcess.emitModel(),
         machines: this.$refs.selectMachines.emitModel(),
-        customer: this.$refs.selectCustomer.emitModel()
+        customer: this.$refs.selectCustomer.emitModel(),
+        lang: this.lanModel
       };
       this.$emit("saveConfigEmit", options);
     },
@@ -173,15 +207,6 @@ export default {
       console.log(fweek);
       return fweek;
     },
-    numericYear() {
-      // Alle nicht numerische chars entfernen \D ist regex und eine "kurze" char Klasse für alle non-digits
-      this.textYear = this.textYear.replace(/\D/g, "");
-      /*
-      if (this.textYear.length > 4) {
-        this.textYear = "";
-      }
-      */
-    },
     numericFromWeek() {
       this.textFromWeek = this.textFromWeek.replace(/\D/g, "");
     },
@@ -190,6 +215,12 @@ export default {
     },
     ...mapActions("states", ["updateMenuTab"])
   },
-  mounted() {}
+  mounted() {
+    const startYear = new Date("01, 01, 2014").getFullYear();
+    const currentYear = new Date().getFullYear();
+    for (let index = startYear; index <= currentYear; index++) {
+      this.yearOptions.push(index);
+    }
+  }
 };
 </script>

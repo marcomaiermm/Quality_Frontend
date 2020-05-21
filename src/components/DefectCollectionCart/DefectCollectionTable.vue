@@ -18,7 +18,7 @@
       <div
         v-show="dataset.length > 0 && table == 'features'"
         class="col q-table__title noselect"
-      >Fehlersammelkarte für {{ subject }}.</div>
+      >Fehlersammelkarte {{ subject }}.</div>
       <q-space></q-space>
       <q-input v-if="table == 'features'" dense v-model="filter" placeholder="Suche">
         <template v-slot:append>

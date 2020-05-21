@@ -2,7 +2,15 @@
   <q-menu>
     <div class="row no-wrap q-pa-md q-gutter-xs">
       <div class="column q-gutter-md">
-        <div class="text-h6 q-mb-md">Filtereinstellungen</div>
+        <div class="text-h6 q-mb-md">Einstellungen</div>
+        <q-toggle
+          v-model="report"
+          dense
+          checked-icon="check"
+          color="primary"
+          label="Report erstellen"
+          unchecked-icon="clear"
+        ></q-toggle>
         <div class="q-gutter-xs" v-if="tab == 'extern'">
           <q-radio v-model="filterOption" val="all_extern" dense label="Gesamt"></q-radio>
           <q-radio v-model="filterOption" val="lieferant" dense label="Lieferant"></q-radio>
@@ -61,6 +69,7 @@ export default {
   },
   data() {
     return {
+      report: false,
       modelMachines: [],
       modelOrders: [],
       modelProcess: [],
@@ -112,7 +121,8 @@ export default {
         machines: this.$refs.selectMachines.emitModel(),
         orders: this.$refs.selectOrders.emitModel(),
         process: this.$refs.selectProcess.emitModel(),
-        parts: this.$refs.selectParts.emitModel()
+        parts: this.$refs.selectParts.emitModel(),
+        report: this.report
       };
       this.updateFilter(filter);
     },

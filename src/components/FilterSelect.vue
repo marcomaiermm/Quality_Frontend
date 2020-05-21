@@ -42,6 +42,7 @@ export default {
       filterOptions: this.stringOptions
     };
   },
+  computed: {},
   methods: {
     emitModel() {
       // this.$emit("selectEmit", this.model);

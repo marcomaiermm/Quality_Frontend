@@ -2,9 +2,9 @@
   <div class="q-pa-md">
     <q-card class="hist-card" bordered>
       <q-card-section>
-        <div class="text-overline text-9">Pareto Merkmale</div>
+        <div class="text-overline text-9">Reklamationen ppm</div>
         <commit-chart-bar
-          chart-id="canvas-pareto"
+          chart-id="canvas-history"
           :width="w"
           :height="h"
           :chartData="datacollection"
@@ -16,10 +16,11 @@
 </template>
 
 <script>
-import CommitChartBar from "./js/CommitChartBar.js";
+import CommitChartBar from "../js/CommitChartBar.js";
 import { mapGetters } from "vuex";
+
 export default {
-  name: "DefectCollectionPareto",
+  name: "DefectCollectionChart",
   components: {
     CommitChartBar
   },
@@ -37,42 +38,30 @@ export default {
   },
   computed: {
     ...mapGetters({
-      Pareto: "defectCollection/getPareto"
+      Chart: "defectCollection/getChart"
     })
   },
   methods: {
     printChart() {
-      const canvasEle = document.getElementById("canvas-pareto");
+      const canvasEle = document.getElementById("canvas-history");
       const htmlString =
         "<br><img src='" + canvasEle.toDataURL("image/jpg") + "' />";
       return htmlString;
     },
-    fillPareto() {
-      let dataPareto = [];
-      dataPareto = this.Pareto;
-      const dataSet = [];
-      const kumSet = [];
-      Object.keys(dataPareto).forEach(element => {
-        dataSet.push(dataPareto[element].Gesamt);
-        kumSet.push(dataPareto[element].Kummuliert);
+    fillData() {
+      let chartData = [];
+      const dataset = [];
+      chartData = this.Chart;
+      Object.keys(chartData).forEach(element => {
+        dataset.push(chartData[element]);
       });
-
       this.datacollection = {
-        labels: Object.keys(dataPareto),
+        labels: Object.keys(chartData),
         datasets: [
           {
-            label: "Kummuliert",
-            yAxisID: "P",
-            data: kumSet,
-            backgroundColor: "rgba(190, 1, 74, 0.8)",
-            borderColor: "rgba(190, 1, 74, 0.8)",
-            fill: false,
-            type: "line"
-          },
-          {
-            label: "Fehler",
-            yAxisID: "H",
-            data: dataSet,
+            label: "ppm",
+            yAxisID: "R",
+            data: dataset,
             backgroundColor: "rgba(2, 62, 115, 0.8)"
           }
         ]
@@ -87,21 +76,11 @@ export default {
         },
         tooltips: {
           mode: "index",
-          position: "nearest",
-          callbacks: {
-            label: function(tooltipItem, data) {
-              if (tooltipItem.datasetIndex === 0) {
-                return "Kummuliert: " + tooltipItem.yLabel + "%";
-              } else {
-                return "Reklamationen: " + tooltipItem.yLabel;
-              }
-            }
-          }
+          position: "nearest"
         },
         scales: {
           xAxes: [
             {
-              stacked: true,
               ticks: {
                 autoSkip: true,
                 maxTicksLimit: 20.1,
@@ -114,24 +93,12 @@ export default {
           ],
           yAxes: [
             {
-              stacked: true,
-              id: "H",
+              id: "R",
               ticks: {
                 beginAtZero: true
               },
               gridLines: {
-                display: false
-              }
-            },
-            {
-              id: "P",
-              position: "right",
-              ticks: {
-                max: 100,
-                min: 0,
-                callback: function(value) {
-                  return value + "%";
-                }
+                display: true
               }
             }
           ]
@@ -140,7 +107,7 @@ export default {
     }
   },
   mounted() {
-    this.fillPareto();
+    this.fillData();
   }
 };
 </script>

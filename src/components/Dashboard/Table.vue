@@ -103,9 +103,12 @@
             >
               <q-tooltip v-if="!load" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
             </q-btn>
-            <q-btn dense flat class="q-ml-xs" icon="filter_list">
-              <q-tooltip content-class="bg-accent" anchor="top left">Filter</q-tooltip>
+            <q-btn dense flat class="q-ml-xs" icon="settings">
+              <q-tooltip content-class="bg-accent" anchor="top left">Einstellungen</q-tooltip>
               <FilterMenu :tab="tab" />
+            </q-btn>
+            <q-btn dense flat class="q-ml-xs" icon="save" :disable="!Save" @click="report()">
+              <q-tooltip content-class="bg-accent" anchor="top right">Report erstellen..</q-tooltip>
             </q-btn>
           </div>
           <div class="col"></div>
@@ -153,7 +156,7 @@ begin = date.formatDate(begin, "YYYY.MM.DD");
 // var moment = require("moment");
 export default {
   components: {
-    FilterMenu: () => import("../components/FilterMenu")
+    FilterMenu: () => import("../FilterMenu")
   },
   data() {
     return {
@@ -187,6 +190,18 @@ export default {
   },
   props: ["tab", "load"],
   computed: {
+    Save() {
+      if (
+        typeof this.Filter.report !== "undefined" &&
+        this.Filter.report === true &&
+        this.load === false &&
+        this.Dataset.length > 0
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     data() {
       return Object.freeze(
         this.tableData.slice(0, pageSize * (this.nextPage - 1))
@@ -247,6 +262,10 @@ export default {
   methods: {
     update(event) {
       // this.loading = true;
+      let report = false;
+      if (typeof this.Filter.report !== "undefined") {
+        report = this.Filter.report;
+      }
       const args = {
         start: this.stringDate(this.startDate),
         end: this.stringDate(this.endDate),
@@ -255,9 +274,13 @@ export default {
         parts: JSON.stringify(this.Filter.parts),
         process: JSON.stringify(this.Filter.process),
         tab: this.tab,
-        table: this.MenuTab
+        table: this.MenuTab,
+        report: report
       };
       this.$emit("refreshEmmit", args);
+    },
+    report(event) {
+      this.$emit("reportEmit");
     },
     onScroll({ to, ref }) {
       const lastIndex = this.data.length - 1;
@@ -418,21 +441,21 @@ export default {
         if (this.Data.length > 0) {
           this.drawTable();
         } else {
-          this.update();
+          // this.update();
         }
         break;
       case "extern":
         if (this.DataExtern.length > 0) {
           this.drawTable();
         } else {
-          this.update();
+          // this.update();
         }
         break;
       case "all":
         if (this.DataAll.length > 0) {
           this.drawTable();
         } else {
-          this.update();
+          // this.update();
         }
         break;
     }
@@ -510,4 +533,3 @@ export default {
   thead tr:first-child th
     top: 0
 </style>
-

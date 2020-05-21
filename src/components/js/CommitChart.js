@@ -1,6 +1,7 @@
 import { Line, mixins } from "vue-chartjs";
 const { reactiveProp } = mixins;
 import zoom from "chartjs-plugin-zoom";
+import annotation from "chartjs-plugin-annotation";
 /*
 Wiederverwendbarer Konstruktor für ein Liniendiagramm
 Daten und Optionen werden als Props exportiert. Nachdem das Diagramm gerenderd wird,
@@ -24,13 +25,14 @@ export default {
   */
   watch: {
     chartData() {
-      this.$data._chart.update();
+      this.renderChart(this.chartData, this.options);
+      // this.$data._chart.update();
     }
   },
   mounted() {
     // this.chartData is created in the mixin.
     // If you want to pass options please create a local options object
-    this.addPlugin(zoom);
+    this.addPlugin([zoom, annotation]);
     this.renderChart(this.chartData, this.options);
   }
 };

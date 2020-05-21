@@ -3,7 +3,8 @@ const state = {
   chart: [],
   defectCollectionCard: [],
   pareto: [],
-  summary: []
+  summary: [],
+  report: ""
 };
 
 const mutations = {
@@ -21,6 +22,9 @@ const mutations = {
   },
   updateSummary(state, payload) {
     state.summary = payload;
+  },
+  updateReport(state, payload) {
+    state.report = payload;
   }
 };
 
@@ -39,6 +43,9 @@ const actions = {
   },
   updateSummary({ commit }, payload) {
     commit("updateSummary", payload);
+  },
+  updateReport({ commit }, payload) {
+    commit("updateReport", payload);
   }
 };
 
@@ -57,6 +64,9 @@ const getters = {
   },
   getSummary: state => {
     return state.summary;
+  },
+  getReport: state => {
+    return state.report;
   }
 };
 

@@ -14,7 +14,12 @@ const state = {
     process: [],
     parts: []
   },
-  parsedPPM: []
+  parsedPPM: [],
+  parsedCost: [],
+  reportIntern: [],
+  reportExtern: [],
+  reportAll: [],
+  report: ""
 };
 
 const mutations = {
@@ -50,6 +55,21 @@ const mutations = {
   },
   updatePPM(state, payload) {
     state.parsedPPM = payload;
+  },
+  updateCost(state, payload) {
+    state.parsedCost = payload;
+  },
+  updateReportAll(state, payload) {
+    state.reportAll = payload;
+  },
+  updateReportIntern(state, payload) {
+    state.reportIntern = payload;
+  },
+  updateReportExtern(state, payload) {
+    state.reportExtern = payload;
+  },
+  updateReport(state, payload) {
+    state.report = payload;
   }
 };
 
@@ -86,6 +106,22 @@ const actions = {
   },
   updatePPM({ commit }, payload) {
     commit("updatePPM", payload);
+  },
+  updateCost({ commit }, payload) {
+    commit("updateCost", payload);
+  },
+  updateReportAll({ commit }, payload) {
+    commit("updateReportAll", payload);
+  },
+  updateReportIntern({ commit }, payload) {
+    commit("updateReportIntern", payload);
+  },
+  updateReportExtern({ commit }, payload) {
+    commit("updateReportExtern", payload);
+  },
+
+  updateReport({ commit }, payload) {
+    commit("updateReport", payload);
   }
 };
 
@@ -122,6 +158,21 @@ const getters = {
   },
   getPPM: state => {
     return state.parsedPPM;
+  },
+  getCost: state => {
+    return state.parsedCost;
+  },
+  getReportAll: state => {
+    return state.reportAll;
+  },
+  getReportIntern: state => {
+    return state.reportIntern;
+  },
+  getReportExtern: state => {
+    return state.reportExtern;
+  },
+  getReport: state => {
+    return state.report;
   }
 };
 

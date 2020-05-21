@@ -13,12 +13,7 @@
         <div class="noselect">Quality Tools</div>
         <q-space />
         <q-btn class="frame-btn" flat icon="minimize" @click="minimize"></q-btn>
-        <q-btn
-          class="frame-btn"
-          flat
-          icon="crop_square"
-          @click="maximize"
-        ></q-btn>
+        <q-btn class="frame-btn" flat icon="crop_square" @click="maximize"></q-btn>
         <q-btn class="frame-btn" flat icon="close" @click="closeApp"></q-btn>
       </q-bar>
     </q-header>
@@ -33,11 +28,7 @@
     >
       <q-list>
         <p />
-        <img
-          src="../assets/allweier-logo-small.png"
-          class="menu-img-aw"
-          width="50%"
-        />
+        <img src="../assets/allweier-logo-small.png" class="menu-img-aw" width="50%" />
         <p />
         <q-separator />
         <MenuItem
@@ -57,9 +48,9 @@
 
     <!--Footer-->
     <q-footer>
-      <div class="copyright-text">
-        Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}
-      </div>
+      <div
+        class="copyright-text"
+      >Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}</div>
     </q-footer>
   </q-layout>
 </template>
@@ -88,6 +79,11 @@ export default {
           title: "DefectCollectionCard",
           icon: "mdi-chart-bar",
           link: "/defectcollectioncard"
+        },
+        {
+          title: "QualityControlChart",
+          icon: "mdi-current-ac",
+          link: "/qualitycontrolchart"
         }
       ]
     };

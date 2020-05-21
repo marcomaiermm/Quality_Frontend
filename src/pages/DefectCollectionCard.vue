@@ -3,17 +3,37 @@
     <!--<img id="reportbg" v-show="false" src="../assets/report-bg.png" />-->
     <div class="q-pa-md q-gutter-xs">
       <div class="row q-gutter-md justify-right">
-        <q-btn dense flat icon="tune" @click="persistent = true">
-          <q-tooltip content-class="bg-accent" anchor="top left">Auswahl</q-tooltip>
-        </q-btn>
+        <div>
+          <q-btn dense flat icon="tune" @click="persistent = true">
+            <q-tooltip content-class="bg-accent" anchor="top left">Auswahl</q-tooltip>
+          </q-btn>
 
-        <q-dialog v-model="persistent" persistent transition-show="scale" transition-hide="scale">
-          <FilterMenu :savedConfig="configOption" @saveConfigEmit="saveConfig" />
-        </q-dialog>
-
-        <q-btn dense flat :disable="false" class="q-ml-xs" icon="refresh" @click="refreshData()">
-          <q-tooltip content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
-        </q-btn>
+          <q-dialog v-model="persistent" persistent transition-show="scale" transition-hide="scale">
+            <FilterMenu :savedConfig="configOption" @saveConfigEmit="saveConfig" />
+          </q-dialog>
+          <!--
+          <q-toggle
+            :label="lanModel"
+            icon="g_translate"
+            color="primary"
+            false-value="de"
+            true-value="en"
+            v-model="lanModel"
+            keep-color
+          ></q-toggle>
+          -->
+          <q-btn
+            dense
+            flat
+            :disable="DisableButton"
+            class="q-ml-xs"
+            icon="refresh"
+            @click="refreshData()"
+          >
+            <q-tooltip v-if="!loading" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
+          </q-btn>
+        </div>
+        <q-separator vertical inset></q-separator>
         <q-btn
           dense
           flat
@@ -56,27 +76,25 @@ import { mapGetters, mapActions } from "vuex";
 export default {
   name: "DefectCollectionCard",
   components: {
-    DefectCollectionTable: () => import("../components/DefectCollectionTable"),
+    DefectCollectionTable: () =>
+      import("../components/DefectCollectionCart/DefectCollectionTable"),
     DefectCollectionPareto: () =>
-      import("../components/DefectCollectionPareto"),
-    DefectCollectionChart: () => import("../components/DefectCollectionChart"),
-    FilterMenu: () => import("../components/FilterMenuDCC")
+      import("../components/DefectCollectionCart/DefectCollectionPareto"),
+    DefectCollectionChart: () =>
+      import("../components/DefectCollectionCart/DefectCollectionChart"),
+    FilterMenu: () => import("../components/DefectCollectionCart/FilterMenuDCC")
   },
-  watch: {
-    option() {
-      this.textSearch = "";
-      this.textYear = "";
-    }
-  },
+  watch: {},
   computed: {
     DisableButton() {
-      //  Die Eingabe der Textfelder wird hier vorgefiltert
-      if (this.textSearch !== "" && this.textYear !== "") {
-        if (this.textYear.length === 2 || this.textYear.length === 4) {
-          return false;
-        } else {
-          return true;
-        }
+      if (this.loading === true) {
+        return true;
+      }
+      if (
+        this.configOption.year !== "" &&
+        typeof this.configOption.year !== "undefined"
+      ) {
+        return false;
       } else {
         return true;
       }
@@ -93,20 +111,17 @@ export default {
       Chart: "defectCollection/getChart",
       DefectCollection: "defectCollection/getDefectCollectionCard",
       Pareto: "defectCollection/getPareto",
-      Summary: "defectCollection/getSummary"
+      Summary: "defectCollection/getSummary",
+      Report: "defectCollection/getReport",
+      Config: "config/getCfg"
     })
   },
   data() {
     return {
       persistent: false,
       configOption: {},
-      model: "intern",
-      textSearch: "",
-      textYear: "",
-      option: "machine",
       save: true,
       loading: false,
-      pdfDoc: "",
       svgBar: "",
       svgPareto: "",
       base64Bg: "",
@@ -122,7 +137,6 @@ export default {
       this.configOption = value;
     },
     createReport() {
-      this.reportDoc();
       if (this.$q.platform.is.electron) {
         const { dialog, app } = require("electron").remote;
         const fs = require("fs");
@@ -146,7 +160,7 @@ export default {
               alert("Kein Name eingegeben.");
               return;
             }
-            fs.writeFile(filename, this.pdfDoc, err => {
+            fs.writeFile(filename, this.Report, err => {
               if (err) {
                 if (err.code !== "ENOENT") {
                   alert("Fehler: " + err.message);
@@ -161,7 +175,7 @@ export default {
             alert(err);
           });
       } else {
-        const blob = new Blob([this.pdfDoc], { type: "text/html" });
+        const blob = new Blob([this.Report], { type: "text/html" });
         const download = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = download;
@@ -170,24 +184,15 @@ export default {
         a.click();
       }
     },
-    numericYear() {
-      // Alle nicht numerische chars entfernen \D ist regex und eine "kurze" char Klasse für alle non-digits
-      this.textYear = this.textYear.replace(/\D/g, "");
-      if (this.textYear.length > 4) {
-        this.textYear = "";
-      }
-    },
-    upperCaseSearch() {
-      this.textSearch = this.textSearch.replace(" ", "_");
-      this.textSearch = this.textSearch.toUpperCase();
-    },
     refreshData() {
       this.save = true;
       this.loading = true;
+
       this.cancelToken = this.$axios.CancelToken;
       this.source = this.cancelToken.source();
       this.updateDefectCollectionCard([]);
       this.updateSummary([]);
+
       this.$axios
         .get("http://pc0547.allweier.lcl:5000/defectcollectioncard", {
           cancelToken: this.source.token,
@@ -199,7 +204,8 @@ export default {
             process: JSON.stringify(this.configOption.process),
             machines: JSON.stringify(this.configOption.machines),
             customer: JSON.stringify(this.configOption.customer),
-            tab: this.configOption.tab
+            tab: this.configOption.tab,
+            lang: this.configOption.lang
           }
         })
         .then(response => {
@@ -223,6 +229,8 @@ export default {
           this.updateChart(chart["Reklamationen pro eine million Teile"]);
           this.updatePareto(pareto);
 
+          this.reportDoc();
+
           this.loading = false;
           this.save = false;
           this.$refs.chart.fillData();
@@ -241,23 +249,34 @@ export default {
         });
     },
     reportDoc() {
-      this.pdfDoc = `
-                        <!DOCTYPE html>
-                        <html>
-                        <!--
-                        * HTML-Sheets-of-Paper (https://github.com/delight-im/HTML-Sheets-of-Paper)
-                        * Copyright (c) delight.im (https://www.delight.im/)
-                        * Licensed under the MIT License (https://opensource.org/licenses/MIT)
-                        -->
-                        <head>
-                          <meta charset="utf-8" />
-                          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-                          <meta
-                            name="description"
-                            content="Emulating real sheets of paper in web documents (using HTML and CSS)"
-                          />
-                          <title>Report</title>
-                        </head>
+      const englishTxt = {
+        summary: "Summary",
+        paretoCW: "Complaints ppm per calendar week",
+        features: "Detailed view of complaints per calendar week",
+        name: this.Dataset.Name_t
+      };
+      const germanTxt = {
+        summary: "Zusammenfassung",
+        paretoCW: "Reklamationen ppm pro Kalenderwoche",
+        features: "Detailansicht Merkmal Reklamationen pro KW",
+        name: this.Dataset.Name
+      };
+      let text = germanTxt;
+      if (this.configOption.lang === "en") {
+        text = englishTxt;
+      }
+      const head = `
+                  <head>
+                    <meta charset="utf-8" />
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+                    <meta
+                      name="description"
+                      content="Emulating real sheets of paper in web documents (using HTML and CSS)"
+                    />
+                    <title>Report</title>
+                  </head>
+      `;
+      const style = `
                         <style>
                           html,
                           body {
@@ -419,38 +438,55 @@ export default {
                             margin: 10px;
                             padding: 20px;
                           }
-                        </style>
-                        <body class="document">
+                        </style>      
+      
+      `;
+      const body = `
+                  <body class="document">
 
-                            <div class="page">
-                              <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
-                              <div class="padded">
-                                <h3 contenteditable="true">Zusammenfassung für ${this.Dataset.Name}</h3>
-                                <p>${this.htmlTableSummary}</p>
-                              </div>
-                            </div>
+                      <div class="page">
+                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <div class="padded">
+                          <h3 contenteditable="true">${text.summary} ${text.name}</h3>
+                          <p>${this.htmlTableSummary}</p>
+                        </div>
+                      </div>
+                      <div class="page">
+                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <div class="padded">
+                          <h3 contenteditable="true">${text.paretoCW}</h3>
+                          <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgBar}'/></p>
+                          <h3 contenteditable="true">Pareto ppm</h3>
+                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgPareto}'/>
+                        </div>
+                      </div>
 
-                            <div class="page">
-                              <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
-                              <div class="padded">
-                                <h3 contenteditable="true">Reklamationen ppm pro Kalenderwoche</h3>
-                                <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgBar}'/></p>
-                                <h3 contenteditable="true">Pareto ppm</h3>
-                                <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgPareto}'/>
-                              </div>
-                            </div>
+                      <div class="page">
+                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <div class="padded">
+                          <h3 contenteditable="true">${text.features}</h3>
+                          <p>${this.htmlTableFeatures}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </body>
+      `;
+      const html = `
+                  <!DOCTYPE html>
+                  <html>
+                  <!--
+                  * HTML-Sheets-of-Paper (https://github.com/delight-im/HTML-Sheets-of-Paper)
+                  * Copyright (c) delight.im (https://www.delight.im/)
+                  * Licensed under the MIT License (https://opensource.org/licenses/MIT)
+                  -->
+                  ${head}
+                  ${style}
+                  ${body}
+                  </html>
+      
+      `;
 
-                            <div class="page">
-                              <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
-                              <div class="padded">
-                                <h3 contenteditable="true">Detailansicht Merkmal Reklamationen pro KW</h3>
-                                <p>${this.htmlTableFeatures}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </body>
-                        </html>
-                        `;
+      this.updateReport(html);
     },
     showNotification() {
       this.$q.notify({
@@ -459,15 +495,35 @@ export default {
         message: "Eingabe überprüfen"
       });
     },
+    ...mapActions("config", ["updateConfig"]),
     ...mapActions("defectCollection", [
       "updateDataset",
       "updateChart",
       "updateDefectCollectionCard",
       "updatePareto",
-      "updateSummary"
+      "updateSummary",
+      "updateReport"
     ])
   },
   mounted() {},
+  created() {
+    // NUR  FÜR DEV ZWECKE! HOT RELOAD => REFERENZ index.vue
+    if (Object.keys(this.Config).length < 2) {
+      const config = {};
+      this.$axios.get("http://pc0547.allweier.lcl:5000/cfg").then(response => {
+        const seed = response.data;
+
+        Object.keys(seed).forEach(element => {
+          const set = JSON.parse(seed[element]);
+          const key = Object.keys(set[0]);
+          config[element] = Object.values(set)
+            .map(item => item[key])
+            .sort();
+        });
+        this.updateConfig(config);
+      });
+    }
+  },
   beforeDestroy() {
     if (this.source) {
       this.source.cancel("Operation canceled by the user.");

@@ -2,36 +2,27 @@
   <div class="q-pa-md">
     <q-card class="hist-card" bordered>
       <q-card-section>
-        <div class="text-overline text-9">Pareto Diagramm</div>
+        <div class="text-overline text-9">Pareto Merkmale</div>
         <commit-chart-bar
+          chart-id="canvas-pareto"
           :width="w"
           :height="h"
           :chartData="datacollection"
           :options="options"
-        >
-        </commit-chart-bar>
+        ></commit-chart-bar>
       </q-card-section>
     </q-card>
   </div>
 </template>
 
 <script>
-import CommitChartBar from "./js/CommitChartBar.js";
+import CommitChartBar from "../js/CommitChartBar.js";
 import { mapGetters } from "vuex";
-
 export default {
-  name: "ParetoChart",
+  name: "DefectCollectionPareto",
   components: {
     CommitChartBar
   },
-  computed: {
-    ...mapGetters({
-      Pareto: "dataset/getPareto",
-      ParetoAll: "dataset/getParetoAll",
-      ParetoExtern: "dataset/getParetoExtern"
-    })
-  },
-  props: ["tab"],
   data() {
     return {
       datacollection: {
@@ -44,24 +35,25 @@ export default {
       w: 1000
     };
   },
+  computed: {
+    ...mapGetters({
+      Pareto: "defectCollection/getPareto"
+    })
+  },
   methods: {
+    printChart() {
+      const canvasEle = document.getElementById("canvas-pareto");
+      const htmlString =
+        "<br><img src='" + canvasEle.toDataURL("image/jpg") + "' />";
+      return htmlString;
+    },
     fillPareto() {
       let dataPareto = [];
-      switch (this.tab) {
-        case "intern":
-          dataPareto = this.Pareto;
-          break;
-        case "extern":
-          dataPareto = this.ParetoExtern;
-          break;
-        case "all":
-          dataPareto = this.ParetoAll;
-          break;
-      }
+      dataPareto = this.Pareto;
       const dataSet = [];
       const kumSet = [];
       Object.keys(dataPareto).forEach(element => {
-        dataSet.push(dataPareto[element].Fehler);
+        dataSet.push(dataPareto[element].Gesamt);
         kumSet.push(dataPareto[element].Kummuliert);
       });
 

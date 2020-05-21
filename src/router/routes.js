@@ -3,10 +3,17 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/Index.vue") },
+      {
+        path: "",
+        component: () => import("pages/Index.vue")
+      },
       {
         path: "defectcollectioncard",
         component: () => import("pages/DefectCollectionCard.vue")
+      },
+      {
+        path: "qualitycontrolchart",
+        component: () => import("pages/QualityControlChart.vue")
       }
     ]
   }

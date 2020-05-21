@@ -1,22 +1,25 @@
 <template>
-  <div class="q-pa-md">
-    <q-card class="hist-card" bordered>
-      <q-card-section>
-        <div class="text-overline text-9">Histogramm</div>
-        <commit-chart-bar
-          :width="w"
-          :height="h"
-          :chartData="datacollection"
-          :options="options"
-        >
-        </commit-chart-bar>
-      </q-card-section>
-    </q-card>
+  <div>
+    <div class="row">
+      <div class="text-overline text-9">Histogramm</div>
+      <q-space></q-space>
+      <q-select
+        borderless
+        v-model="model"
+        dense
+        :options="selectOption"
+        map-options
+        emit-value
+        label="Auswahl"
+        style="width: 100px"
+      ></q-select>
+    </div>
+    <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
   </div>
 </template>
 
 <script>
-import CommitChartBar from "./js/CommitChartBar.js";
+import CommitChartBar from "../js/CommitChartBar.js";
 import { mapGetters } from "vuex";
 
 export default {
@@ -24,15 +27,27 @@ export default {
   components: {
     CommitChartBar
   },
-  computed: {
-    ...mapGetters({
-      History: "dataset/getHistory",
-      HistoryAll: "dataset/getHistoryAll",
-      HistoryExtern: "dataset/getHistoryExtern"
-    })
-  },
   data() {
     return {
+      model: "parts",
+      selectOption: [
+        {
+          label: "Material",
+          value: "parts"
+        },
+        {
+          label: "Auftrag",
+          value: "orders"
+        },
+        {
+          label: "Vorgang",
+          value: "process"
+        },
+        {
+          label: "Maschine",
+          value: "machines"
+        }
+      ],
       datacollection: {
         labels: [],
         datasets: []
@@ -46,28 +61,58 @@ export default {
     };
   },
   props: ["tab"],
-
+  computed: {
+    ...mapGetters({
+      History: "dataset/getHistory",
+      HistoryAll: "dataset/getHistoryAll",
+      HistoryExtern: "dataset/getHistoryExtern"
+    })
+  },
+  watch: {
+    model() {
+      this.fillData();
+    }
+  },
   methods: {
     fillData() {
       this.datacollection = {
         labels: [],
         datasets: []
       };
+
+      let colors = [];
+      let colorOne = [];
+      let colorTwo = [];
+      const c1 = "rgb(0, 56, 113)";
+      const cm = "rgb(217, 221, 3)";
+      const c2 = "rgb(221, 3, 51)";
+
       let dataHistory = [];
       switch (this.tab) {
         case "intern":
-          dataHistory = this.History;
+          dataHistory = JSON.parse(this.History[this.model]);
           break;
         case "extern":
-          dataHistory = this.HistoryExtern;
+          dataHistory = JSON.parse(this.HistoryExtern[this.model]);
           break;
         case "all":
-          dataHistory = this.HistoryAll;
+          dataHistory = JSON.parse(this.HistoryAll[this.model]);
           break;
       }
       if (Object.keys(dataHistory).length === 0) {
         return;
       }
+
+      const steps = Object.keys(dataHistory[Object.keys(dataHistory)[0]])
+        .length;
+      const s1 = Math.floor(steps / 2);
+      const s2 = steps - s1;
+
+      colorOne = this.interpolateColors(c1, cm, s1);
+
+      colorTwo = this.interpolateColors(cm, c2, s2);
+
+      colors = colorOne.concat(colorTwo);
 
       Object.keys(dataHistory[Object.keys(dataHistory)[0]]).forEach(key => {
         this.datacollection.datasets.push({
@@ -83,8 +128,17 @@ export default {
           this.datacollection.datasets[index].data.push(
             dataHistory[key][innerKey]
           );
+
+          // this.datacollection.datasets[index].backgroundColor =
+          //  "rgba(2, 62, 115, 0.8)";
           this.datacollection.datasets[index].backgroundColor =
-            "rgba(2, 62, 115, 0.8)";
+            "rgba(" +
+            colors[index][0] +
+            ", " +
+            colors[index][1] +
+            ", " +
+            colors[index][2] +
+            ", 0.8)";
         });
       });
       this.options = {
@@ -145,6 +199,35 @@ export default {
           }
         }
       };
+    },
+    // Funktionen interpolateColor und interpolateColors für die Farben im gestapelten Balkendiagramm
+    // https://github.com/ondras/rot.js
+    interpolateColor(color1, color2, factor) {
+      if (arguments.length < 3) {
+        factor = 0.5;
+      }
+      const result = color1.slice();
+      for (let i = 0; i < 3; i++) {
+        result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+      }
+      return result;
+    },
+
+    interpolateColors(color1, color2, steps) {
+      const stepFactor = 1 / (steps - 1);
+      const interpolatedColorArray = [];
+
+      // \d => einfache Stelle (56 => 5,6) \d+ => zwei Stellen (56=>56)
+      // Number Konstruktor stellt Konvertierung in eine Zahl sicher
+      color1 = color1.match(/\d+/g).map(Number);
+      color2 = color2.match(/\d+/g).map(Number);
+
+      for (let i = 0; i < steps; i++) {
+        interpolatedColorArray.push(
+          this.interpolateColor(color1, color2, stepFactor * i)
+        );
+      }
+      return interpolatedColorArray;
     }
   },
   mounted() {
