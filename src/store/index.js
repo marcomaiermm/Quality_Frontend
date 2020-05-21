@@ -1,9 +1,12 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from "vue";
+import Vuex from "vuex";
 
-// import example from './module-example'
+import dataset from "./store-data";
+import states from "./store-state";
+import defectCollection from "./store-defect-collection-card";
+import config from "./store-cfg";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 /*
  * If not building with SSR mode, you can
@@ -14,16 +17,19 @@ Vue.use(Vuex)
  * with the Store instance.
  */
 
-export default function (/* { ssrContext } */) {
+export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      // example
+      dataset,
+      states,
+      defectCollection,
+      config
     },
 
     // enable strict mode (adds overhead!)
     // for dev mode only
     strict: process.env.DEV
-  })
+  });
 
-  return Store
+  return Store;
 }

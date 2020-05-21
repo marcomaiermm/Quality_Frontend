@@ -1,9 +1,7 @@
 <template>
-  <q-layout
-  view="hHh Lpr fFf"
-  >
+  <q-layout view="hHh Lpr fFf">
     <q-header elevated>
-      <q-bar class="q-electron-drag">
+      <q-bar class="q-electron-drag q-pr-none">
         <q-btn
           flat
           dense
@@ -12,12 +10,11 @@
           aria-label="Menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
-        <q-space/>
-        <div>Quality Tools</div>
-        <q-space/>
-        <q-btn dense flat icon="minimize" @click="minimize"></q-btn>
-        <q-btn dense flat icon="crop_square" @click="maximize"></q-btn>
-        <q-btn dense flat icon="close" @click="closeApp"></q-btn>
+        <div class="noselect">Quality Tools</div>
+        <q-space />
+        <q-btn class="frame-btn" flat icon="minimize" @click="minimize"></q-btn>
+        <q-btn class="frame-btn" flat icon="crop_square" @click="maximize"></q-btn>
+        <q-btn class="frame-btn" flat icon="close" @click="closeApp"></q-btn>
       </q-bar>
     </q-header>
 
@@ -30,96 +27,105 @@
       content-class="bg-grey-3"
     >
       <q-list>
-        <p/>
-        <img src="../assets/allweier-logo-small.png" class="menu-img-aw" width="50%"/>
-        <p/>
-        <q-separator/>
+        <p />
+        <img src="../assets/allweier-logo-small.png" class="menu-img-aw" width="50%" />
+        <p />
+        <q-separator />
         <MenuItem
           v-for="link in menuItems"
           :key="link.title"
           v-bind="link"
+          :active="link === link.title"
         />
       </q-list>
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <q-page>
+        <router-view />
+      </q-page>
     </q-page-container>
 
     <!--Footer-->
     <q-footer>
-      <q-bar elevated>
-        <q-space/>
-        <div class="text-white">
-          Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}
-        </div>
-      </q-bar>
+      <div
+        class="copyright-text"
+      >Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}</div>
     </q-footer>
-
   </q-layout>
 </template>
 
 <script>
-import MenuItem from 'components/MenuItem'
+import MenuItem from "components/MenuItem";
 
 export default {
-  name: 'MainLayout',
+  name: "MainLayout",
 
   components: {
     MenuItem
   },
 
-  data () {
+  data() {
     return {
       year: null,
       leftDrawerOpen: false,
       menuItems: [
         {
-          title: 'Dashboard',
-          icon: 'dashboard',
-          link: '/dashboard'
+          title: "Dashboard",
+          icon: "mdi-home-analytics",
+          link: "/"
         },
         {
-          title: 'Analyse',
-          icon: 'scatter_plot',
-          link: '/scatter'
+          title: "DefectCollectionCard",
+          icon: "mdi-chart-bar",
+          link: "/defectcollectioncard"
+        },
+        {
+          title: "QualityControlChart",
+          icon: "mdi-current-ac",
+          link: "/qualitycontrolchart"
         }
       ]
-    }
+    };
   },
 
   methods: {
-    minimize () {
-      if (process.env.MODE === 'electron') {
-        this.$q.electron.remote.BrowserWindow.getFocusedWindow().minimize()
+    minimize() {
+      if (process.env.MODE === "electron") {
+        this.$q.electron.remote.BrowserWindow.getFocusedWindow().minimize();
       }
     },
 
-    maximize () {
-      if (process.env.MODE === 'electron') {
-        const win = this.$q.electron.remote.BrowserWindow.getFocusedWindow()
+    maximize() {
+      if (process.env.MODE === "electron") {
+        const win = this.$q.electron.remote.BrowserWindow.getFocusedWindow();
 
         if (win.isMaximized()) {
-          win.unmaximize()
+          win.unmaximize();
         } else {
-          win.maximize()
+          win.maximize();
         }
       }
     },
 
-    closeApp () {
-      if (process.env.MODE === 'electron') {
-        this.$q.electron.remote.BrowserWindow.getFocusedWindow().close()
+    closeApp() {
+      if (process.env.MODE === "electron") {
+        this.$q.electron.remote.BrowserWindow.getFocusedWindow().close();
       }
     }
   }
-}
+};
 </script>
 
-<style>
-.menu-img-aw {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
+<style style lang="sass">
+.copyright-text
+  text-align: right
+  padding: 3px
+  font-size: 11px
+.frame-btn
+  border-radius: 0px
+.menu-img-aw
+  display: block
+  margin-left: auto
+  margin-right: auto
 </style>
