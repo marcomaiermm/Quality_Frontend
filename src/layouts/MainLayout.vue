@@ -13,7 +13,12 @@
         <div class="noselect">Quality Tools</div>
         <q-space />
         <q-btn class="frame-btn" flat icon="minimize" @click="minimize"></q-btn>
-        <q-btn class="frame-btn" flat icon="crop_square" @click="maximize"></q-btn>
+        <q-btn
+          class="frame-btn"
+          flat
+          icon="crop_square"
+          @click="maximize"
+        ></q-btn>
         <q-btn class="frame-btn" flat icon="close" @click="closeApp"></q-btn>
       </q-bar>
     </q-header>
@@ -28,7 +33,11 @@
     >
       <q-list>
         <p />
-        <img src="../assets/allweier-logo-small.png" class="menu-img-aw" width="50%" />
+        <img
+          src="../assets/allweier-logo-small.png"
+          class="menu-img-aw"
+          width="50%"
+        />
         <p />
         <q-separator />
         <MenuItem
@@ -41,16 +50,22 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page>
-        <router-view />
+      <q-page class="row no-wrap">
+        <div class="col">
+          <div class="column full-height">
+            <q-scroll-area class="col" visible>
+              <router-view />
+            </q-scroll-area>
+          </div>
+        </div>
       </q-page>
     </q-page-container>
 
     <!--Footer-->
     <q-footer>
-      <div
-        class="copyright-text"
-      >Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}</div>
+      <div class="copyright-text">
+        Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}
+      </div>
     </q-footer>
   </q-layout>
 </template>

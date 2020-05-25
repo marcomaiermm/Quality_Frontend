@@ -1,5 +1,9 @@
 <template>
   <div class="q-app">
+    <transition name="fade">
+      <Spinning v-if="loading" />
+    </transition>
+
     <!--<img id="reportbg" v-show="false" src="../assets/report-bg.png" />-->
     <div class="q-pa-md q-gutter-xs">
       <div class="row q-pb-md">
@@ -83,7 +87,8 @@ export default {
       import("../components/QualityControlChart/QualityControlChartTable"),
     DataChart: () =>
       import("../components/QualityControlChart/QualityControlChartChart"),
-    CardInfo: () => import("../components/QualityControlChart/CardInfo")
+    CardInfo: () => import("../components/QualityControlChart/CardInfo"),
+    Spinning: () => import("../components/QualityControlChart/Loading")
   },
   watch: {
     modelFeature(newVal, oldVal) {
@@ -205,3 +210,14 @@ export default {
   }
 };
 </script>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+</style>
+

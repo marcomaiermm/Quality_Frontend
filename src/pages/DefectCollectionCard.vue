@@ -8,7 +8,12 @@
             <q-tooltip content-class="bg-accent" anchor="top left">Auswahl</q-tooltip>
           </q-btn>
 
-          <q-dialog v-model="persistent" persistent transition-show="scale" transition-hide="scale">
+          <q-dialog
+            v-model="persistent"
+            no-backdrop-dismiss
+            transition-show="scale"
+            transition-hide="scale"
+          >
             <FilterMenu :savedConfig="configOption" @saveConfigEmit="saveConfig" />
           </q-dialog>
           <!--
