@@ -1,24 +1,24 @@
 <template>
   <div>
-    <div v-if="subject==='m'" class="text-overline text-10">x&#772;</div>
-    <div v-else-if="subject==='r'" class="text-overline text-10">R</div>
-    <commit-chart-bar
+    <div v-if="subject === 'm'" class="text-overline text-10">x&#772;</div>
+    <div v-else-if="subject === 'r'" class="text-overline text-10">R</div>
+    <commit-chart
       chart-id="mychart"
       :width="w"
       :height="h"
       :chartData="datacollection"
       :options="options"
-    ></commit-chart-bar>
+    ></commit-chart>
   </div>
 </template>
 
 <script>
-import CommitChartBar from "../js/CommitChart";
+import CommitChart from "../js/CommitChart";
 
 export default {
   name: "QualityControlChartChart",
   components: {
-    CommitChartBar
+    CommitChart
   },
   props: ["propdata", "info", "subject", "height"],
   data() {
@@ -99,7 +99,8 @@ export default {
             backgroundColor: "rgba(190, 1, 74, 0.8)",
             borderColor: "rgba(190, 1, 74, 0.8)",
             fill: false,
-            type: "line"
+            // type: "line",
+            cubicInterpolationMode: "monotone"
           }
         ]
       };

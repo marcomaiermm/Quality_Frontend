@@ -42,7 +42,7 @@
           flat
           :loading="loading"
           :disable="Disabled"
-          class="q-ml-xs"
+          class="refresh-btn q-ml-xs"
           icon="refresh"
           @click="getData()"
         >
@@ -115,7 +115,8 @@ export default {
       }
     },
     ...mapGetters({
-      Dataset: "defectCollection/getDataset"
+      Dataset: "defectCollection/getDataset",
+      Path: "config/getPath"
     })
   },
   data() {
@@ -148,13 +149,21 @@ export default {
       this.cancelToken = this.$axios.CancelToken;
       this.source = this.cancelToken.source();
       this.$axios
-        .get("http://pc0547.allweier.lcl:5000/qualitycontrolchart", {
-          cancelToken: this.source.token,
-          params: {
-            part: this.modelPart
-            // months: this.modelTime
+        // .get("http://pc0547.allweier.lcl:5000/qualitycontrolchart", {
+        .get(
+          "http://" +
+            this.Path.host +
+            ":" +
+            this.Path.port +
+            "/qualitycontrolchart",
+          {
+            cancelToken: this.source.token,
+            params: {
+              part: this.modelPart
+              // months: this.modelTime
+            }
           }
-        })
+        )
         .then(response => {
           const seed = response.data;
           if (seed === null) {

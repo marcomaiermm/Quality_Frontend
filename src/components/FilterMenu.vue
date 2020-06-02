@@ -45,6 +45,20 @@
             @onClickUpdate="updateOption"
             ref="selectMachines"
           />
+          <FilterSelect
+            :stringOptions="Dataset.productgrp"
+            :type="'Produktgruppe'"
+            :multipleselect="true"
+            @onClickUpdate="updateOption"
+            ref="selectGroup"
+          />
+          <FilterSelect
+            :stringOptions="Dataset.material"
+            :type="'Werkstoff'"
+            :multipleselect="true"
+            @onClickUpdate="updateOption"
+            ref="selectMaterial"
+          />
         </div>
         <q-btn
           color="primary"
@@ -74,6 +88,8 @@ export default {
       modelOrders: [],
       modelProcess: [],
       modelParts: [],
+      modelGroup: [],
+      modelMaterial: [],
       uniqueMachines: [],
       filterOption: "all_extern"
     };
@@ -84,13 +100,17 @@ export default {
         machines: [],
         orders: [],
         process: [],
-        parts: []
+        parts: [],
+        productgrp: [],
+        material: []
       };
       if (this.Config) {
         data.machines = this.Config.machines;
         data.orders = this.Config.orders;
         data.process = this.Config.process;
         data.parts = this.Config.parts;
+        data.productgrp = this.Config.productgrp;
+        data.material = this.Config.material;
       }
       return data;
     },
@@ -122,6 +142,8 @@ export default {
         orders: this.$refs.selectOrders.emitModel(),
         process: this.$refs.selectProcess.emitModel(),
         parts: this.$refs.selectParts.emitModel(),
+        productgrp: this.$refs.selectGroup.emitModel(),
+        material: this.$refs.selectMaterial.emitModel(),
         report: this.report
       };
       this.updateFilter(filter);

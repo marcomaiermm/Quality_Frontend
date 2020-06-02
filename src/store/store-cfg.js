@@ -1,6 +1,10 @@
 const state = {
   config: {
     year: ""
+  },
+  path: {
+    host: "pc0547.allweier.lcl",
+    port: "5000"
   }
 };
 
@@ -19,6 +23,9 @@ const actions = {
 const getters = {
   getCfg: state => {
     return state.config;
+  },
+  getPath: state => {
+    return state.path;
   }
 };
 

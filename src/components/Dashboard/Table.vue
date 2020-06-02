@@ -33,8 +33,16 @@
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                    <q-date v-model="startDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
+                  <q-popup-proxy
+                    ref="qDateProxy"
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-date
+                      v-model="startDate"
+                      today-btn
+                      @input="() => $refs.qDateProxy.hide()"
+                    ></q-date>
                   </q-popup-proxy>
                 </q-icon>
               </template>
@@ -53,8 +61,16 @@
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                    <q-date v-model="endDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
+                  <q-popup-proxy
+                    ref="qDateProxy"
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-date
+                      v-model="endDate"
+                      today-btn
+                      @input="() => $refs.qDateProxy.hide()"
+                    ></q-date>
                   </q-popup-proxy>
                 </q-icon>
               </template>
@@ -95,20 +111,36 @@
             <q-btn
               dense
               flat
-              class="q-ml-xs"
+              class="refresh-btn q-ml-xs"
               icon="refresh"
               :loading="load"
               @click="update()"
               :disable="load"
             >
-              <q-tooltip v-if="!load" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
+              <q-tooltip
+                v-if="!load"
+                content-class="bg-accent"
+                anchor="top left"
+                >Aktualisieren</q-tooltip
+              >
             </q-btn>
-            <q-btn dense flat class="q-ml-xs" icon="settings">
-              <q-tooltip content-class="bg-accent" anchor="top left">Einstellungen</q-tooltip>
+            <q-btn dense flat class="settings-btn q-ml-xs" icon="settings">
+              <q-tooltip content-class="bg-accent" anchor="top left"
+                >Einstellungen</q-tooltip
+              >
               <FilterMenu :tab="tab" />
             </q-btn>
-            <q-btn dense flat class="q-ml-xs" icon="save" :disable="!Save" @click="report()">
-              <q-tooltip content-class="bg-accent" anchor="top right">Report erstellen..</q-tooltip>
+            <q-btn
+              dense
+              flat
+              class="save-btn q-ml-xs"
+              icon="save"
+              :disable="!Save"
+              @click="report()"
+            >
+              <q-tooltip content-class="bg-accent" anchor="top right"
+                >Report erstellen..</q-tooltip
+              >
             </q-btn>
           </div>
           <div class="col"></div>
@@ -153,7 +185,6 @@ let begin = new Date();
 begin.setMonth(begin.getMonth() - 1);
 begin = date.formatDate(begin, "YYYY.MM.DD");
 
-// var moment = require("moment");
 export default {
   components: {
     FilterMenu: () => import("../FilterMenu")
@@ -273,6 +304,8 @@ export default {
         orders: JSON.stringify(this.Filter.orders),
         parts: JSON.stringify(this.Filter.parts),
         process: JSON.stringify(this.Filter.process),
+        productgrp: JSON.stringify(this.Filter.productgrp),
+        material: JSON.stringify(this.Filter.material),
         tab: this.tab,
         table: this.MenuTab,
         report: report
@@ -532,4 +565,10 @@ export default {
     top: 48px
   thead tr:first-child th
     top: 0
+.refresh-btn
+  color: $primary
+.settings-btn
+  color: $primary
+.save-btn
+  color: $primary
 </style>

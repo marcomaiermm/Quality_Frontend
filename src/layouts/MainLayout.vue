@@ -10,15 +10,10 @@
           aria-label="Menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
-        <div class="noselect">Quality Tools</div>
+        <div class="noselect">QVue</div>
         <q-space />
         <q-btn class="frame-btn" flat icon="minimize" @click="minimize"></q-btn>
-        <q-btn
-          class="frame-btn"
-          flat
-          icon="crop_square"
-          @click="maximize"
-        ></q-btn>
+        <q-btn class="frame-btn" flat icon="crop_square" @click="maximize"></q-btn>
         <q-btn class="frame-btn" flat icon="close" @click="closeApp"></q-btn>
       </q-bar>
     </q-header>
@@ -32,13 +27,12 @@
       content-class="bg-grey-3"
     >
       <q-list>
-        <p />
-        <img
-          src="../assets/allweier-logo-small.png"
-          class="menu-img-aw"
-          width="50%"
-        />
-        <p />
+        <div class="main-icon q-ma-md">
+          <router-link to="/">
+            <img src="../assets/allweier-logo-small.png" class="menu-img-aw" />
+          </router-link>
+        </div>
+
         <q-separator />
         <MenuItem
           v-for="link in menuItems"
@@ -54,7 +48,9 @@
         <div class="col">
           <div class="column full-height">
             <q-scroll-area class="col" visible>
-              <router-view />
+              <transition name="fade" mode="out-in">
+                <router-view />
+              </transition>
             </q-scroll-area>
           </div>
         </div>
@@ -63,9 +59,9 @@
 
     <!--Footer-->
     <q-footer>
-      <div class="copyright-text">
-        Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}
-      </div>
+      <div
+        class="copyright-text"
+      >Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}</div>
     </q-footer>
   </q-layout>
 </template>
@@ -88,7 +84,7 @@ export default {
         {
           title: "Dashboard",
           icon: "mdi-home-analytics",
-          link: "/"
+          link: "/dashboard"
         },
         {
           title: "DefectCollectionCard",
@@ -140,7 +136,20 @@ export default {
 .frame-btn
   border-radius: 0px
 .menu-img-aw
+  width: 50px
   display: block
   margin-left: auto
   margin-right: auto
+  transition: 0.1s
+  max-width: 100%
+.menu-img-aw:hover
+  transform: scale(1.2)
+.fade-enter 
+  opacity: 0
+.fade-enter-active 
+  transition: opacity 0.1s ease
+.fade-leave
+.fade-leave-active 
+  transition: opacity 0.1s ease
+  opacity: 0
 </style>

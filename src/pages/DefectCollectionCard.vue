@@ -4,7 +4,7 @@
     <div class="q-pa-md q-gutter-xs">
       <div class="row q-gutter-md justify-right">
         <div>
-          <q-btn dense flat icon="tune" @click="persistent = true">
+          <q-btn dense flat icon="tune" @click="persistent = true" class="settings-btn">
             <q-tooltip content-class="bg-accent" anchor="top left">Auswahl</q-tooltip>
           </q-btn>
 
@@ -31,7 +31,7 @@
             dense
             flat
             :disable="DisableButton"
-            class="q-ml-xs"
+            class="refresh-btn q-ml-xs"
             icon="refresh"
             @click="refreshData()"
           >
@@ -43,7 +43,7 @@
           dense
           flat
           :disable="DisableSave"
-          class="q-ml-xs"
+          class="save-btn"
           icon="save"
           @click="createReport()"
         >
@@ -118,7 +118,8 @@ export default {
       Pareto: "defectCollection/getPareto",
       Summary: "defectCollection/getSummary",
       Report: "defectCollection/getReport",
-      Config: "config/getCfg"
+      Config: "config/getCfg",
+      Path: "config/getPath"
     })
   },
   data() {
@@ -199,20 +200,27 @@ export default {
       this.updateSummary([]);
 
       this.$axios
-        .get("http://pc0547.allweier.lcl:5000/defectcollectioncard", {
-          cancelToken: this.source.token,
-          params: {
-            year: this.configOption.year,
-            weeks: JSON.stringify(this.configOption.weeks),
-            parts: JSON.stringify(this.configOption.parts),
-            orders: JSON.stringify(this.configOption.orders),
-            process: JSON.stringify(this.configOption.process),
-            machines: JSON.stringify(this.configOption.machines),
-            customer: JSON.stringify(this.configOption.customer),
-            tab: this.configOption.tab,
-            lang: this.configOption.lang
+        .get(
+          "http://" +
+            this.Path.host +
+            ":" +
+            this.Path.port +
+            "/defectcollectioncard",
+          {
+            cancelToken: this.source.token,
+            params: {
+              year: this.configOption.year,
+              weeks: JSON.stringify(this.configOption.weeks),
+              parts: JSON.stringify(this.configOption.parts),
+              orders: JSON.stringify(this.configOption.orders),
+              process: JSON.stringify(this.configOption.process),
+              machines: JSON.stringify(this.configOption.machines),
+              customer: JSON.stringify(this.configOption.customer),
+              tab: this.configOption.tab,
+              lang: this.configOption.lang
+            }
           }
-        })
+        )
         .then(response => {
           const seed = response.data;
           const chart = JSON.parse(seed.Chart);
@@ -510,23 +518,24 @@ export default {
       "updateReport"
     ])
   },
-  mounted() {},
   created() {
     // NUR  FÜR DEV ZWECKE! HOT RELOAD => REFERENZ index.vue
     if (Object.keys(this.Config).length < 2) {
       const config = {};
-      this.$axios.get("http://pc0547.allweier.lcl:5000/cfg").then(response => {
-        const seed = response.data;
+      this.$axios
+        .get("http://" + this.Path.host + ":" + this.Path.port + "/cfg")
+        .then(response => {
+          const seed = response.data;
 
-        Object.keys(seed).forEach(element => {
-          const set = JSON.parse(seed[element]);
-          const key = Object.keys(set[0]);
-          config[element] = Object.values(set)
-            .map(item => item[key])
-            .sort();
+          Object.keys(seed).forEach(element => {
+            const set = JSON.parse(seed[element]);
+            const key = Object.keys(set[0]);
+            config[element] = Object.values(set)
+              .map(item => item[key])
+              .sort();
+          });
+          this.updateConfig(config);
         });
-        this.updateConfig(config);
-      });
     }
   },
   beforeDestroy() {

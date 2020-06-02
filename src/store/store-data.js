@@ -12,7 +12,9 @@ const state = {
     machines: [],
     orders: [],
     process: [],
-    parts: []
+    parts: [],
+    productgrp: [],
+    material: []
   },
   parsedPPM: [],
   parsedCost: [],
