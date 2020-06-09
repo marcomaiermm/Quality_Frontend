@@ -29,27 +29,39 @@
               ]"
             ></q-btn-toggle>
 
-            <div class="row">
-              <q-select
-                v-model="textYear"
-                :options="yearOptions"
-                dense
-                square
-                outlined
-                maxlength="4"
-                style="width: 250px"
-                label="Jahr"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    v-show="textYear !== ''"
-                    class="cursor-pointer"
-                    name="clear"
-                    @click.stop="textYear = ''"
-                  ></q-icon>
-                </template>
-              </q-select>
+            <q-select
+              v-model="textYear"
+              :options="yearOptions"
+              dense
+              square
+              outlined
+              maxlength="4"
+              style="width: 250px"
+              label="Jahr"
+            >
+              <template v-slot:append>
+                <q-icon
+                  v-show="textYear !== ''"
+                  class="cursor-pointer"
+                  name="clear"
+                  @click.stop="textYear = ''"
+                ></q-icon>
+              </template>
+            </q-select>
+            <div class="col">
+              <q-btn-toggle
+                v-model="timeModel"
+                toggle-color="primary"
+                unelevated
+                spread
+                :options="[
+                { label: 'Kalenderwoche', value: 'kw' },
+                { label: 'Monat', value: 'month' }
+              ]"
+              ></q-btn-toggle>
+            </div>
 
+            <div class="row" v-if="timeModel==='kw'">
               <q-input
                 v-model="textFromWeek"
                 dense
@@ -92,6 +104,50 @@
                 </template>
               </q-input>
             </div>
+
+            <div class="row" v-if="timeModel==='month'">
+              <q-select
+                v-model="modelMonthFrom"
+                :options="timeOptions"
+                dense
+                square
+                outlined
+                maxlength="2"
+                size="2"
+                label="Von Monat"
+                style="width: 100%"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    v-show="modelMonthFrom !== ''"
+                    class="cursor-pointer"
+                    name="clear"
+                    @click.stop="modelMonthFrom = ''"
+                  ></q-icon>
+                </template>
+              </q-select>
+              <q-select
+                v-model="modelMonthTo"
+                :options="OptionsMonthTo"
+                dense
+                square
+                outlined
+                maxlength="2"
+                size="2"
+                label="Bis Monat"
+                style="width: 100%"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    v-show="modelMonthTo !== ''"
+                    class="cursor-pointer"
+                    name="clear"
+                    @click.stop="modelMonthTo = ''"
+                  ></q-icon>
+                </template>
+              </q-select>
+            </div>
+
             <FilterSelect
               :stringOptions="Config.parts"
               :multipleselect="true"
@@ -152,6 +208,23 @@ export default {
   data() {
     return {
       model: "intern",
+      timeModel: "kw",
+      timeOptions: [
+        { label: "Januar", value: 1 },
+        { label: "Februar", value: 2 },
+        { label: "März", value: 3 },
+        { label: "April", value: 4 },
+        { label: "Mai", value: 5 },
+        { label: "Juni", value: 6 },
+        { label: "Juli", value: 7 },
+        { label: "August", value: 8 },
+        { label: "September", value: 9 },
+        { label: "Oktober", value: 10 },
+        { label: "November", value: 11 },
+        { label: "Dezember", value: 12 }
+      ],
+      modelMonthFrom: "",
+      modelMonthTo: "",
       disabled: true,
       lanModel: "de",
       modelYearWeek: "year",
@@ -172,16 +245,34 @@ export default {
   },
 
   computed: {
+    OptionsMonthTo() {
+      let options = this.timeOptions;
+      if (Object.keys(this.modelMonthFrom).length > 0) {
+        options = this.timeOptions.filter(
+          d => d.value >= this.modelMonthFrom.value
+        );
+      }
+      return options;
+    },
     ...mapGetters({
       Config: "config/getCfg"
     })
   },
   methods: {
     emitOptions() {
+      if (this.modelMonthFrom === "") {
+        this.modelMonthFrom = this.modelMonthTo;
+      }
+
+      if (this.modelMonthTo === "") {
+        this.modelMonthTo = this.modelMonthFrom;
+      }
       const options = {
         tab: this.model,
         year: this.textYear,
+        timeOption: this.timeModel,
         weeks: [this.textFromWeek, this.textToWeek],
+        months: [this.modelMonthFrom.value, this.modelMonthTo.value],
         parts: this.$refs.selectParts.emitModel(),
         orders: this.$refs.selectOrders.emitModel(),
         process: this.$refs.selectProcess.emitModel(),

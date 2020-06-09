@@ -11,7 +11,9 @@
             native-context-menu
             class="qimg rounded-borders"
           >
-            <div class="imgtext absolute-bottom text-subtitle1 text-center">Dashboard</div>
+            <div class="imgtext absolute-bottom text-subtitle1 text-center">
+              Dashboard
+            </div>
           </q-img>
         </router-link>
       </div>
@@ -23,7 +25,9 @@
             native-context-menu
             class="qimg rounded-borders"
           >
-            <div class="imgtext absolute-bottom text-subtitle1 text-center">Fehlersammelkarte</div>
+            <div class="imgtext absolute-bottom text-subtitle1 text-center">
+              Fehlersammelkarte
+            </div>
           </q-img>
         </router-link>
       </div>
@@ -35,7 +39,9 @@
             native-context-menu
             class="qimg rounded-borders"
           >
-            <div class="imgtext absolute-bottom text-subtitle1 text-center">Qualitätsregelkarte</div>
+            <div class="imgtext absolute-bottom text-subtitle1 text-center">
+              Qualitätsregelkarte
+            </div>
           </q-img>
         </router-link>
       </div>
@@ -107,50 +113,53 @@ export default {
   }
 };
 </script>
-<style scoped>
-#idx {
-  position: relative;
-  width: 100%;
-  align-content: center;
-}
-#bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  filter: blur(5px);
-  background-image: url(../assets/landing.png);
-  background-size: cover;
-  background-repeat: no-repeat;
-  z-index: -1;
-}
-.content {
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.item {
-  text-align: center;
-}
+<style lang="sass">
+#idx
+  position: relative
+  width: 100%
+  align-content: center
 
-.qimg:hover {
-  transform: scale(1.2);
-  cursor: pointer;
-}
+#bg
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  filter: blur(5px)
+  opacity: 0.6
+  background-image: url(../assets/landing.png)
+  background-size: cover
+  background-repeat: no-repeat
+  z-index: -1
 
-.qimg {
-  box-shadow: 2px 3px 8px 3px rgba(0, 0, 0, 0.5);
-  transition: 0.1s;
-}
-.imgtext {
-  user-select: none;
-}
+.content
+  height: 100%
+  padding: 0
+  margin: 0
+  display: -webkit-box
+  display: -moz-box
+  display: -ms-flexbox
+  display: -webkit-flex
+  display: flex
+  align-items: center
+  justify-content: center
+
+.item
+  text-align: center
+.qimg:hover
+  transform: scale(1.2)
+  cursor: pointer
+
+.qimg
+  box-shadow: 2px 3px 8px 3px rgba(0, 0, 0, 0.5)
+  transition: 0.1s
+.imgtext
+  user-select: none
+
+.refresh-btn
+  color: $primary
+.settings-btn
+  color: $primary
+.save-btn
+  color: $primary
 </style>

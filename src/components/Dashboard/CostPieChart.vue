@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row">
-      <div class="text-overline text-9">Kosten</div>
+      <div class="text-overline text-9">Kostenaufschlüsselung in EUR</div>
       <q-space></q-space>
       <q-select
         borderless
@@ -21,6 +21,7 @@
 <script>
 import CommitChartPie from "../js/CommitChartPie";
 import { getCosts } from "../js/CalcCost";
+import { formatCost } from "../js/FormatCost";
 import { interpolateColors } from "../js/InterpolateColors";
 import { mapGetters } from "vuex";
 
@@ -70,7 +71,9 @@ export default {
         "Vorgangs-Nr.",
         "Fehlermerkmal",
         "Material",
-        "Maschine"
+        "Maschine",
+        "Produktgruppe",
+        "Werkstoff"
       ],
       datacollection: {
         labels: [],
@@ -139,6 +142,19 @@ export default {
         },
         animation: {
           duration: 2000
+        },
+        tooltips: {
+          mode: "label",
+          callbacks: {
+            label: function(tooltipItem, data) {
+              const indice = tooltipItem.index;
+              return (
+                data.labels[indice] +
+                ": " +
+                formatCost(data.datasets[0].data[indice])
+              );
+            }
+          }
         }
       };
     }

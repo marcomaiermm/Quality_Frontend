@@ -46,8 +46,4 @@ export default {
   background: #F2C037
 .mini-icon
   color: $secondary
-.q-item:hover
-  transform: scale(1.1)
-.q-item
-  transition: 0.1s
 </style>

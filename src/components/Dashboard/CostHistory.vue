@@ -14,21 +14,16 @@
           style="width: 120px"
         ></q-select>
       </div>
-      <div class="q-pl-md">
-        <q-input v-model="search" :label="model" dense style="width: 250px">
-          <template v-slot:append>
-            <q-icon
-              v-if="search !== null"
-              class="cursor-pointer"
-              name="clear"
-              @click.stop="search = null"
-            ></q-icon>
-          </template>
-          <template v-slot:after>
-            <q-btn dense flat icon="send" class="send-btn" @click="checkRefresh()"></q-btn>
-          </template>
-        </q-input>
+      <div class="q-pl-md" v-if="model !== 'Gesamt'">
+        <q-select
+          v-model="search"
+          :label="model"
+          :options="selectOptionHistory"
+          dense
+          style="width: 250px"
+        ></q-select>
       </div>
+      <q-btn dense flat icon="send" class="send-btn" @click="checkRefresh()"></q-btn>
     </div>
     <commit-chart :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart>
   </div>
@@ -36,6 +31,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { formatCost } from "../js/FormatCost";
 import CommitChart from "../js/CommitChart.js";
 
 export default {
@@ -46,15 +42,19 @@ export default {
   props: ["tab"],
   data() {
     return {
-      model: "Material",
+      model: "Gesamt",
       search: "",
       selectOption: [
+        "Gesamt",
         "Auftrags-Nr.",
         "Vorgangs-Nr.",
         "Fehlermerkmal",
         "Material",
-        "Maschine"
+        "Maschine",
+        "Produktgruppe",
+        "Werkstoff"
       ],
+      selectOptionHistory: [],
       datacollection: {
         labels: [],
         datasets: []
@@ -89,6 +89,12 @@ export default {
   },
   watch: {
     model() {
+      if (this.model !== "Gesamt") {
+        this.selectOptionHistory = this.Data.map(c => c[this.model]).filter(
+          this.uniqueArrayValues
+        );
+      }
+
       this.search = null;
     }
   },
@@ -103,20 +109,39 @@ export default {
         labels: [],
         datasets: []
       };
-      const filter = this.Data.filter(obj => {
-        return obj[this.model] === this.search;
-      });
-      const cost = filter.map(c => ({
-        Datum: c.Datum,
-        Kosten: c.Kosten
-      }));
+      let cost = [];
+      if (this.model === "Gesamt") {
+        cost = this.Data.map(c => ({
+          Datum: c.Datum,
+          Kosten: c.Kosten
+        })).reverse();
+      } else {
+        cost = this.costs();
+      }
+
+      cost = [
+        ...cost
+          .reduce((map, item) => {
+            const { Datum: key, Kosten } = item;
+            const prev = map.get(key);
+
+            if (prev) {
+              prev.Kosten += Kosten;
+            } else {
+              map.set(key, Object.assign({}, item));
+            }
+
+            return map;
+          }, new Map())
+          .values()
+      ];
 
       this.datacollection = {
         labels: cost.map(c => c.Datum),
         datasets: [
           {
             label: "Kosten " + this.search,
-            data: cost.map(c => c.Kosten),
+            data: cost.map(c => this.formatCost(c.Kosten)),
             backgroundColor: "#dd0333",
             borderColor: "#dd0333",
             fill: false,
@@ -126,10 +151,43 @@ export default {
       };
       this.setOptions();
     },
+    formatCost(a) {
+      return Math.round((a + Number.EPSILON) * 100) / 100;
+    },
+    uniqueArrayValues(value, index, self) {
+      return self.indexOf(value) === index;
+    },
+    costs() {
+      const filter = this.Data.filter(obj => {
+        return obj[this.model] === this.search;
+      });
+
+      const cost = filter
+        .map(c => ({
+          Datum: c.Datum,
+          Kosten: c.Kosten
+        }))
+        .reverse();
+      return cost;
+    },
+
     setOptions() {
       this.options = {
         legend: {
           display: false
+        },
+        tooltips: {
+          mode: "label",
+          callbacks: {
+            label: function(tooltipItem, data) {
+              const indice = tooltipItem.index;
+              return (
+                data.labels[indice] +
+                ": " +
+                formatCost(data.datasets[0].data[indice])
+              );
+            }
+          }
         },
         scales: {
           xAxes: [

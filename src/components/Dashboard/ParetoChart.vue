@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-overline text-9">Pareto Diagramm</div>
+    <div class="text-overline text-9">Reklamations Pareto Diagramm</div>
     <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
   </div>
 </template>
@@ -31,7 +31,9 @@ export default {
       dataset: {},
       options: {},
       h: 370,
-      w: 1000
+      w: 1000,
+      pointHoverRadiusVal: 4,
+      pointRadiusVal: 3
     };
   },
   methods: {
@@ -55,6 +57,12 @@ export default {
         kumSet.push(dataPareto[element].Kummuliert);
       });
 
+      // Kummulierte Datenpunkte bei zuvielen Datenpunkten kleiner machen
+      if (kumSet.length >= 40) {
+        this.pointHoverRadiusVal = 0;
+        this.pointRadiusVal = 0;
+      }
+
       this.datacollection = {
         labels: Object.keys(dataPareto),
         datasets: [
@@ -65,7 +73,9 @@ export default {
             backgroundColor: "rgba(190, 1, 74, 0.8)",
             borderColor: "rgba(190, 1, 74, 0.8)",
             fill: false,
-            type: "line"
+            type: "line",
+            pointRadius: this.pointRadiusVal,
+            pointHoverRadius: this.pointHoverRadiusVal
           },
           {
             label: "Fehler",
@@ -125,8 +135,10 @@ export default {
               id: "P",
               position: "right",
               ticks: {
+                /*
                 max: 100,
                 min: 0,
+                */
                 callback: function(value) {
                   return value + "%";
                 }

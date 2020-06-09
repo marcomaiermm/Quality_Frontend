@@ -57,7 +57,11 @@
               <DataTable :dataset="dataTable" :windowHeight="height*0.4" />
             </div>
             <div class="col-4 q-pl-md">
-              <CardInfo :data="dataInfo[modelFeature]" :windowHeight="height*0.2" />
+              <CardInfo
+                :data="dataInfo[modelFeature]"
+                :scope="scope[modelFeature]"
+                :windowHeight="height*0.2"
+              />
             </div>
           </div>
         </q-card>
@@ -134,6 +138,7 @@ export default {
       dataValuesX: [],
       dataInfo: [],
       dataInfoR: [],
+      scope: {},
       features: [],
       months: [],
       thisMonth: new Date().getMonth(),
@@ -149,7 +154,6 @@ export default {
       this.cancelToken = this.$axios.CancelToken;
       this.source = this.cancelToken.source();
       this.$axios
-        // .get("http://pc0547.allweier.lcl:5000/qualitycontrolchart", {
         .get(
           "http://" +
             this.Path.host +
@@ -173,7 +177,7 @@ export default {
           }
           this.dataValues = JSON.parse(seed.X.Werte);
           this.dataInfo = seed.X.Eingriffsgrenzen;
-
+          this.scope = seed.Bins;
           // this.dataValuesR = JSON.parse(seed.R.Werte);
           this.dataInfoR = seed.R.Eingriffsgrenzen;
 
@@ -201,6 +205,7 @@ export default {
       this.dataInfo = [];
       this.dataValuesR = [];
       this.dataInfoR = [];
+      this.intervall = {};
       this.features = [];
       this.modelFeature = null;
     }

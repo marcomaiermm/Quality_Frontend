@@ -127,8 +127,10 @@ export default {
               id: "P",
               position: "right",
               ticks: {
+                /*
                 max: 100,
                 min: 0,
+                */
                 callback: function(value) {
                   return value + "%";
                 }

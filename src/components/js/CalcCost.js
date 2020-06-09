@@ -8,7 +8,7 @@ export function getCosts(data, option) {
   );
   const result = Object.keys(grouped).map(k => ({
     [option]: k,
-    Kosten: grouped[k]
+    Kosten: Math.round((grouped[k] + Number.EPSILON) * 100) / 100
   }));
   return result;
 }

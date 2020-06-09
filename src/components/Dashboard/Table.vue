@@ -565,10 +565,4 @@ export default {
     top: 48px
   thead tr:first-child th
     top: 0
-.refresh-btn
-  color: $primary
-.settings-btn
-  color: $primary
-.save-btn
-  color: $primary
 </style>

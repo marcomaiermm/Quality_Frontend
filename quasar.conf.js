@@ -116,8 +116,8 @@ module.exports = function(ctx) {
       workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: "Quality App",
-        short_name: "Quality App",
+        name: "QVue",
+        short_name: "QVue",
         description: "Quasar Framework fuer Qualitätstool",
         display: "standalone",
         orientation: "portrait",

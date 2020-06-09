@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row">
-      <div class="text-overline text-9">Histogramm</div>
+      <div class="text-overline text-9">Reklamations Histogramm</div>
       <q-space></q-space>
       <q-select
         borderless
@@ -166,6 +166,16 @@ export default {
         },
         tooltips: {
           callbacks: {
+            label: function(tooltipItem, data) {
+              const indice = tooltipItem.index;
+              return (
+                /*
+                data.labels[indice] +
+                ": " +
+                */
+                "Reklamationen: " + data.datasets[0].data[indice]
+              );
+            },
             footer: (tooltipItem, data) => {
               let total = 0;
               for (let i = 0; i < data.datasets.length; i++) {
@@ -202,6 +212,7 @@ export default {
             }
           ]
         },
+
         plugins: {
           zoom: {
             zoom: {

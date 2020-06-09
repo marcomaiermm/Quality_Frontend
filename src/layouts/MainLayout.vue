@@ -13,7 +13,12 @@
         <div class="noselect">QVue</div>
         <q-space />
         <q-btn class="frame-btn" flat icon="minimize" @click="minimize"></q-btn>
-        <q-btn class="frame-btn" flat icon="crop_square" @click="maximize"></q-btn>
+        <q-btn
+          class="frame-btn"
+          flat
+          icon="crop_square"
+          @click="maximize"
+        ></q-btn>
         <q-btn class="frame-btn" flat icon="close" @click="closeApp"></q-btn>
       </q-bar>
     </q-header>
@@ -47,7 +52,11 @@
       <q-page class="row no-wrap">
         <div class="col">
           <div class="column full-height">
-            <q-scroll-area class="col" visible>
+            <q-scroll-area
+              class="col"
+              :thumb-style="thumbStyle"
+              :bar-style="barStyle"
+            >
               <transition name="fade" mode="out-in">
                 <router-view />
               </transition>
@@ -59,9 +68,9 @@
 
     <!--Footer-->
     <q-footer>
-      <div
-        class="copyright-text"
-      >Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}</div>
+      <div class="copyright-text">
+        Allweier Präzisionsteile GmbH &copy; {{ new Date().getFullYear() }}
+      </div>
     </q-footer>
   </q-layout>
 </template>
@@ -79,6 +88,18 @@ export default {
   data() {
     return {
       year: null,
+      thumbStyle: {
+        right: "4px",
+        backgroundColor: "#172c3f",
+        width: "6px",
+        opacity: 0.75
+      },
+      barStyle: {
+        right: "2px",
+        backgroundColor: "#172c3f",
+        width: "9px",
+        opacity: 0.2
+      },
       leftDrawerOpen: false,
       menuItems: [
         {
@@ -144,12 +165,12 @@ export default {
   max-width: 100%
 .menu-img-aw:hover
   transform: scale(1.2)
-.fade-enter 
+.fade-enter
   opacity: 0
-.fade-enter-active 
+.fade-enter-active
   transition: opacity 0.1s ease
 .fade-leave
-.fade-leave-active 
+.fade-leave-active
   transition: opacity 0.1s ease
   opacity: 0
 </style>

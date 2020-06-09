@@ -198,7 +198,7 @@ export default {
       this.source = this.cancelToken.source();
       this.updateDefectCollectionCard([]);
       this.updateSummary([]);
-
+      console.log(this.configOption);
       this.$axios
         .get(
           "http://" +
@@ -211,11 +211,13 @@ export default {
             params: {
               year: this.configOption.year,
               weeks: JSON.stringify(this.configOption.weeks),
+              months: JSON.stringify(this.configOption.months),
               parts: JSON.stringify(this.configOption.parts),
               orders: JSON.stringify(this.configOption.orders),
               process: JSON.stringify(this.configOption.process),
               machines: JSON.stringify(this.configOption.machines),
               customer: JSON.stringify(this.configOption.customer),
+              timeOption: this.configOption.timeOption,
               tab: this.configOption.tab,
               lang: this.configOption.lang
             }
@@ -274,6 +276,18 @@ export default {
         features: "Detailansicht Merkmal Reklamationen pro KW",
         name: this.Dataset.Name
       };
+
+      switch (this.configOption.timeOption) {
+        case "month":
+          englishTxt.paretoCW = "Complaints ppm per month";
+          englishTxt.features = "Detailed view of complaints per month";
+          germanTxt.paretoCW = "Reklamationen ppm pro Monat";
+          germanTxt.features = "Detailansicht Merkmal Reklamationen pro Monat";
+          break;
+        default:
+          break;
+      }
+
       let text = germanTxt;
       if (this.configOption.lang === "en") {
         text = englishTxt;
