@@ -210,6 +210,7 @@ export default {
         cost: seed.base64.Kosten,
         hist: seed.base64.History,
         pareto: seed.base64.Pareto,
+        gradient: seed.base64.Kostenverlauf,
         bg: seed.bg
       };
       switch (this.tab) {
@@ -513,6 +514,14 @@ export default {
                           <p><img style='display:block;margin-left:auto;margin-right:auto;width:50%;height:50%;' src='data:image/svg+xml;base64,${report.cost["Product Group Code"]}'/></p>
                           <h4>Werkstoff</h4>
                           <p><img style='display:block;margin-left:auto;margin-right:auto;width:50%;height:50%;' src='data:image/svg+xml;base64,${report.cost["Material Code"]}'/></p>
+                        </div>
+                      </div>
+
+                      <div class="page">
+                        <img class="bg" src='data:image/png;base64,${report.bg}' />
+                        <div class="padded">
+                          <h4>Kostenverlauf</h4>
+                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:100%;height:100%;' src='data:image/svg+xml;base64,${report.gradient}'/></p>
                         </div>
                       </div>
                   </body>

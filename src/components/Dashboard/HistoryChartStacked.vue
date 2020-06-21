@@ -14,7 +14,12 @@
         style="width: 120px"
       ></q-select>
     </div>
-    <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
+    <commit-chart-bar
+      :width="w"
+      :height="h"
+      :chartData="datacollection"
+      :options="options"
+    ></commit-chart-bar>
   </div>
 </template>
 
@@ -166,16 +171,6 @@ export default {
         },
         tooltips: {
           callbacks: {
-            label: function(tooltipItem, data) {
-              const indice = tooltipItem.index;
-              return (
-                /*
-                data.labels[indice] +
-                ": " +
-                */
-                "Reklamationen: " + data.datasets[0].data[indice]
-              );
-            },
             footer: (tooltipItem, data) => {
               let total = 0;
               for (let i = 0; i < data.datasets.length; i++) {

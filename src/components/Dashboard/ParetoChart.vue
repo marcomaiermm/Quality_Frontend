@@ -1,7 +1,12 @@
 <template>
   <div>
     <div class="text-overline text-9">Reklamations Pareto Diagramm</div>
-    <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
+    <commit-chart-bar
+      :width="w"
+      :height="h"
+      :chartData="datacollection"
+      :options="options"
+    ></commit-chart-bar>
   </div>
 </template>
 
@@ -101,7 +106,7 @@ export default {
               if (tooltipItem.datasetIndex === 0) {
                 return "Kummuliert: " + tooltipItem.yLabel + "%";
               } else {
-                return "Reklamationen: " + tooltipItem.yLabel;
+                return "Teile: " + tooltipItem.yLabel;
               }
             }
           }

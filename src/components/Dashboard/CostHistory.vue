@@ -23,9 +23,36 @@
           style="width: 250px"
         ></q-select>
       </div>
-      <q-btn dense flat icon="send" class="send-btn" @click="checkRefresh()"></q-btn>
+      <q-btn
+        dense
+        flat
+        icon="send"
+        class="send-btn"
+        @click="checkRefresh()"
+      ></q-btn>
+      <q-space></q-space>
+      <div
+        class="text-overline text-9 q-pl-xs row"
+        v-if="Object.keys(this.regressionData).length > 0"
+      >
+        <div>Steigung der Trendlinie:</div>
+        <div
+          :style="[
+            regressionData.equation[0] <= 0
+              ? { color: '#009130' }
+              : { color: '#be0138' }
+          ]"
+        >
+          {{ DOMCost(regressionData.equation[0]) }}
+        </div>
+      </div>
     </div>
-    <commit-chart :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart>
+    <commit-chart
+      :width="w"
+      :height="h"
+      :chartData="datacollection"
+      :options="options"
+    ></commit-chart>
   </div>
 </template>
 
@@ -33,6 +60,7 @@
 import { mapGetters } from "vuex";
 import { formatCost } from "../js/FormatCost";
 import CommitChart from "../js/CommitChart.js";
+import regression from "regression";
 
 export default {
   name: "CostHistory",
@@ -59,6 +87,7 @@ export default {
         labels: [],
         datasets: []
       },
+      regressionData: {},
       dataset: {},
       options: {},
       h: 250,
@@ -135,33 +164,52 @@ export default {
           }, new Map())
           .values()
       ];
-
+      this.regressionData = this.lineRegress(cost);
       this.datacollection = {
         labels: cost.map(c => c.Datum),
         datasets: [
           {
             label: "Kosten " + this.search,
-            data: cost.map(c => this.formatCost(c.Kosten)),
+            data: cost.map(c => this.formatDigitsCost(c.Kosten)),
             backgroundColor: "#dd0333",
             borderColor: "#dd0333",
+            fill: false,
+            lineTension: 0
+          },
+          {
+            label: "Trendlinie",
+            data: this.regressionData.points.map(r =>
+              this.formatDigitsCost(r[1])
+            ),
+            backgroundColor: "#003871",
+            borderColor: "#003871",
             fill: false,
             lineTension: 0
           }
         ]
       };
+
       this.setOptions();
     },
-    formatCost(a) {
+    lineRegress(data) {
+      // [x,y]
+      const f = data.map((d, i) => [i + 1, d.Kosten]);
+      const result = regression.linear(f);
+      return result;
+    },
+    formatDigitsCost(a) {
       return Math.round((a + Number.EPSILON) * 100) / 100;
     },
     uniqueArrayValues(value, index, self) {
       return self.indexOf(value) === index;
     },
+    DOMCost(value) {
+      return formatCost(value);
+    },
     costs() {
       const filter = this.Data.filter(obj => {
         return obj[this.model] === this.search;
       });
-
       const cost = filter
         .map(c => ({
           Datum: c.Datum,
@@ -174,18 +222,21 @@ export default {
     setOptions() {
       this.options = {
         legend: {
-          display: false
+          display: true
         },
         tooltips: {
-          mode: "label",
+          mode: "index",
+          position: "nearest",
           callbacks: {
             label: function(tooltipItem, data) {
               const indice = tooltipItem.index;
-              return (
-                data.labels[indice] +
-                ": " +
-                formatCost(data.datasets[0].data[indice])
-              );
+              if (tooltipItem.datasetIndex === 0) {
+                return "Kosten: " + formatCost(data.datasets[0].data[indice]);
+              } else {
+                return (
+                  "Trendwert: " + formatCost(data.datasets[1].data[indice])
+                );
+              }
             }
           }
         },

@@ -2,7 +2,7 @@
   <div class="q-pa-md">
     <q-card class="hist-card" bordered>
       <q-card-section>
-        <div class="text-overline text-9">Reklamationen ppm</div>
+        <div class="text-overline text-9">Reklamierte Teile ppm</div>
         <commit-chart-bar
           chart-id="canvas-history"
           :width="w"

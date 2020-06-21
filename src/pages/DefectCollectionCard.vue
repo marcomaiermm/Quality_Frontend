@@ -198,7 +198,6 @@ export default {
       this.source = this.cancelToken.source();
       this.updateDefectCollectionCard([]);
       this.updateSummary([]);
-      console.log(this.configOption);
       this.$axios
         .get(
           "http://" +
@@ -241,7 +240,7 @@ export default {
           this.updateDataset(seed);
           this.updateDefectCollectionCard(defectCollectionCard);
           this.updateSummary(summary);
-          this.updateChart(chart["Reklamationen pro eine million Teile"]);
+          this.updateChart(chart["Fehler pro eine million Teile"]);
           this.updatePareto(pareto);
 
           this.reportDoc();
@@ -266,23 +265,23 @@ export default {
     reportDoc() {
       const englishTxt = {
         summary: "Summary",
-        paretoCW: "Complaints ppm per calendar week",
-        features: "Detailed view of complaints per calendar week",
+        paretoCW: "Defect ppm per calendar week",
+        features: "Detailed view of defects per calendar week",
         name: this.Dataset.Name_t
       };
       const germanTxt = {
         summary: "Zusammenfassung",
-        paretoCW: "Reklamationen ppm pro Kalenderwoche",
-        features: "Detailansicht Merkmal Reklamationen pro KW",
+        paretoCW: "Fehler ppm pro Kalenderwoche",
+        features: "Detailansicht Merkmal Fehler pro KW",
         name: this.Dataset.Name
       };
 
       switch (this.configOption.timeOption) {
         case "month":
-          englishTxt.paretoCW = "Complaints ppm per month";
-          englishTxt.features = "Detailed view of complaints per month";
-          germanTxt.paretoCW = "Reklamationen ppm pro Monat";
-          germanTxt.features = "Detailansicht Merkmal Reklamationen pro Monat";
+          englishTxt.paretoCW = "Defects ppm per month";
+          englishTxt.features = "Detailed view of defects per month";
+          germanTxt.paretoCW = "Fehler ppm pro Monat";
+          germanTxt.features = "Detailansicht Merkmal Fehler pro Monat";
           break;
         default:
           break;
