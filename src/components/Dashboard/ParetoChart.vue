@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="text-overline text-9">Reklamations Pareto Diagramm</div>
+    <div class="row">
+    <div class="text-overline text-9 col-5">Reklamations Pareto Diagramm</div>
+    <div class="col-6"><TopSlider :maxValue="Object.keys(Data).length" @sliderRefreshEmit="slicedPareto"/></div>
+    </div>
     <commit-chart-bar
       :width="w"
       :height="h"
@@ -12,14 +15,54 @@
 
 <script>
 import CommitChartBar from "../js/CommitChartBar";
+import TopSlider from "../TopSlider";
 import { mapGetters } from "vuex";
 
 export default {
   name: "ParetoChart",
   components: {
-    CommitChartBar
+    CommitChartBar,
+    TopSlider
   },
   computed: {
+    Data() {
+      // arr.slice(begin, end)
+      // Object.entries(obj).slice(begin, end)
+      let data = {}
+        switch (this.tab) {
+        case "intern":
+          data = this.Pareto;
+          break;
+        case "extern":
+          data = this.ParetoExtern;
+          break;
+        case "all":
+          data = this.ParetoAll;
+          break;
+      }
+      return data
+    },
+    MaxValues() {
+      let len = 0
+      if (Object.keys(this.Data).length > 0) {
+        len = Object.keys(this.Data).length;
+      }
+      return len
+    },
+    SlicedData(){
+      const data = this.Data
+      const sliced = Object.keys(data).slice(0, this.plotLength).reduce((result, key) => {
+                          result[key] = data[key];
+                          return result;
+                      }, {});
+      let result = {}
+      if(Object.keys(sliced).length>0){
+        result = sliced
+      } else {
+        result = data
+      }
+      return result
+    },
     ...mapGetters({
       Pareto: "dataset/getPareto",
       ParetoAll: "dataset/getParetoAll",
@@ -29,6 +72,7 @@ export default {
   props: ["tab"],
   data() {
     return {
+      plotLength: this.MaxValues,
       datacollection: {
         labels: [],
         datasets: []
@@ -42,19 +86,12 @@ export default {
     };
   },
   methods: {
+    slicedPareto(value) {
+      this.plotLength = value;
+      this.fillPareto();
+    },
     fillPareto() {
-      let dataPareto = [];
-      switch (this.tab) {
-        case "intern":
-          dataPareto = this.Pareto;
-          break;
-        case "extern":
-          dataPareto = this.ParetoExtern;
-          break;
-        case "all":
-          dataPareto = this.ParetoAll;
-          break;
-      }
+      const dataPareto = this.SlicedData;
       const dataSet = [];
       const kumSet = [];
       Object.keys(dataPareto).forEach(element => {

@@ -1,8 +1,12 @@
 <template>
   <div>
     <div class="row">
-      <div class="text-overline text-9">Reklamations Histogramm</div>
-      <q-space></q-space>
+      <div class="text-overline text-9 col-4">Reklamations Histogramm</div>
+      <div class="col-6 q-pr-md">
+        <TopSlider :maxValue="MaxValues" @sliderRefreshEmit="slicedData"/>
+      </div>
+      <!--<q-space></q-space>-->
+      <div class="col-2">
       <q-select
         borderless
         v-model="model"
@@ -13,6 +17,7 @@
         label="Auswahl"
         style="width: 120px"
       ></q-select>
+      </div>
     </div>
     <commit-chart-bar
       :width="w"
@@ -25,17 +30,20 @@
 
 <script>
 import CommitChartBar from "../js/CommitChartBar.js";
+import TopSlider from "../TopSlider";
 import { mapGetters } from "vuex";
 import { interpolateColors } from "../js/InterpolateColors";
 
 export default {
   name: "HistChart",
   components: {
-    CommitChartBar
+    CommitChartBar,
+    TopSlider
   },
   data() {
     return {
       model: "parts",
+      plotLength: this.MaxValues,
       selects: [
         {
           label: "Material",
@@ -76,6 +84,14 @@ export default {
   },
   props: ["tab"],
   computed: {
+    MaxValues() {
+      let len = 0
+      if (Object.keys(this.Data).length > 0) {
+        const data = JSON.parse(this.Data[this.model]);
+        len = Object.keys(data).length;
+      }
+      return len
+    },
     Data() {
       let data = [];
       switch (this.tab) {
@@ -91,6 +107,18 @@ export default {
       }
       return data;
     },
+    SlicedData(){
+      const data = JSON.parse(this.Data[this.model])
+      const keep = Object.keys(data).slice(0,this.plotLength)
+      const sliced = keep.reduce((result, key) => { result[key] = data[key]; return result; }, {});
+      let result = {}
+      if(Object.keys(sliced).length>0){
+        result = sliced
+      } else {
+        result = data
+      }
+      return result
+    },
     ...mapGetters({
       History: "dataset/getHistory",
       HistoryAll: "dataset/getHistoryAll",
@@ -105,6 +133,10 @@ export default {
     }
   },
   methods: {
+    slicedData(value) {
+      this.plotLength = value;
+      this.fillData();
+    },
     fillData() {
       this.datacollection = {
         labels: [],
@@ -117,9 +149,9 @@ export default {
       const c1 = "rgb(0, 56, 113)";
       const cm = "rgb(217, 221, 3)";
       const c2 = "rgb(221, 3, 51)";
-
-      const dataHistory = JSON.parse(this.Data[this.model]);
-
+      const usedData = this.SlicedData;
+      // const dataHistory = JSON.parse(this.Data[this.model]);
+      const dataHistory = usedData;
       if (Object.keys(dataHistory).length === 0) {
         return;
       }
