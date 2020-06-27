@@ -54,12 +54,13 @@ export default {
           value: "orders"
         },
         {
-          label: "Vorgang",
-          value: "process"
-        },
-        {
           label: "Maschine",
           value: "machines"
+        }
+        /*
+        {
+          label: "Vorgang",
+          value: "process"
         },
         {
           label: "Produktgruppe",
@@ -69,6 +70,7 @@ export default {
           label: "Werkstoff",
           value: "material"
         }
+        */
       ],
       datacollection: {
         labels: [],
@@ -239,7 +241,7 @@ export default {
             }
           ]
         },
-
+        /*
         plugins: {
           zoom: {
             zoom: {
@@ -252,6 +254,7 @@ export default {
             }
           }
         }
+        */
       };
     }
   },

@@ -31,7 +31,7 @@ export default {
   props: ["maxValue"],
   data () {
     return {
-      sliderValue: 0
+      sliderValue: 10
     }
   },
   computed: {

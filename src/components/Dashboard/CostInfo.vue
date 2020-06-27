@@ -6,31 +6,37 @@
         <div class="col">
           <div class="text-overline text-9">Maschine:</div>
           <div class="text-overline text-9">Auftrag:</div>
-          <div class="text-overline text-9">Vorgang:</div>
           <div class="text-overline text-9">Material:</div>
+          <!--
+          <div class="text-overline text-9">Vorgang:</div>
           <div class="text-overline text-9">Fehlermerkmal:</div>
           <div class="text-overline text-9">Produktgruppe:</div>
           <div class="text-overline text-9">Werkstoff:</div>
+          -->
         </div>
         <q-separator vertical inset />
         <div class="col q-pl-md">
           <div class="text-overline text-9">{{ maxCosts.machine.Maschine }}</div>
           <div class="text-overline text-9">{{ maxCosts.order["Auftrags-Nr."] }}</div>
-          <div class="text-overline text-9">{{ maxCosts.process["Vorgangs-Nr."] }}</div>
           <div class="text-overline text-9">{{ maxCosts.part.Material }}</div>
+          <!--
+          <div class="text-overline text-9">{{ maxCosts.process["Vorgangs-Nr."] }}</div>
           <div class="text-overline text-9">{{ maxCosts.feature.Fehlermerkmal }}</div>
           <div class="text-overline text-9">{{ maxCosts.productgrp.Produktgruppe }}</div>
           <div class="text-overline text-9">{{ maxCosts.material.Werkstoff }}</div>
+          -->
         </div>
         <q-separator vertical inset />
         <div class="col q-pl-md">
           <div class="text-overline text-9">{{ format(maxCosts.machine.Kosten) }}</div>
           <div class="text-overline text-9">{{ format(maxCosts.order.Kosten) }}</div>
-          <div class="text-overline text-9">{{ format(maxCosts.process.Kosten) }}</div>
           <div class="text-overline text-9">{{ format(maxCosts.part.Kosten) }}</div>
+          <!--
+          <div class="text-overline text-9">{{ format(maxCosts.process.Kosten) }}</div>
           <div class="text-overline text-9">{{ format(maxCosts.feature.Kosten) }}</div>
           <div class="text-overline text-9">{{ format(maxCosts.productgrp.Kosten) }}</div>
           <div class="text-overline text-9">{{ format(maxCosts.material.Kosten) }}</div>
+          -->
         </div>
       </div>
       <q-separator horizontal inset />
@@ -91,30 +97,36 @@ export default {
       costData: [],
       options: [
         "Auftrags-Nr.",
-        "Vorgangs-Nr.",
-        "Fehlermerkmal",
-        "Material",
         "Maschine",
+        "Material"
+        /*
+        "Fehlermerkmal",
         "Produktgruppe",
+        "Vorgangs-Nr.",
         "Werkstoff"
+        */
       ],
       costs: {
         order: [],
+        part: [],
+        machine: []
+        /*
         process: [],
         feature: [],
-        part: [],
-        machine: [],
         productgrp: [],
         material: []
+        */
       },
       maxCosts: {
         order: {},
-        process: {},
-        feature: {},
         part: {},
-        machine: {},
+        machine: {}
+        /*
+        feature: {},
+        process: {},
         productgrp: {},
         material: {}
+        */
       },
       allCosts: ""
     };

@@ -465,25 +465,8 @@ export default {
                         <img class="bg" src='data:image/png;base64,${report.bg}' />
                         <div class="padded">
                           <p>
-                          <h4>Vorgang</h4>
-                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${report.hist.process}'/>
-                          </p>
-                          <p>
                           <h4>Maschinen</h4>
                           <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${report.hist.machines}'/>
-                          </p>
-                        </div>
-                      </div>
-                      <div class="page">
-                        <img class="bg" src='data:image/png;base64,${report.bg}' />
-                        <div class="padded">
-                          <p>
-                          <h4>Produktgruppe</h4>
-                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${report.hist.productgrp}'/>
-                          </p>
-                          <p>
-                          <h4>Werkstoff</h4>
-                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${report.hist.material}'/>
                           </p>
                         </div>
                       </div>
@@ -501,19 +484,8 @@ export default {
                       <div class="page">
                         <img class="bg" src='data:image/png;base64,${report.bg}' />
                         <div class="padded">
-                          <h4>Vorgang</h4>
-                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:50%;height:50%;' src='data:image/svg+xml;base64,${report.cost.PROCESS_ID}'/></p>
                           <h4>Maschine</h4>
                           <p><img style='display:block;margin-left:auto;margin-right:auto;width:50%;height:50%;' src='data:image/svg+xml;base64,${report.cost.MACHINE_NO}'/></p>
-                        </div>
-                      </div>
-                      <div class="page">
-                        <img class="bg" src='data:image/png;base64,${report.bg}' />
-                        <div class="padded">
-                          <h4>Produktgruppe</h4>
-                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:50%;height:50%;' src='data:image/svg+xml;base64,${report.cost["Product Group Code"]}'/></p>
-                          <h4>Werkstoff</h4>
-                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:50%;height:50%;' src='data:image/svg+xml;base64,${report.cost["Material Code"]}'/></p>
                         </div>
                       </div>
 

@@ -28,7 +28,14 @@
                 { label: 'Extern', value: 'extern' }
               ]"
             ></q-btn-toggle>
-
+            <q-btn-toggle 
+            v-show="model === 'extern'"
+            v-model="modelExtern"
+            toggle-color="primary"
+            unelevated
+            spread
+            :options="[{label:'Kunde', value:'kunde'},{label:'Lieferant',value:'lieferant'}]"
+            ></q-btn-toggle>
             <q-select
               v-model="textYear"
               :options="yearOptions"
@@ -161,24 +168,26 @@
               ref="selectOrders"
             />
             <FilterSelect
-              :stringOptions="Config.process"
-              :multipleselect="true"
-              :type="'Vorgang'"
-              ref="selectProcess"
-            />
-            <FilterSelect
               :stringOptions="Config.machines"
               :multipleselect="true"
               :type="'Maschine'"
               ref="selectMachines"
             />
             <FilterSelect
-              v-show="model === 'extern'"
+              v-show="model === 'extern' && modelExtern=='kunde'"
               :stringOptions="Config.customer"
-              :multipleselect="false"
+              :multipleselect="true"
               :type="'Kunde'"
               ref="selectCustomer"
             />
+            <!--
+              <FilterSelect
+              :stringOptions="Config.process"
+              :multipleselect="true"
+              :type="'Vorgang'"
+              ref="selectProcess"
+            />
+            -->
           </div>
           <q-card-actions align="center">
             <q-btn
@@ -208,6 +217,7 @@ export default {
   data() {
     return {
       model: "intern",
+      modelExtern: "kunde",
       timeModel: "kw",
       timeOptions: [
         { label: "Januar", value: 1 },
@@ -245,6 +255,13 @@ export default {
   },
 
   computed: {
+    Option() {
+      let option='intern'
+      if (this.model !== 'intern') {
+        option = this.modelExtern
+      }
+      return option
+    },
     OptionsMonthTo() {
       let options = this.timeOptions;
       if (Object.keys(this.modelMonthFrom).length > 0) {
@@ -269,16 +286,17 @@ export default {
       }
       const options = {
         tab: this.model,
+        option: this.Option,
         year: this.textYear,
         timeOption: this.timeModel,
         weeks: [this.textFromWeek, this.textToWeek],
         months: [this.modelMonthFrom.value, this.modelMonthTo.value],
         parts: this.$refs.selectParts.emitModel(),
         orders: this.$refs.selectOrders.emitModel(),
-        process: this.$refs.selectProcess.emitModel(),
         machines: this.$refs.selectMachines.emitModel(),
         customer: this.$refs.selectCustomer.emitModel(),
         lang: this.lanModel
+        // process: this.$refs.selectProcess.emitModel(),
       };
       this.$emit("saveConfigEmit", options);
     },
@@ -295,7 +313,6 @@ export default {
         year = this.year;
       }
       const fweek = year + "W" + week;
-      console.log(fweek);
       return fweek;
     },
     numericFromWeek() {

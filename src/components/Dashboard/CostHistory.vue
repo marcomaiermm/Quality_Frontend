@@ -75,12 +75,14 @@ export default {
       selectOption: [
         "Gesamt",
         "Auftrags-Nr.",
-        "Vorgangs-Nr.",
-        "Fehlermerkmal",
-        "Material",
         "Maschine",
+        "Material"
+        /*
+        "Fehlermerkmal",
         "Produktgruppe",
+        "Vorgangs-Nr.",
         "Werkstoff"
+        */
       ],
       selectOptionHistory: [],
       datacollection: {

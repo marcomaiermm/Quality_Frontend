@@ -12,7 +12,7 @@
       :loading="load"
       :filter="filter"
       row-key="name"
-      no-data-label="I didn't find anything for you"
+      no-data-label="Noch keinen Daten angekommen..."
       :pagination.sync="pagination"
       :rows-per-page-options="[0]"
       :visible-columns="visibleColumns"
@@ -366,7 +366,7 @@ export default {
     drawTable() {
       this.tableHead = Object.keys(this.Dataset[0]);
       this.tableHead.forEach(element => {
-        this.visibleColumns.push(element);
+        // this.visibleColumns.push(element);
         if (element === "Datum") {
           this.columns.push({
             name: element,
@@ -391,6 +391,18 @@ export default {
           val: element,
           label: element
         });
+        this.visibleColumns = 
+          [
+          "Datum",
+          "Auftrags-Nr.", 
+          "Maschine", 
+          "Material-Nr.", 
+          "Material", 
+          "Reklamierte Menge", 
+          "Kosten pro Einheit", 
+          "Kosten"
+          ]
+        console.log(this.tableHead.map(d => d))
       });
       // this.loading = false;
     },

@@ -32,18 +32,19 @@
             ref="selectOrders"
           />
           <FilterSelect
-            :stringOptions="Dataset.process"
-            :type="'Vorgang'"
-            :multipleselect="true"
-            @onClickUpdate="updateOption"
-            ref="selectProcess"
-          />
-          <FilterSelect
             :stringOptions="Dataset.machines"
             :type="'Maschine'"
             :multipleselect="true"
             @onClickUpdate="updateOption"
             ref="selectMachines"
+          />
+          <!--
+          <FilterSelect
+            :stringOptions="Dataset.process"
+            :type="'Vorgang'"
+            :multipleselect="true"
+            @onClickUpdate="updateOption"
+            ref="selectProcess"
           />
           <FilterSelect
             :stringOptions="Dataset.productgrp"
@@ -52,6 +53,7 @@
             @onClickUpdate="updateOption"
             ref="selectGroup"
           />
+          
           <FilterSelect
             :stringOptions="Dataset.material"
             :type="'Werkstoff'"
@@ -59,6 +61,7 @@
             @onClickUpdate="updateOption"
             ref="selectMaterial"
           />
+          -->
         </div>
         <q-btn
           color="primary"
@@ -85,12 +88,12 @@ export default {
       report: false,
       modelMachines: [],
       modelOrders: [],
-      modelProcess: [],
       modelParts: [],
-      modelGroup: [],
-      modelMaterial: [],
       uniqueMachines: [],
       filterOption: "all_extern"
+      // modelProcess: [],
+      // modelGroup: [],
+      // modelMaterial: [],
     };
   },
   computed: {
@@ -98,18 +101,18 @@ export default {
       const data = {
         machines: [],
         orders: [],
-        process: [],
         parts: [],
-        productgrp: [],
-        material: []
+        // process: [],
+        // productgrp: [],
+        // material: []
       };
       if (this.Config) {
         data.machines = this.Config.machines;
         data.orders = this.Config.orders;
-        data.process = this.Config.process;
         data.parts = this.Config.parts;
-        data.productgrp = this.Config.productgrp;
-        data.material = this.Config.material;
+        // data.process = this.Config.process;
+        // data.productgrp = this.Config.productgrp;
+        // data.material = this.Config.material;
       }
       return data;
     },
@@ -137,13 +140,14 @@ export default {
           break;
       }
       const filter = {
+        report: this.report,
         machines: this.$refs.selectMachines.emitModel(),
         orders: this.$refs.selectOrders.emitModel(),
-        process: this.$refs.selectProcess.emitModel(),
-        parts: this.$refs.selectParts.emitModel(),
-        productgrp: this.$refs.selectGroup.emitModel(),
-        material: this.$refs.selectMaterial.emitModel(),
-        report: this.report
+        parts: this.$refs.selectParts.emitModel()
+        // process: this.$refs.selectProcess.emitModel(),
+        // productgrp: this.$refs.selectGroup.emitModel(),
+        // material: this.$refs.selectMaterial.emitModel(),
+        
       };
       this.updateFilter(filter);
     },

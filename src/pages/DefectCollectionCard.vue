@@ -218,6 +218,7 @@ export default {
               customer: JSON.stringify(this.configOption.customer),
               timeOption: this.configOption.timeOption,
               tab: this.configOption.tab,
+              option: this.configOption.option,
               lang: this.configOption.lang
             }
           }
