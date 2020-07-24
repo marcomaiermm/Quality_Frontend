@@ -3,7 +3,7 @@ const state = {
     year: ""
   },
   path: {
-    host: "pc0547.allweier.lcl",
+    host: "AWWKS-004222.allweier.lcl",
     port: "5000"
   }
 };
