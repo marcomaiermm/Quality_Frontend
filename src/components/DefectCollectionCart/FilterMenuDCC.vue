@@ -28,13 +28,13 @@
                 { label: 'Extern', value: 'extern' }
               ]"
             ></q-btn-toggle>
-            <q-btn-toggle 
-            v-show="model === 'extern'"
-            v-model="modelExtern"
-            toggle-color="primary"
-            unelevated
-            spread
-            :options="[{label:'Kunde', value:'kunde'},{label:'Lieferant',value:'lieferant'}]"
+            <q-btn-toggle
+              v-show="model === 'extern'"
+              v-model="modelExtern"
+              toggle-color="primary"
+              unelevated
+              spread
+              :options="[{label:'Kunde', value:'kunde'},{label:'Lieferant',value:'lieferant'}]"
             ></q-btn-toggle>
             <q-select
               v-model="textYear"
@@ -157,18 +157,21 @@
 
             <FilterSelect
               :stringOptions="Config.parts"
+              :savedModel="savedModel.parts"
               :multipleselect="true"
               :type="'Material'"
               ref="selectParts"
             />
             <FilterSelect
               :stringOptions="Config.orders"
+              :savedModel="savedModel.orders"
               :multipleselect="true"
               :type="'Auftrag'"
               ref="selectOrders"
             />
             <FilterSelect
               :stringOptions="Config.machines"
+              :savedModel="savedModel.machines"
               :multipleselect="true"
               :type="'Maschine'"
               ref="selectMachines"
@@ -176,6 +179,7 @@
             <FilterSelect
               v-show="model === 'extern' && modelExtern=='kunde'"
               :stringOptions="Config.customer"
+              :savedModel="savedModel.customer"
               :multipleselect="true"
               :type="'Kunde'"
               ref="selectCustomer"
@@ -241,7 +245,13 @@ export default {
       yearOptions: [],
       textYear: "",
       textFromWeek: "",
-      textToWeek: ""
+      textToWeek: "",
+      savedModel: {
+        parts: [],
+        orders: [],
+        machines: [],
+        customer: []
+      }
     };
   },
   watch: {
@@ -256,15 +266,18 @@ export default {
 
   computed: {
     Option() {
-      let option='intern'
-      if (this.model !== 'intern') {
-        option = this.modelExtern
+      let option = "intern";
+      if (this.model !== "intern") {
+        option = this.modelExtern;
       }
-      return option
+      return option;
     },
     OptionsMonthTo() {
       let options = this.timeOptions;
-      if (Object.keys(this.modelMonthFrom).length > 0) {
+      if (
+        Object.keys(this.modelMonthFrom).length > 0 &&
+        this.modelMonthFrom !== "null"
+      ) {
         options = this.timeOptions.filter(
           d => d.value >= this.modelMonthFrom.value
         );
@@ -272,10 +285,27 @@ export default {
       return options;
     },
     ...mapGetters({
-      Config: "config/getCfg"
+      Config: "config/getCfg",
+      MenuData: "menuData/getMenuDefectCollection"
     })
   },
   methods: {
+    getModels() {
+      if (Object.keys(this.MenuData).length !== 0) {
+        this.savedModel.parts = this.MenuData.parts;
+        this.savedModel.orders = this.MenuData.orders;
+        this.savedModel.machines = this.MenuData.machines;
+        this.savedModel.customer = this.MenuData.customer;
+        this.modelMonthFrom = this.MenuData.months[0];
+        this.modelMonthTo = this.MenuData.months[1];
+        this.textFromWeek = this.MenuData.weeks[0];
+        this.textToWeek = this.MenuData.weeks[1];
+        this.textYear = this.MenuData.year;
+        this.timeModel = this.MenuData.timeOption;
+        this.model = this.MenuData.tab;
+        this.modelExtern = this.MenuData.modelExtern;
+      }
+    },
     emitOptions() {
       if (this.modelMonthFrom === "") {
         this.modelMonthFrom = this.modelMonthTo;
@@ -284,6 +314,7 @@ export default {
       if (this.modelMonthTo === "") {
         this.modelMonthTo = this.modelMonthFrom;
       }
+
       const options = {
         tab: this.model,
         option: this.Option,
@@ -298,7 +329,14 @@ export default {
         lang: this.lanModel
         // process: this.$refs.selectProcess.emitModel(),
       };
+
+      // neue Variable aus den Optionen für das gespeicherte Menü
+      const savedOptions = options;
+      savedOptions.modelExtern = this.modelExtern;
+      savedOptions.months = [this.modelMonthFrom, this.modelMonthTo];
+
       this.$emit("saveConfigEmit", options);
+      this.updateMenuDefectCollectionCard(savedOptions);
     },
     formatWeeks(week) {
       if (week === "") {
@@ -321,7 +359,8 @@ export default {
     numericToWeek() {
       this.textToWeek = this.textToWeek.replace(/\D/g, "");
     },
-    ...mapActions("states", ["updateMenuTab"])
+    ...mapActions("states", ["updateMenuTab"]),
+    ...mapActions("menuData", ["updateMenuDefectCollectionCard"])
   },
   mounted() {
     const startYear = new Date("01, 01, 2014").getFullYear();
@@ -329,6 +368,7 @@ export default {
     for (let index = startYear; index <= currentYear; index++) {
       this.yearOptions.push(index);
     }
+    this.getModels();
   }
 };
 </script>

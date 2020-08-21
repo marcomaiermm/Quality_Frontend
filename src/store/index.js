@@ -5,6 +5,7 @@ import dataset from "./store-data";
 import states from "./store-state";
 import defectCollection from "./store-defect-collection-card";
 import config from "./store-cfg";
+import menuData from "./store-menu";
 
 Vue.use(Vuex);
 
@@ -23,7 +24,8 @@ export default function(/* { ssrContext } */) {
       dataset,
       states,
       defectCollection,
-      config
+      config,
+      menuData
     },
 
     // enable strict mode (adds overhead!)

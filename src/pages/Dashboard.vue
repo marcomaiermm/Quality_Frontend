@@ -11,7 +11,7 @@
     >
       <q-tab name="intern" label="Interne Reklamationen" @click="setTab('intern')"></q-tab>
       <q-tab name="extern" label="Externe Reklamationen" @click="setTab('extern')"></q-tab>
-      <q-tab name="all" label="Gesamte Reklamationen" @click="setTab('all')"></q-tab>
+      <!--<q-tab name="all" label="Gesamte Reklamationen" @click="setTab('all')"></q-tab>-->
     </q-tabs>
     <div class="row q-pl-xs">
       <q-tab-panels class="col-12" v-model="tab" animated>
@@ -138,6 +138,7 @@ export default {
       cancelToken: null,
       source: null,
       loading: false,
+      extOption: "lieferant",
       cost: {
         data: [],
         label: {
@@ -151,6 +152,9 @@ export default {
     };
   },
   methods: {
+    getExtOptions(option) {
+      this.extOption = option;
+    },
     onClickRefresh(value) {
       this.getData(value);
     },
@@ -203,6 +207,7 @@ export default {
     },
     report() {},
     update(seed) {
+      console.log(seed)
       const data = JSON.parse(seed.table);
       const history = seed.history;
       const pareto = JSON.parse(seed.pareto);

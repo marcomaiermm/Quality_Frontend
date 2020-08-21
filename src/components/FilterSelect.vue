@@ -35,10 +35,10 @@
 <script>
 export default {
   name: "FilterSelect",
-  props: ["stringOptions", "type", "multipleselect"],
+  props: ["stringOptions", "type", "multipleselect", "savedModel"],
   data() {
     return {
-      model: [],
+      model: this.savedModel,
       filterOptions: this.stringOptions
     };
   },

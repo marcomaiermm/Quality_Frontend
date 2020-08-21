@@ -38,11 +38,12 @@
           <div class="text-overline text-9">{{ format(maxCosts.material.Kosten) }}</div>
           -->
         </div>
+        <q-separator horizontal inset />
       </div>
-      <q-separator horizontal inset />
+
       <div class="row">
         <div class="col">
-          <div class="text-overline text-9">Gesamt:</div>
+          <div class="text-overline text-9">Gesamtkosten:</div>
         </div>
         <div class="col q-pl-md">
           <div class="text-overline text-9"></div>
@@ -80,15 +81,17 @@ export default {
         case "extern":
           data = this.DataExtern;
           break;
+        /*
         case "all":
           data = this.DataAll;
           break;
+        */
       }
       return data;
     },
     ...mapGetters({
       DataIntern: "dataset/getData",
-      DataAll: "dataset/getDataAll",
+      // DataAll: "dataset/getDataAll",
       DataExtern: "dataset/getDataExtern"
     })
   },

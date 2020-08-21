@@ -12,7 +12,7 @@
           unchecked-icon="clear"
         ></q-toggle>
         <div class="q-gutter-xs" v-if="tab == 'extern'">
-          <q-radio v-model="filterOption" val="all_extern" dense label="Gesamt"></q-radio>
+          <!--<q-radio v-model="filterOption" val="all_extern" dense label="Gesamt"></q-radio>-->
           <q-radio v-model="filterOption" val="lieferant" dense label="Lieferant"></q-radio>
           <q-radio v-model="filterOption" val="kunde" dense label="Kunde"></q-radio>
         </div>
@@ -20,6 +20,7 @@
           <FilterSelect
             :stringOptions="Dataset.parts"
             :type="'Material'"
+            :savedModel="MenuData.parts"
             :multipleselect="true"
             @onClickUpdate="updateOption"
             ref="selectParts"
@@ -27,6 +28,7 @@
           <FilterSelect
             :stringOptions="Dataset.orders"
             :type="'Auftrag'"
+            :savedModel="MenuData.orders"
             :multipleselect="true"
             @onClickUpdate="updateOption"
             ref="selectOrders"
@@ -34,6 +36,7 @@
           <FilterSelect
             :stringOptions="Dataset.machines"
             :type="'Maschine'"
+            :savedModel="MenuData.machines"
             :multipleselect="true"
             @onClickUpdate="updateOption"
             ref="selectMachines"
@@ -90,18 +93,35 @@ export default {
       modelOrders: [],
       modelParts: [],
       uniqueMachines: [],
-      filterOption: "all_extern"
+      filterOption: "lieferant"
       // modelProcess: [],
       // modelGroup: [],
       // modelMaterial: [],
     };
   },
   computed: {
+    MenuData() {
+      // let data = {
+      //   machines: [],
+      //   orders: [],
+      //   parts: []
+      // };
+      // switch (this.tab) {
+      //   case "intern":
+      //     data = this.MenuIntern;
+      //     break;
+
+      //   case "extern":
+      //     data = this.MenuExtern;
+      //     break;
+      // }
+      return [];
+    },
     Dataset() {
       const data = {
         machines: [],
         orders: [],
-        parts: [],
+        parts: []
         // process: [],
         // productgrp: [],
         // material: []
@@ -119,11 +139,28 @@ export default {
     ...mapGetters({
       Data: "dataset/getData",
       DataExtern: "dataset/getDataExtern",
-      DataAll: "dataset/getDataAll",
-      Config: "config/getCfg"
+      // DataAll: "dataset/getDataAll",
+      Config: "config/getCfg",
+      MenuIntern: "menuData/getMenuIntern",
+      MenuExtern: "menuData/getMenuExtern"
     })
   },
   methods: {
+    updateMenuData() {
+      // const data = {
+      //   machins: this.Dataset.machines,
+      //   orders: this.Dataset.orders,
+      //   parts: this.Dataset.parts
+      // };
+      switch (this.tab) {
+        case "intern":
+          this.updateMenuDashboardIntern(this.MenuData);
+          break;
+        case "extern":
+          this.updateMenuDashboardExtern(this.MenuData);
+          break;
+      }
+    },
     onClickUpdate() {
       this.updateOption();
     },
@@ -135,9 +172,11 @@ export default {
         case "extern":
           this.updateMenuTab(this.filterOption);
           break;
+        /*
         case "all":
           this.updateMenuTab("all");
           break;
+        */
       }
       const filter = {
         report: this.report,
@@ -147,15 +186,19 @@ export default {
         // process: this.$refs.selectProcess.emitModel(),
         // productgrp: this.$refs.selectGroup.emitModel(),
         // material: this.$refs.selectMaterial.emitModel(),
-        
       };
       this.updateFilter(filter);
+      this.updateMenuData();
     },
     ...mapActions("states", ["updateMenuTab"]),
-    ...mapActions("dataset", ["updateFilter"])
+    ...mapActions("dataset", ["updateFilter"]),
+    ...mapActions("menuData", [
+      "updateMenuDashboardIntern",
+      "updateMenuDashboardExtern"
+    ])
   },
   mounted() {
-    this.filterOption = "all_extern";
+    this.filterOption = "lieferant";
     this.updateMenuTab(this.filterOption);
   }
 };
