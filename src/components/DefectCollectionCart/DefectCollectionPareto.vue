@@ -5,7 +5,7 @@
         <div class="row">
           <div class="text-overline text-9 col-6">Pareto Merkmale</div>
           <div class="col-6">
-            <TopSlider :maxValue="Object.keys(Pareto).length" @sliderRefreshEmit="slicedPareto"/>
+            <TopSlider :maxValue="Object.keys(Pareto).length" @sliderRefreshEmit="slicedPareto" />
           </div>
         </div>
         <commit-chart-bar
@@ -66,7 +66,8 @@ export default {
         return result
     },
     ...mapGetters({
-      Pareto: "defectCollection/getPareto"
+      Pareto: "defectCollection/getPareto",
+      MenuData: "menuData/getMenuDefectCollection"
     })
   },
   methods: {

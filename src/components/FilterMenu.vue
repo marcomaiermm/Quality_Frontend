@@ -3,14 +3,26 @@
     <div class="row no-wrap q-pa-md q-gutter-xs">
       <div class="column q-gutter-md">
         <div class="text-h6 q-mb-md">Einstellungen</div>
-        <q-toggle
-          v-model="report"
-          dense
-          checked-icon="check"
-          color="primary"
-          label="Report erstellen"
-          unchecked-icon="clear"
-        ></q-toggle>
+        <div class="row justify-between">
+          <q-toggle
+            v-model="report"
+            dense
+            checked-icon="check"
+            color="primary"
+            label="Report erstellen"
+            unchecked-icon="clear"
+          ></q-toggle>
+          <q-toggle
+            v-show="report==true"
+            :label="lang"
+            icon="g_translate"
+            color="primary"
+            false-value="de"
+            true-value="en"
+            v-model="lang"
+            keep-color
+          ></q-toggle>
+        </div>
         <div class="q-gutter-xs" v-if="tab == 'extern'">
           <!--<q-radio v-model="filterOption" val="all_extern" dense label="Gesamt"></q-radio>-->
           <q-radio v-model="filterOption" val="lieferant" dense label="Lieferant"></q-radio>
@@ -89,11 +101,12 @@ export default {
   data() {
     return {
       report: false,
+      lang:'de',
       modelMachines: [],
       modelOrders: [],
       modelParts: [],
       uniqueMachines: [],
-      filterOption: "lieferant"
+      filterOption: "lieferant",
       // modelProcess: [],
       // modelGroup: [],
       // modelMaterial: [],
@@ -101,21 +114,17 @@ export default {
   },
   computed: {
     MenuData() {
-      // let data = {
-      //   machines: [],
-      //   orders: [],
-      //   parts: []
-      // };
-      // switch (this.tab) {
-      //   case "intern":
-      //     data = this.MenuIntern;
-      //     break;
+      let data = {}
+      switch (this.tab) {
+        case "intern":
+          data = this.MenuIntern;
+          break;
 
-      //   case "extern":
-      //     data = this.MenuExtern;
-      //     break;
-      // }
-      return [];
+        case "extern":
+          data = this.MenuExtern;
+          break;
+      }
+      return data;
     },
     Dataset() {
       const data = {
@@ -146,40 +155,22 @@ export default {
     })
   },
   methods: {
-    updateMenuData() {
-      // const data = {
-      //   machins: this.Dataset.machines,
-      //   orders: this.Dataset.orders,
-      //   parts: this.Dataset.parts
-      // };
-      switch (this.tab) {
-        case "intern":
-          this.updateMenuDashboardIntern(this.MenuData);
-          break;
-        case "extern":
-          this.updateMenuDashboardExtern(this.MenuData);
-          break;
+    getModels() {
+      if (Object.keys(this.MenuData).length !== 0) {
+        this.savedModel.parts = this.MenuData.parts;
+        this.savedModel.orders = this.MenuData.orders;
+        this.savedModel.machines = this.MenuData.machines;
+        this.report = this.MenuData.report
+        this.lang = this.MenuData.lang
       }
     },
     onClickUpdate() {
       this.updateOption();
     },
     updateOption() {
-      switch (this.tab) {
-        case "intern":
-          this.updateMenuTab("intern");
-          break;
-        case "extern":
-          this.updateMenuTab(this.filterOption);
-          break;
-        /*
-        case "all":
-          this.updateMenuTab("all");
-          break;
-        */
-      }
       const filter = {
         report: this.report,
+        lang: this.lang,
         machines: this.$refs.selectMachines.emitModel(),
         orders: this.$refs.selectOrders.emitModel(),
         parts: this.$refs.selectParts.emitModel()
@@ -188,7 +179,22 @@ export default {
         // material: this.$refs.selectMaterial.emitModel(),
       };
       this.updateFilter(filter);
-      this.updateMenuData();
+
+      switch (this.tab) {
+        case "intern":
+          this.updateMenuTab("intern");
+          this.updateMenuDashboardIntern(filter)
+          break;
+        case "extern":
+          this.updateMenuTab(this.filterOption);
+          this.updateMenuDashboardExtern(filter)
+          break;
+        /*
+        case "all":
+          this.updateMenuTab("all");
+          break;
+        */
+      }
     },
     ...mapActions("states", ["updateMenuTab"]),
     ...mapActions("dataset", ["updateFilter"]),

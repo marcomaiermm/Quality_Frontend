@@ -23,13 +23,7 @@
           style="width: 250px"
         ></q-select>
       </div>
-      <q-btn
-        dense
-        flat
-        icon="send"
-        class="send-btn"
-        @click="checkRefresh()"
-      ></q-btn>
+      <q-btn dense flat icon="send" class="send-btn" @click="checkRefresh()"></q-btn>
       <q-space></q-space>
       <div
         class="text-overline text-9 q-pl-xs row"
@@ -42,17 +36,10 @@
               ? { color: '#009130' }
               : { color: '#be0138' }
           ]"
-        >
-          {{ DOMCost(regressionData.equation[0]) }}
-        </div>
+        >{{ DOMCost(regressionData.equation[0]) }}</div>
       </div>
     </div>
-    <commit-chart
-      :width="w"
-      :height="h"
-      :chartData="datacollection"
-      :options="options"
-    ></commit-chart>
+    <commit-chart :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart>
   </div>
 </template>
 
@@ -145,7 +132,8 @@ export default {
         cost = this.Data.map(c => ({
           Datum: c.Datum,
           Kosten: c.Kosten
-        })).reverse();
+        }))
+        // .reverse();
       } else {
         cost = this.costs();
       }
@@ -217,7 +205,7 @@ export default {
           Datum: c.Datum,
           Kosten: c.Kosten
         }))
-        .reverse();
+        // .reverse();
       return cost;
     },
 

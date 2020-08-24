@@ -7,6 +7,19 @@
             <div class="col text-h6">Auswahl</div>
             <div class="col">
               <q-toggle
+                label="Report"
+                icon="description"
+                color="primary"
+                false-value="false"
+                true-value="true"
+                v-model="reportModel"
+                keep-color
+              ></q-toggle>
+            </div>
+            <div class="col">
+              <q-toggle
+                class="q-px-md"
+                v-show="reportModel=='true'"
                 :label="lanModel"
                 icon="g_translate"
                 color="primary"
@@ -241,6 +254,7 @@ export default {
       modelMonthTo: "",
       disabled: true,
       lanModel: "de",
+      reportModel: "false",
       modelYearWeek: "year",
       yearOptions: [],
       textYear: "",
@@ -304,6 +318,8 @@ export default {
         this.timeModel = this.MenuData.timeOption;
         this.model = this.MenuData.tab;
         this.modelExtern = this.MenuData.modelExtern;
+        this.reportModel = this.MenuData.report
+        this.lanModel = this.MenuData.lang
       }
     },
     emitOptions() {
@@ -326,7 +342,8 @@ export default {
         orders: this.$refs.selectOrders.emitModel(),
         machines: this.$refs.selectMachines.emitModel(),
         customer: this.$refs.selectCustomer.emitModel(),
-        lang: this.lanModel
+        lang: this.lanModel,
+        report: this.reportModel
         // process: this.$refs.selectProcess.emitModel(),
       };
 

@@ -105,7 +105,7 @@ export default {
       }
     },
     DisableSave() {
-      if (Object.keys(this.Dataset).length > 0) {
+      if (Object.keys(this.Dataset).length > 0 && this.configOption.report === 'true') {
         return false;
       } else {
         return true;
@@ -135,7 +135,8 @@ export default {
       htmlTableSummary: "",
       errors: [],
       cancelToken: null,
-      source: null
+      source: null,
+      report: null
     };
   },
   methods: {
@@ -219,7 +220,8 @@ export default {
               timeOption: this.configOption.timeOption,
               tab: this.configOption.tab,
               option: this.configOption.option,
-              lang: this.configOption.lang
+              lang: this.configOption.lang,
+              report: this.configOption.report
             }
           }
         )
@@ -229,8 +231,10 @@ export default {
           const defectCollectionCard = JSON.parse(seed.Fehlersammelkarte);
           const pareto = JSON.parse(seed.Pareto);
           const summary = JSON.parse(seed.Zusammenfassung);
-
           // Byte64 Images und HTML Tabellen
+          const report = seed.report
+          console.log(report)
+
           this.svgBar = seed.bar;
           this.svgPareto = seed.pareto;
           this.base64Bg = seed.bg;
@@ -243,7 +247,7 @@ export default {
           this.updateSummary(summary);
           this.updateChart(chart["Fehler pro eine million Teile"]);
           this.updatePareto(pareto);
-
+          this.updateReport(report)
           this.reportDoc();
 
           this.loading = false;
@@ -364,7 +368,7 @@ export default {
                             width: 21cm;
                             min-height: 29.7cm;
                             /*
-                            background-image: url('data:image/png;base64,${this.base64Bg}'); 
+                            background-image: url('data:image/png;base64,${this.Report.background_img}'); 
                             background-size: contain;
                             */
                           }
@@ -442,7 +446,7 @@ export default {
                             body {
                               background-color: #fff;
                               /*
-                              background-image: url('data:image/png;base64,${this.base64Bg}') !important;
+                              background-image: url('data:image/png;base64,${this.Report.background_img}') !important;
                               background-size: contain !important; 
                               */
                             }
@@ -472,27 +476,27 @@ export default {
                   <body class="document">
 
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <img class="bg" src='data:image/png;base64,${this.Report.background_img}' />
                         <div class="padded">
                           <h3 contenteditable="true">${text.summary} ${text.name}</h3>
-                          <p>${this.htmlTableSummary}</p>
+                          <p>${this.Report.html_tables.summary}</p>
                         </div>
                       </div>
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <img class="bg" src='data:image/png;base64,${this.Report.background_img}' />
                         <div class="padded">
                           <h3 contenteditable="true">${text.paretoCW}</h3>
-                          <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgBar}'/></p>
+                          <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.Report.plots.Features}'/></p>
                           <h3 contenteditable="true">Pareto ppm</h3>
-                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgPareto}'/>
+                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.Report.plots.Pareto}'/>
                         </div>
                       </div>
 
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <img class="bg" src='data:image/png;base64,${this.Report.background_img}' />
                         <div class="padded">
                           <h3 contenteditable="true">${text.features}</h3>
-                          <p>${this.htmlTableFeatures}</p>
+                          <p>${this.Report.html_tables.features}</p>
                         </div>
                       </div>
                     </div>

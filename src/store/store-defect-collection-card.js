@@ -4,7 +4,7 @@ const state = {
   defectCollectionCard: [],
   pareto: [],
   summary: [],
-  report: ""
+  report: {}
 };
 
 const mutations = {
@@ -29,22 +29,34 @@ const mutations = {
 };
 
 const actions = {
-  updateDataset({ commit }, payload) {
+  updateDataset({
+    commit
+  }, payload) {
     commit("updateDataset", payload);
   },
-  updateChart({ commit }, payload) {
+  updateChart({
+    commit
+  }, payload) {
     commit("updateChart", payload);
   },
-  updateDefectCollectionCard({ commit }, payload) {
+  updateDefectCollectionCard({
+    commit
+  }, payload) {
     commit("updateDefectCollectionCard", payload);
   },
-  updatePareto({ commit }, payload) {
+  updatePareto({
+    commit
+  }, payload) {
     commit("updatePareto", payload);
   },
-  updateSummary({ commit }, payload) {
+  updateSummary({
+    commit
+  }, payload) {
     commit("updateSummary", payload);
   },
-  updateReport({ commit }, payload) {
+  updateReport({
+    commit
+  }, payload) {
     commit("updateReport", payload);
   }
 };

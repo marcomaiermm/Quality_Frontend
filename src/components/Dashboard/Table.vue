@@ -34,8 +34,16 @@
               >
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                      <q-date v-model="startDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
+                    <q-popup-proxy
+                      ref="qDateProxyStart"
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date
+                        v-model="startDate"
+                        today-btn
+                        @input="() => $refs.qDateProxyStart.hide()"
+                      ></q-date>
                     </q-popup-proxy>
                   </q-icon>
                 </template>
@@ -54,8 +62,12 @@
               >
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                      <q-date v-model="endDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
+                    <q-popup-proxy
+                      ref="qDateProxyEnd"
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date v-model="endDate" today-btn @input="() => $refs.qDateProxyEnd.hide()"></q-date>
                     </q-popup-proxy>
                   </q-icon>
                 </template>
