@@ -4,8 +4,16 @@
     <div class="q-pa-md q-gutter-xs">
       <div class="row q-gutter-md justify-right">
         <div>
-          <q-btn dense flat icon="tune" @click="persistent = true" class="settings-btn">
-            <q-tooltip content-class="bg-accent" anchor="top left">Auswahl</q-tooltip>
+          <q-btn
+            dense
+            flat
+            icon="tune"
+            @click="persistent = true"
+            class="settings-btn"
+          >
+            <q-tooltip content-class="bg-accent" anchor="top left"
+              >Auswahl</q-tooltip
+            >
           </q-btn>
 
           <q-dialog
@@ -14,7 +22,10 @@
             transition-show="scale"
             transition-hide="scale"
           >
-            <FilterMenu :savedConfig="configOption" @saveConfigEmit="saveConfig" />
+            <FilterMenu
+              :savedConfig="configOption"
+              @saveConfigEmit="saveConfig"
+            />
           </q-dialog>
           <!--
           <q-toggle
@@ -35,7 +46,12 @@
             icon="refresh"
             @click="refreshData()"
           >
-            <q-tooltip v-if="!loading" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
+            <q-tooltip
+              v-if="!loading"
+              content-class="bg-accent"
+              anchor="top left"
+              >Aktualisieren</q-tooltip
+            >
           </q-btn>
         </div>
         <q-separator vertical inset></q-separator>
@@ -47,7 +63,9 @@
           icon="save"
           @click="createReport()"
         >
-          <q-tooltip content-class="bg-accent" anchor="top left">Report speichern...</q-tooltip>
+          <q-tooltip content-class="bg-accent" anchor="top left"
+            >Report speichern...</q-tooltip
+          >
         </q-btn>
       </div>
       <q-separator></q-separator>
@@ -105,7 +123,10 @@ export default {
       }
     },
     DisableSave() {
-      if (Object.keys(this.Dataset).length > 0 && this.configOption.report === 'true') {
+      if (
+        Object.keys(this.Dataset).length > 0 &&
+        this.configOption.report === "true"
+      ) {
         return false;
       } else {
         return true;
@@ -232,8 +253,8 @@ export default {
           const pareto = JSON.parse(seed.Pareto);
           const summary = JSON.parse(seed.Zusammenfassung);
           // Byte64 Images und HTML Tabellen
-          const report = seed.report
-          console.log(report)
+          const report = seed.report;
+          console.log(report);
 
           this.svgBar = seed.bar;
           this.svgPareto = seed.pareto;
@@ -247,7 +268,7 @@ export default {
           this.updateSummary(summary);
           this.updateChart(chart["Fehler pro eine million Teile"]);
           this.updatePareto(pareto);
-          this.updateReport(report)
+          this.updateReport(report);
           this.reportDoc();
 
           this.loading = false;
@@ -563,3 +584,4 @@ export default {
   }
 };
 </script>
+<style lang="stylus" scoped></style>

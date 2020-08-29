@@ -21,12 +21,7 @@
         </q-item>
       </template>
       <template v-slot:append>
-        <q-icon
-          v-if="model !== null"
-          class="cursor-pointer"
-          name="clear"
-          @click.stop="model = null"
-        ></q-icon>
+        <q-icon v-if="model !== []" class="cursor-pointer" name="clear" @click.stop="model = []"></q-icon>
       </template>
     </q-select>
   </div>

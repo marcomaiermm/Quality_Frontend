@@ -13,7 +13,7 @@
             unchecked-icon="clear"
           ></q-toggle>
           <q-toggle
-            v-show="report==true"
+            v-show="report == true"
             :label="lang"
             icon="g_translate"
             color="primary"
@@ -25,8 +25,18 @@
         </div>
         <div class="q-gutter-xs" v-if="tab == 'extern'">
           <!--<q-radio v-model="filterOption" val="all_extern" dense label="Gesamt"></q-radio>-->
-          <q-radio v-model="filterOption" val="lieferant" dense label="Lieferant"></q-radio>
-          <q-radio v-model="filterOption" val="kunde" dense label="Kunde"></q-radio>
+          <q-radio
+            v-model="filterOption"
+            val="lieferant"
+            dense
+            label="Lieferant"
+          ></q-radio>
+          <q-radio
+            v-model="filterOption"
+            val="kunde"
+            dense
+            label="Kunde"
+          ></q-radio>
         </div>
         <div class="q-gutter-xs">
           <FilterSelect
@@ -53,6 +63,15 @@
             @onClickUpdate="updateOption"
             ref="selectMachines"
           />
+          <FilterSelect
+            v-show="filterOption === 'kunde'"
+            :stringOptions="Dataset.customer"
+            :type="'Kunde'"
+            :savedModel="MenuData.customer"
+            :multipleselect="true"
+            @onClickUpdate="updateOption"
+            ref="selectCustomer"
+          />
           <!--
           <FilterSelect
             :stringOptions="Dataset.process"
@@ -68,7 +87,7 @@
             @onClickUpdate="updateOption"
             ref="selectGroup"
           />
-          
+
           <FilterSelect
             :stringOptions="Dataset.material"
             :type="'Werkstoff'"
@@ -101,12 +120,13 @@ export default {
   data() {
     return {
       report: false,
-      lang:'de',
+      lang: "de",
       modelMachines: [],
       modelOrders: [],
       modelParts: [],
+      modelCustomer: [],
       uniqueMachines: [],
-      filterOption: "lieferant",
+      filterOption: "lieferant"
       // modelProcess: [],
       // modelGroup: [],
       // modelMaterial: [],
@@ -114,7 +134,7 @@ export default {
   },
   computed: {
     MenuData() {
-      let data = {}
+      let data = {};
       switch (this.tab) {
         case "intern":
           data = this.MenuIntern;
@@ -130,7 +150,8 @@ export default {
       const data = {
         machines: [],
         orders: [],
-        parts: []
+        parts: [],
+        customer: []
         // process: [],
         // productgrp: [],
         // material: []
@@ -139,6 +160,7 @@ export default {
         data.machines = this.Config.machines;
         data.orders = this.Config.orders;
         data.parts = this.Config.parts;
+        data.customer = this.Config.customer;
         // data.process = this.Config.process;
         // data.productgrp = this.Config.productgrp;
         // data.material = this.Config.material;
@@ -160,8 +182,9 @@ export default {
         this.savedModel.parts = this.MenuData.parts;
         this.savedModel.orders = this.MenuData.orders;
         this.savedModel.machines = this.MenuData.machines;
-        this.report = this.MenuData.report
-        this.lang = this.MenuData.lang
+        this.savedModel.customer = this.MenuData.customer;
+        this.report = this.MenuData.report;
+        this.lang = this.MenuData.lang;
       }
     },
     onClickUpdate() {
@@ -173,7 +196,8 @@ export default {
         lang: this.lang,
         machines: this.$refs.selectMachines.emitModel(),
         orders: this.$refs.selectOrders.emitModel(),
-        parts: this.$refs.selectParts.emitModel()
+        parts: this.$refs.selectParts.emitModel(),
+        customer: this.$refs.selectCustomer.emitModel()
         // process: this.$refs.selectProcess.emitModel(),
         // productgrp: this.$refs.selectGroup.emitModel(),
         // material: this.$refs.selectMaterial.emitModel(),
@@ -183,11 +207,11 @@ export default {
       switch (this.tab) {
         case "intern":
           this.updateMenuTab("intern");
-          this.updateMenuDashboardIntern(filter)
+          this.updateMenuDashboardIntern(filter);
           break;
         case "extern":
           this.updateMenuTab(this.filterOption);
-          this.updateMenuDashboardExtern(filter)
+          this.updateMenuDashboardExtern(filter);
           break;
         /*
         case "all":

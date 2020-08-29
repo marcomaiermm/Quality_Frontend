@@ -6,6 +6,8 @@ import states from "./store-state";
 import defectCollection from "./store-defect-collection-card";
 import config from "./store-cfg";
 import menuData from "./store-menu";
+import costOptions from "./store-cost";
+import qCard from "./store-quality-card";
 
 Vue.use(Vuex);
 
@@ -18,14 +20,16 @@ Vue.use(Vuex);
  * with the Store instance.
  */
 
-export default function(/* { ssrContext } */) {
+export default function ( /* { ssrContext } */ ) {
   const Store = new Vuex.Store({
     modules: {
       dataset,
       states,
       defectCollection,
       config,
-      menuData
+      menuData,
+      costOptions,
+      qCard
     },
 
     // enable strict mode (adds overhead!)

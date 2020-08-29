@@ -1,57 +1,26 @@
 <template>
   <q-card class="hist-card" flat>
-    <div class="text-overline text-12">Größte Kostenverursacher nach Kategorie</div>
+    <div class="text-overline text-12">
+      Größte Kostenverursacher Top {{ Object.keys(MaxCosts).length }}
+    </div>
+    <!-- <div class="text-overline text-12">Größte Kostenverursacher nach Kategorie</div> -->
     <q-card-section>
-      <div class="row">
-        <div class="col">
-          <div class="text-overline text-9">Maschine:</div>
-          <div class="text-overline text-9">Auftrag:</div>
-          <div class="text-overline text-9">Material:</div>
-          <!--
-          <div class="text-overline text-9">Vorgang:</div>
-          <div class="text-overline text-9">Fehlermerkmal:</div>
-          <div class="text-overline text-9">Produktgruppe:</div>
-          <div class="text-overline text-9">Werkstoff:</div>
-          -->
-        </div>
-        <q-separator vertical inset />
-        <div class="col q-pl-md">
-          <div class="text-overline text-9">{{ maxCosts.machine.Maschine }}</div>
-          <div class="text-overline text-9">{{ maxCosts.order["Auftrags-Nr."] }}</div>
-          <div class="text-overline text-9">{{ maxCosts.part.Material }}</div>
-          <!--
-          <div class="text-overline text-9">{{ maxCosts.process["Vorgangs-Nr."] }}</div>
-          <div class="text-overline text-9">{{ maxCosts.feature.Fehlermerkmal }}</div>
-          <div class="text-overline text-9">{{ maxCosts.productgrp.Produktgruppe }}</div>
-          <div class="text-overline text-9">{{ maxCosts.material.Werkstoff }}</div>
-          -->
-        </div>
-        <q-separator vertical inset />
-        <div class="col q-pl-md">
-          <div class="text-overline text-9">{{ format(maxCosts.machine.Kosten) }}</div>
-          <div class="text-overline text-9">{{ format(maxCosts.order.Kosten) }}</div>
-          <div class="text-overline text-9">{{ format(maxCosts.part.Kosten) }}</div>
-          <!--
-          <div class="text-overline text-9">{{ format(maxCosts.process.Kosten) }}</div>
-          <div class="text-overline text-9">{{ format(maxCosts.feature.Kosten) }}</div>
-          <div class="text-overline text-9">{{ format(maxCosts.productgrp.Kosten) }}</div>
-          <div class="text-overline text-9">{{ format(maxCosts.material.Kosten) }}</div>
-          -->
-        </div>
-        <q-separator horizontal inset />
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <div class="text-overline text-9">Gesamtkosten:</div>
-        </div>
-        <div class="col q-pl-md">
-          <div class="text-overline text-9"></div>
-        </div>
-        <q-separator vertical inset />
-        <div class="col q-pl-md">
-          <div class="text-overline text-9">{{format(allCosts)}}</div>
-        </div>
+      <table class="costTable">
+        <thead>
+          <tr>
+            <th>{{ SelectOption }}</th>
+            <th>Kosten</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(cost, i) in MaxCosts" :key="i">
+            <td>{{ cost[SelectOption] }}</td>
+            <td>{{ cost.Kosten }}€</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="alligner-item aligner-item--bottom text-overline text-9">
+        Gesamtkosten: {{ format(allCosts) }}
       </div>
     </q-card-section>
   </q-card>
@@ -72,6 +41,19 @@ export default {
     }
   },
   computed: {
+    MaxCosts() {
+      let costs = [...this.Costs];
+      costs = costs.sort((a, b) => parseFloat(b.Kosten) - parseFloat(a.Kosten));
+      costs = costs.slice(0, this.SelectHead);
+      if (Object.keys(costs).length > 10) {
+        costs = costs.slice(0, 10);
+      }
+
+      // if (Object.keys(costs).length>10) {
+      //   costs = costs.slice(0,10)
+      // }
+      return costs;
+    },
     Data() {
       let data = [];
       switch (this.tab) {
@@ -92,7 +74,10 @@ export default {
     ...mapGetters({
       DataIntern: "dataset/getData",
       // DataAll: "dataset/getDataAll",
-      DataExtern: "dataset/getDataExtern"
+      DataExtern: "dataset/getDataExtern",
+      SelectOption: "costOptions/getSelect",
+      SelectHead: "costOptions/getHead",
+      Costs: "costOptions/getCosts"
     })
   },
   data() {
@@ -164,7 +149,40 @@ export default {
 };
 </script>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .hist-card
   width: 100%
+
+table.costTable
+  border: 0px solid #1C6EA4
+  width: 100%
+
+
+table.costTable td, table.costTable th
+  border: 0px solid #AAAAAA
+  padding: .4rem .7rem
+
+table.costTable tbody td
+  font-size: .8rem
+  font-weight: 500
+
+table.costTable tr:nth-child(even)
+  background: #D0E4F5
+
+table.costTable thead
+  border-bottom: 2px solid #444444
+
+table.costTable thead th
+  font-size: 15px
+  font-weight: bold
+  color: #FFFFFF
+  text-align: left
+  border-left: 2px solid #D0E4F5
+  background: $primary
+
+table.costTable thead th:first-child
+  border-left: none
+
+.aligner-item--bottom
+  align-self: flex-end
 </style>

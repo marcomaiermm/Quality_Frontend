@@ -3,28 +3,23 @@
     <div class="row">
       <div class="text-overline text-9 col-4">Reklamations Histogramm</div>
       <div class="col-6 q-pr-md">
-        <TopSlider :maxValue="MaxValues" @sliderRefreshEmit="slicedData"/>
+        <TopSlider :maxValue="MaxValues" @sliderRefreshEmit="slicedData" />
       </div>
       <!--<q-space></q-space>-->
       <div class="col-2">
-      <q-select
-        borderless
-        v-model="model"
-        dense
-        :options="selects"
-        map-options
-        emit-value
-        label="Auswahl"
-        style="width: 120px"
-      ></q-select>
+        <q-select
+          borderless
+          v-model="model"
+          dense
+          :options="selects"
+          map-options
+          emit-value
+          label="Auswahl"
+          style="width: 120px"
+        ></q-select>
       </div>
     </div>
-    <commit-chart-bar
-      :width="w"
-      :height="h"
-      :chartData="datacollection"
-      :options="options"
-    ></commit-chart-bar>
+    <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
   </div>
 </template>
 
@@ -43,7 +38,7 @@ export default {
   data() {
     return {
       model: "parts",
-      plotLength: this.MaxValues,
+      plotLength: 10,
       selects: [
         {
           label: "Material",

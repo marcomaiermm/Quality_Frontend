@@ -1,5 +1,37 @@
 import { app, BrowserWindow, nativeTheme, screen } from "electron";
 
+// Update Server
+require("update-electron-app")();
+const { autoUpdater, dialog } = require("electron");
+
+const server = "http://awslgit01:1337";
+const url = `${server}/update/${process.platform}/${app.getVersion()}`;
+autoUpdater.setFeedURL({
+  url
+});
+setInterval(() => {
+  autoUpdater.checkForUpdates();
+}, 60000);
+
+autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName) => {
+  const dialogOpts = {
+    type: "info",
+    buttons: ["Restart", "Later"],
+    title: "Application Update",
+    message: process.platform === "win32" ? releaseNotes : releaseName,
+    detail:
+      "Eine neue Version wurde heruntergeladen. Starte die Applikation neu damit du alle neuerungen bekommst."
+  };
+
+  dialog.showMessageBox(dialogOpts).then(returnValue => {
+    if (returnValue.response === 0) autoUpdater.quitAndInstall();
+  });
+});
+autoUpdater.on("error", message => {
+  console.error("Problem beim Softwareupdate ist aufgetreten");
+  console.error(message);
+});
+
 try {
   if (
     process.platform === "win32" &&

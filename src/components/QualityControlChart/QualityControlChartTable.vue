@@ -10,7 +10,7 @@
     virtual-scroll
     :pagination.sync="pagination"
     :rows-per-page-options="[0]"
-    no-data-label="Keine Daten gefunden. Merkmal ausgewählt?"
+    no-data-label="Keine Daten gefunden. Richtige Materialnummer?"
   ></q-table>
 </template>
 

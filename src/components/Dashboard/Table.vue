@@ -67,7 +67,11 @@
                       transition-show="scale"
                       transition-hide="scale"
                     >
-                      <q-date v-model="endDate" today-btn @input="() => $refs.qDateProxyEnd.hide()"></q-date>
+                      <q-date
+                        v-model="endDate"
+                        today-btn
+                        @input="() => $refs.qDateProxyEnd.hide()"
+                      ></q-date>
                     </q-popup-proxy>
                   </q-icon>
                 </template>
@@ -92,18 +96,6 @@
                 </template>
               </q-select>
             </div>
-            <!--
-          <div v-if="$q.screen.gt.xs" class="col full-width">
-            <q-toggle
-              v-model="visibleColumns"
-              v-for="(cols, idx) in vCols"
-              :key="idx"
-              :val="cols.val"
-              :label="cols.label"
-            ></q-toggle>
-          </div>
-          v-else
-            -->
             <div class="col-1">
               <q-btn
                 dense
@@ -114,10 +106,17 @@
                 @click="update()"
                 :disable="load"
               >
-                <q-tooltip v-if="!load" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
+                <q-tooltip
+                  v-if="!load"
+                  content-class="bg-accent"
+                  anchor="top left"
+                  >Aktualisieren</q-tooltip
+                >
               </q-btn>
               <q-btn dense flat class="settings-btn q-ml-xs" icon="settings">
-                <q-tooltip content-class="bg-accent" anchor="top left">Einstellungen</q-tooltip>
+                <q-tooltip content-class="bg-accent" anchor="top left"
+                  >Einstellungen</q-tooltip
+                >
                 <FilterMenu :tab="tab" />
               </q-btn>
               <q-btn
@@ -128,11 +127,15 @@
                 :disable="!Save"
                 @click="report()"
               >
-                <q-tooltip content-class="bg-accent" anchor="top right">Report erstellen..</q-tooltip>
+                <q-tooltip content-class="bg-accent" anchor="top right"
+                  >Report erstellen..</q-tooltip
+                >
               </q-btn>
             </div>
             <div class="col-2">
-              <div class="text-overline text-9" v-if="tab=='extern'">{{ExtOption}}</div>
+              <div class="text-overline text-9" v-if="tab == 'extern'">
+                {{ ExtOption }}
+              </div>
             </div>
             <q-space></q-space>
             <div class="col-2 q-mx-xs">
@@ -155,7 +158,6 @@
                 map-options
                 :options="columns"
                 option-value="name"
-                style="min-width: 150px"
                 label="Ausblenden"
               ></q-select>
             </div>
@@ -306,9 +308,11 @@ export default {
         process: JSON.stringify(this.Filter.process),
         productgrp: JSON.stringify(this.Filter.productgrp),
         material: JSON.stringify(this.Filter.material),
+        customer: JSON.stringify(this.Filter.customer),
         tab: this.tab,
         table: this.MenuTab,
-        report: report
+        report: report,
+        lang: this.Filter.lang
       };
       this.$emit("refreshEmmit", args);
     },
@@ -580,5 +584,4 @@ export default {
     top: 48px
   thead tr:first-child th
     top: 0
-
 </style>

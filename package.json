@@ -1,10 +1,14 @@
 {
-  "name": "quality_frontend",
+  "name": "qvue",
   "version": "0.0.1",
   "description": "Quasar Framework fuer Qualitätstool",
   "productName": "QVue",
   "author": "Marco Maier <mm.maiermarco@gmail.com>",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcomaiermm/Quality_Frontend.git"
+  },
   "scripts": {
     "lint": "eslint --ext .js,.vue src",
     "test": "echo \"No test specified\" && exit 0",
@@ -20,8 +24,10 @@
     "chartjs-plugin-annotation": "^0.5.7",
     "chartjs-plugin-zoom": "^0.7.5",
     "core-js": "3.0.0",
+    "electron-builder-squirrel-windows": "^22.8.1",
     "quasar": "^1.9.9",
     "regression": "^2.0.1",
+    "update-electron-app": "^1.5.0",
     "vue-chartjs": "^3.5.0",
     "vue-lottie": "^0.2.1"
   },

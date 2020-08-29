@@ -166,7 +166,7 @@ module.exports = function(ctx) {
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-electron-apps/configuring-electron
     electron: {
-      bundler: "packager", // 'packager' or 'builder'
+      bundler: "builder", // 'packager' or 'builder'
 
       packager: {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
@@ -182,7 +182,20 @@ module.exports = function(ctx) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: "quality_frontend"
+        appId: "com.electron.qvue",
+        productName: "QVue",
+        copyright: "Copyright © 2020 ${Marco Maier}",
+        // NSIS Installer
+        // win: {
+        //   target: "nsis"
+        // },
+        // Updates benötigen squirrel wegen nupkg!
+        win: {
+          target: "squirrel"
+        },
+        squirrelWindows: {
+          loadingGif: "build/install-spinner.gif"
+        }
       },
 
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration

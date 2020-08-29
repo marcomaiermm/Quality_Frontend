@@ -1,15 +1,12 @@
 <template>
   <div>
     <div class="row">
-    <div class="text-overline text-9 col-5">Reklamations Pareto Diagramm</div>
-    <div class="col-6"><TopSlider :maxValue="Object.keys(Data).length" @sliderRefreshEmit="slicedPareto"/></div>
+      <div class="text-overline text-9 col-5">Reklamations Pareto Diagramm</div>
+      <div class="col-6">
+        <TopSlider :maxValue="Object.keys(Data).length" @sliderRefreshEmit="slicedPareto" />
+      </div>
     </div>
-    <commit-chart-bar
-      :width="w"
-      :height="h"
-      :chartData="datacollection"
-      :options="options"
-    ></commit-chart-bar>
+    <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
   </div>
 </template>
 
@@ -72,7 +69,7 @@ export default {
   props: ["tab"],
   data() {
     return {
-      plotLength: this.MaxValues,
+      plotLength: 10,
       datacollection: {
         labels: [],
         datasets: []

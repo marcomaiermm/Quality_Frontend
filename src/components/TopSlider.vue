@@ -4,23 +4,28 @@
 -->
 <template>
   <div class="row ">
-    <div class="col-2 q-pr-xs text-overline text-9">
-      Top {{sliderValue}}
-    </div>
+    <div class="col-2 q-pr-xs text-overline text-9">Top {{ sliderValue }}</div>
     <div class="col-8 q-pr-xs">
-    <q-slider
-      v-model="sliderValue"
-      :min="0"
-      :max="maxValue"
-      :step="1"
-      label
-      :label-value="'Top ' + sliderValue"
-      color="#dd0333"
-      ref="slider"
-    ></q-slider>
+      <q-slider
+        v-model="sliderValue"
+        :min="0"
+        :max="maxValue"
+        :step="1"
+        label
+        :label-value="'Top ' + sliderValue"
+        color="#dd0333"
+        ref="slider"
+      ></q-slider>
     </div>
     <div class="col-2 q-pl-md">
-      <q-btn dense flat :disable="DisableButton" icon="send" @click="refresh()" />
+      <q-btn
+        class="confirm-slider-btn"
+        dense
+        flat
+        :disable="DisableButton"
+        icon="send"
+        @click="refresh()"
+      />
     </div>
   </div>
 </template>
@@ -29,20 +34,20 @@
 export default {
   name: "TopSlider",
   props: ["maxValue"],
-  data () {
+  data() {
     return {
       sliderValue: 10
-    }
+    };
   },
   computed: {
     DisableButton() {
-      let disabled = false
+      let disabled = false;
       if (this.maxValue === 0) {
-        disabled = true
+        disabled = true;
       } else {
-        disabled = false
+        disabled = false;
       }
-      return disabled
+      return disabled;
     }
   },
   methods: {
@@ -51,9 +56,10 @@ export default {
       this.$emit("sliderRefreshEmit", args);
     }
   }
-}
+};
 </script>
 
-<style>
-
+<style lang="sass" scoped>
+.confirm-slider-btn
+  color: $primary
 </style>

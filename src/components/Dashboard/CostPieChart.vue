@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="row">
-      <div class="text-overline text-9">Kostenaufschlüsselung in EUR</div>
+      <div class="col text-overline text-9">Kostenaufschlüsselung in EUR</div>
+      <div class="col-6">
+        <TopSlider :maxValue="Object.keys(Data).length" @sliderRefreshEmit="slicedPie" />
+      </div>
       <q-space></q-space>
       <q-select
         borderless
@@ -20,16 +23,18 @@
 
 <script>
 import CommitChartPie from "../js/CommitChartPie";
+import TopSlider from "../TopSlider";
 import { getCosts } from "../js/CalcCost";
 import { formatCost } from "../js/FormatCost";
 import { interpolateColors } from "../js/InterpolateColors";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "CostPieChart",
   props: ["tab"],
   components: {
-    CommitChartPie
+    CommitChartPie,
+    TopSlider
   },
   computed: {
     Data() {
@@ -47,6 +52,13 @@ export default {
       }
       return data;
     },
+    MaxValues() {
+      let len = 0
+      if (Object.keys(this.Data).length > 0) {
+        len = Object.keys(this.Data).length;
+      }
+      return len
+    },
     ...mapGetters({
       DataIntern: "dataset/getData",
       DataAll: "dataset/getDataAll",
@@ -56,6 +68,7 @@ export default {
   watch: {
     model() {
       this.fillPie();
+      this.updateSelect(this.model)
     },
     tab() {
       if (this.Data.length > 0) {
@@ -81,12 +94,24 @@ export default {
         labels: [],
         datasets: []
       },
+      plotLength: 5,
       options: {},
       h: 370,
       w: 1000
     };
   },
   methods: {
+    slicedPie(value) {
+      this.plotLength = value;
+      this.updateSelect(this.model)
+      this.updateHead(this.plotLength)
+      this.fillPie();
+    },
+    sliceData(data){
+      let cost = data
+      cost = cost.slice(0,this.plotLength)
+      return cost
+    },
     fillPie() {
       let colors = [];
       let colorOne = [];
@@ -105,6 +130,9 @@ export default {
         ]
       };
       collection = getCosts(this.Data, this.model);
+      this.updateCosts(collection)
+      collection = this.sliceData(collection)
+      
       const steps = Object.keys(collection).length;
       const s1 = Math.floor(steps / 2);
       const s2 = steps - s1;
@@ -113,7 +141,11 @@ export default {
       colorTwo = interpolateColors(cm, c2, s2);
       colors = colorOne.concat(colorTwo);
 
+      
+
       collection.sort((a, b) => parseFloat(a.Kosten) - parseFloat(b.Kosten));
+      
+
       collection = collection.map(item => {
         return {
           label: item[this.model],
@@ -159,7 +191,8 @@ export default {
           }
         }
       };
-    }
+    },
+    ...mapActions("costOptions", ["updateSelect","updateHead","updateCosts"]),
   },
   mounted() {
     if (this.Data.length > 0) {

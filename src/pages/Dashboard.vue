@@ -9,8 +9,16 @@
       narrow-indicator
       align="center"
     >
-      <q-tab name="intern" label="Interne Reklamationen" @click="setTab('intern')"></q-tab>
-      <q-tab name="extern" label="Externe Reklamationen" @click="setTab('extern')"></q-tab>
+      <q-tab
+        name="intern"
+        label="Interne Reklamationen"
+        @click="setTab('intern')"
+      ></q-tab>
+      <q-tab
+        name="extern"
+        label="Externe Reklamationen"
+        @click="setTab('extern')"
+      ></q-tab>
       <!--<q-tab name="all" label="Gesamte Reklamationen" @click="setTab('all')"></q-tab>-->
     </q-tabs>
     <div class="row q-pl-xs">
@@ -33,10 +41,11 @@
             :load="loading"
             v-bind:key="tab"
             @refreshEmmit="onClickRefresh"
+            @reportEmit="onClickReport"
             ref="dataTableExtern"
           />
         </q-tab-panel>
-        <q-tab-panel name="all">
+        <!-- <q-tab-panel name="all">
           <DataTable
             :tab="tab"
             :oldTab="oldTab"
@@ -45,7 +54,7 @@
             @refreshEmmit="onClickRefresh"
             ref="dataTableAll"
           />
-        </q-tab-panel>
+        </q-tab-panel> -->
       </q-tab-panels>
     </div>
     <div class="row q-pa-md">
@@ -97,7 +106,7 @@ export default {
   },
   computed: {
     MenuData() {
-      let data = {}
+      let data = {};
       switch (this.tab) {
         case "intern":
           data = this.MenuIntern;
@@ -136,14 +145,14 @@ export default {
       Pareto: "dataset/getPareto",
       ParetoAll: "dataset/getParetoAll",
       ParetoExtern: "dataset/getParetoExtern",
-      ReportAll: "dataset/getReportAll",
+      // ReportAll: "dataset/getReportAll",
       ReportIntern: "dataset/getReportIntern",
       ReportExtern: "dataset/getReportExtern",
       Report: "dataset/getReport",
       Config: "config/getCfg",
       Path: "config/getPath",
       MenuIntern: "menuData/getMenuIntern",
-      MenuExtern: "menuData/getMenuExtern",
+      MenuExtern: "menuData/getMenuExtern"
     })
   },
   data() {
@@ -222,11 +231,10 @@ export default {
     },
     report() {},
     update(seed) {
-      console.log(seed)
       const data = JSON.parse(seed.table);
       const history = seed.history;
       const pareto = JSON.parse(seed.pareto);
-      const report = seed.report
+      const report = seed.report;
       // const images = {
       //   cost: seed.base64.Kosten,
       //   hist: seed.base64.History,
@@ -247,7 +255,6 @@ export default {
           this.updateDataExtern(data);
           this.updateHistoryExtern(history);
           this.updateParetoExtern(pareto);
-          // this.updateReportExtern(images);
           this.updateReportExtern(report);
           this.$refs.dataTableExtern.refreshDataTable();
           break;
@@ -271,16 +278,38 @@ export default {
     },
     createReportData() {
       let report = null;
+      const filters = {
+        machines: "",
+        orders: "",
+        parts: "",
+        customer: ""
+      };
+      let customer = "";
       switch (this.tab) {
         case "intern":
           report = this.ReportIntern;
           break;
         case "extern":
           report = this.ReportExtern;
+          if (this.MenuTab === "kunde") {
+            customer = `<p class="filter-headline">Kunde/Customer</p><p>${filters.customer}</p>`;
+          }
           break;
         case "all":
           report = this.ReportAll;
           break;
+      }
+      if (typeof this.MenuData.machines !== "undefined") {
+        filters.machines = this.MenuData.machines.join(", ");
+      }
+      if (typeof this.MenuData.orders !== "undefined") {
+        filters.orders = this.MenuData.orders.join(", ");
+      }
+      if (typeof this.MenuData.parts !== "undefined") {
+        filters.parts = this.MenuData.orders.join(", ");
+      }
+      if (typeof this.MenuData.customer !== "undefined") {
+        filters.customer = this.MenuData.customer.join(", ");
       }
       // if (typeof report.pareto === "undefined") {
       //   return;
@@ -300,7 +329,7 @@ export default {
                         <style>
                           html,
                           body {
-                            margin: 0;   
+                            margin: 0;
                             padding: 0;
                             font-family: "Roboto", -apple-system, "San Francisco", "Segoe UI",
                               "Helvetica Neue", sans-serif;
@@ -324,7 +353,7 @@ export default {
                               width: 100%;
                               border: 1px solid #AAAAAA;
                               font-size: 9px;
-                              text-align: center; 
+                              text-align: center;
                           }
                           th {
                             font-size: 9px;
@@ -357,7 +386,7 @@ export default {
                             width: 21cm;
                             min-height: 29.7cm;
                             /*
-                            background-image: url('data:image/png;base64,${report.background_img}'); 
+                            background-image: url('data:image/png;base64,${report.background_img}');
                             background-size: contain;
                             */
                           }
@@ -436,7 +465,7 @@ export default {
                               background-color: #fff;
                               /*
                               background-image: url('data:image/png;base64,${report.background_img}') !important;
-                              background-size: contain !important; 
+                              background-size: contain !important;
                               */
                             }
                             .page {
@@ -458,68 +487,112 @@ export default {
                             margin: 10px;
                             padding: 20px;
                           }
-                        </style>      
-      
+                          .filter-headline {
+                            font-weight: bold;
+                          }
+                        </style>
+
       `;
       const body = `
                   <body class="document">
 
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${report.background_img}' />
+                        <img class="bg" src='data:image/png;base64,${
+                          report.background_img
+                        }' />
                         <div class="padded">
+                          <h3>
+                          ${report.date.start.split(" ")[0]}
+                          -
+                          ${report.date.end.split(" ")[0]}
+                          </h3>
                           <h3 contenteditable="true">Dashboard Reporting</h3>
                           <h3>Pareto</h3>
-                          <img style='width:100%;height:300%;' src='data:image/svg+xml;base64,${report.plots.Pareto}'/>
+                          <img style='width:100%;height:300%;' src='data:image/svg+xml;base64,${
+                            report.plots.Pareto
+                          }'/>
+                          <p style="font-size: 1.2rem; font-weight: bold;">Filter:</p>
+                          <p class="filter-headline">Maschinen/Machines</p>
+                          <p>${filters.machines}</p>
+                          <p class="filter-headline">Auftrags-Nr./Order-no.</p>
+                          <p>${filters.orders}</p>
+                          <p class="filter-headline">Material/Parts</p>
+                          <p>${filters.parts}</p>
+                          <div>${customer}</div>
                         </div>
                       </div>
 
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${report.background_img}' />
+                        <img class="bg" src='data:image/png;base64,${
+                          report.background_img
+                        }' />
                         <div class="padded">
                           <h3 contenteditable="true">Histogramme (Histograms) Top 10</h3>
                           <p>
-                          <h4>Material</h4>
-                          <img style='width:110%;height:100%;' src='data:image/svg+xml;base64,${report.plots.History.parts}'/>
+                          <h4>Material / Parts</h4>
+                          <img style='width:110%;height:100%;' src='data:image/svg+xml;base64,${
+                            report.plots.History.parts
+                          }'/>
                           </p>
                           <p>
-                          <h4>Auftrag</h4>
-                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${report.plots.History.orders}'/>
+                          <h4>Auftrag / Orders</h4>
+                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${
+                            report.plots.History.orders
+                          }'/>
                           </p>
                         </div>
                       </div>
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${report.background_img}' />
+                        <img class="bg" src='data:image/png;base64,${
+                          report.background_img
+                        }' />
                         <div class="padded">
                           <p>
-                          <h4>Maschinen</h4>
-                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${report.plots.History.machines}'/>
+                          <h4>Maschine / Machine</h4>
+                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${
+                            report.plots.History.machines
+                          }'/>
                           </p>
-                        </div>
-                      </div>
-                      
-                      <div class="page">
-                        <img class="bg" src='data:image/png;base64,${report.background_img}' />
-                        <div class="padded">
-                          <h3 contenteditable="true">Kosten (Costs) Top 10</h3>
-                          <h4>Material </h4>
-                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:70%;height:70%;' src='data:image/svg+xml;base64,${report.plots.Kosten.Material}'/></p>
-                          <h4>Auftrag</h4>
-                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:70%;height:70%;' src='data:image/svg+xml;base64,${report.plots.Kosten.ORDER_ID}'/></p>
-                        </div>
-                      </div>
-                      <div class="page">
-                        <img class="bg" src='data:image/png;base64,${report.background_img}' />
-                        <div class="padded">
-                          <h4>Maschine</h4>
-                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:70%;height:70%;' src='data:image/svg+xml;base64,${report.plots.Kosten.MACHINE_NO}'/></p>
                         </div>
                       </div>
 
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${report.background_img}' />
+                        <img class="bg" src='data:image/png;base64,${
+                          report.background_img
+                        }' />
                         <div class="padded">
-                          <h4>Kostenverlauf</h4>
-                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:100%;height:100%;' src='data:image/svg+xml;base64,${report.plots.Kostenverlauf}'/></p>
+                          <h3 contenteditable="true">Kosten (Costs) Top 10</h3>
+                          <h4>Material / Parts</h4>
+                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:70%;height:70%;' src='data:image/svg+xml;base64,${
+                            report.plots.Kosten.MATERIAL
+                          }'/></p>
+                          <h4>Auftrag / Order</h4>
+                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:70%;height:70%;' src='data:image/svg+xml;base64,${
+                            report.plots.Kosten.ORDER_ID
+                          }'/></p>
+                        </div>
+                      </div>
+                      <div class="page">
+                        <img class="bg" src='data:image/png;base64,${
+                          report.background_img
+                        }' />
+                        <div class="padded">
+                          <h4>Maschine / Machine</h4>
+                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:70%;height:70%;' src='data:image/svg+xml;base64,${
+                            report.plots.Kosten.MACHINE_NO
+                          }'/></p>
+                        </div>
+                      </div>
+
+                      <div class="page">
+                        <img class="bg" src='data:image/png;base64,${
+                          report.background_img
+                        }' />
+                        <div class="padded">
+                          <h4>Kostenverlauf / Cost trend</h4>
+                          <p><img style='display:block;margin-left:auto;margin-right:auto;width:100%;height:100%;' src='data:image/svg+xml;base64,${
+                            report.plots.Kostenverlauf
+                          }'/></p>
                         </div>
                       </div>
                   </body>
@@ -536,7 +609,7 @@ export default {
                   ${style}
                   ${body}
                   </html>
-      
+
       `;
       this.updateReport(html);
     },
@@ -598,3 +671,4 @@ export default {
   }
 };
 </script>
+<style lang="sass"></style>

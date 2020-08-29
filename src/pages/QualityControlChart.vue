@@ -17,7 +17,14 @@
           label="Monate zurück..."
         ></q-select>-->
 
-        <q-input v-model="modelPart" dense square outlined style="width: 250px" label="Material">
+        <q-input
+          v-model="modelPart"
+          dense
+          square
+          outlined
+          style="width: 250px"
+          label="Material Nummer"
+        >
           <template v-slot:append>
             <q-icon
               v-show="modelPart !== null"
@@ -46,7 +53,9 @@
           icon="refresh"
           @click="getData()"
         >
-          <q-tooltip v-if="!loading" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
+          <q-tooltip v-if="!loading" content-class="bg-accent" anchor="top left"
+            >Aktualisieren</q-tooltip
+          >
         </q-btn>
       </div>
 
@@ -54,13 +63,13 @@
         <q-card>
           <div class="row q-pa-md">
             <div class="col-8 q-pr-md">
-              <DataTable :dataset="dataTable" :windowHeight="height*0.4" />
+              <DataTable :dataset="dataTable" :windowHeight="height * 0.4" />
             </div>
             <div class="col-4 q-pl-md">
               <CardInfo
                 :data="dataInfo[modelFeature]"
                 :scope="scope[modelFeature]"
-                :windowHeight="height*0.2"
+                :windowHeight="height * 0.2"
               />
             </div>
           </div>
@@ -70,10 +79,18 @@
         <q-card>
           <div class="row q-pa-md">
             <div class="col-6">
-              <DataChart :propdata="dataTable" :info="dataInfo[modelFeature]" :subject="'m'" />
+              <DataChart
+                :propdata="dataTable"
+                :info="dataInfo[modelFeature]"
+                :subject="'m'"
+              />
             </div>
             <div class="col-6">
-              <DataChart :propdata="dataTable" :info="dataInfoR[modelFeature]" :subject="'r'" />
+              <DataChart
+                :propdata="dataTable"
+                :info="dataInfoR[modelFeature]"
+                :subject="'r'"
+              />
             </div>
           </div>
         </q-card>
@@ -119,7 +136,7 @@ export default {
       }
     },
     ...mapGetters({
-      Dataset: "defectCollection/getDataset",
+      Dataset: "qCard/getDataset",
       Path: "config/getPath"
     })
   },
@@ -148,6 +165,7 @@ export default {
   },
   methods: {
     ...mapActions("config", ["updateConfig"]),
+    ...mapActions("qCard", ["updateDataset"]),
     getData() {
       this.loading = true;
       this.resetData();
@@ -176,9 +194,10 @@ export default {
             return;
           }
           this.dataValues = JSON.parse(seed.X.Werte);
+
           this.dataInfo = seed.X.Eingriffsgrenzen;
           this.scope = seed.Bins;
-          // this.dataValuesR = JSON.parse(seed.R.Werte);
+          // this.dataValuesR = JSON.parse(seed.R);
           this.dataInfoR = seed.R.Eingriffsgrenzen;
 
           this.features = Object.keys(this.dataInfo);
@@ -225,13 +244,11 @@ export default {
 };
 </script>
 
-<style>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
-}
-</style>
+<style lang="sass">
 
+.fade-enter-active
+.fade-leave-active
+  transition: opacity 0.5s
+fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */
+  opacity: 0
+</style>
