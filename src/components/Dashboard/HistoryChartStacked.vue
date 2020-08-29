@@ -1,18 +1,23 @@
 <template>
   <div>
     <div class="row">
-      <div class="text-overline text-9">Histogramm</div>
-      <q-space></q-space>
-      <q-select
-        borderless
-        v-model="model"
-        dense
-        :options="selectOption"
-        map-options
-        emit-value
-        label="Auswahl"
-        style="width: 100px"
-      ></q-select>
+      <div class="text-overline text-9 col-4">Reklamations Histogramm</div>
+      <div class="col-6 q-pr-md">
+        <TopSlider :maxValue="MaxValues" @sliderRefreshEmit="slicedData" />
+      </div>
+      <!--<q-space></q-space>-->
+      <div class="col-2">
+        <q-select
+          borderless
+          v-model="model"
+          dense
+          :options="selects"
+          map-options
+          emit-value
+          label="Auswahl"
+          style="width: 120px"
+        ></q-select>
+      </div>
     </div>
     <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
   </div>
@@ -20,17 +25,21 @@
 
 <script>
 import CommitChartBar from "../js/CommitChartBar.js";
+import TopSlider from "../TopSlider";
 import { mapGetters } from "vuex";
+import { interpolateColors } from "../js/InterpolateColors";
 
 export default {
   name: "HistChart",
   components: {
-    CommitChartBar
+    CommitChartBar,
+    TopSlider
   },
   data() {
     return {
       model: "parts",
-      selectOption: [
+      plotLength: 10,
+      selects: [
         {
           label: "Material",
           value: "parts"
@@ -40,13 +49,23 @@ export default {
           value: "orders"
         },
         {
+          label: "Maschine",
+          value: "machines"
+        }
+        /*
+        {
           label: "Vorgang",
           value: "process"
         },
         {
-          label: "Maschine",
-          value: "machines"
+          label: "Produktgruppe",
+          value: "productgrp"
+        },
+        {
+          label: "Werkstoff",
+          value: "material"
         }
+        */
       ],
       datacollection: {
         labels: [],
@@ -62,6 +81,41 @@ export default {
   },
   props: ["tab"],
   computed: {
+    MaxValues() {
+      let len = 0
+      if (Object.keys(this.Data).length > 0) {
+        const data = JSON.parse(this.Data[this.model]);
+        len = Object.keys(data).length;
+      }
+      return len
+    },
+    Data() {
+      let data = [];
+      switch (this.tab) {
+        case "intern":
+          data = this.History;
+          break;
+        case "extern":
+          data = this.HistoryExtern;
+          break;
+        case "all":
+          data = this.HistoryAll;
+          break;
+      }
+      return data;
+    },
+    SlicedData(){
+      const data = JSON.parse(this.Data[this.model])
+      const keep = Object.keys(data).slice(0,this.plotLength)
+      const sliced = keep.reduce((result, key) => { result[key] = data[key]; return result; }, {});
+      let result = {}
+      if(Object.keys(sliced).length>0){
+        result = sliced
+      } else {
+        result = data
+      }
+      return result
+    },
     ...mapGetters({
       History: "dataset/getHistory",
       HistoryAll: "dataset/getHistoryAll",
@@ -70,10 +124,16 @@ export default {
   },
   watch: {
     model() {
-      this.fillData();
+      if (typeof this.Data === "object" && Object.keys(this.Data).length > 0) {
+        this.fillData();
+      }
     }
   },
   methods: {
+    slicedData(value) {
+      this.plotLength = value;
+      this.fillData();
+    },
     fillData() {
       this.datacollection = {
         labels: [],
@@ -86,19 +146,9 @@ export default {
       const c1 = "rgb(0, 56, 113)";
       const cm = "rgb(217, 221, 3)";
       const c2 = "rgb(221, 3, 51)";
-
-      let dataHistory = [];
-      switch (this.tab) {
-        case "intern":
-          dataHistory = JSON.parse(this.History[this.model]);
-          break;
-        case "extern":
-          dataHistory = JSON.parse(this.HistoryExtern[this.model]);
-          break;
-        case "all":
-          dataHistory = JSON.parse(this.HistoryAll[this.model]);
-          break;
-      }
+      const usedData = this.SlicedData;
+      // const dataHistory = JSON.parse(this.Data[this.model]);
+      const dataHistory = usedData;
       if (Object.keys(dataHistory).length === 0) {
         return;
       }
@@ -108,9 +158,9 @@ export default {
       const s1 = Math.floor(steps / 2);
       const s2 = steps - s1;
 
-      colorOne = this.interpolateColors(c1, cm, s1);
+      colorOne = interpolateColors(c1, cm, s1);
 
-      colorTwo = this.interpolateColors(cm, c2, s2);
+      colorTwo = interpolateColors(cm, c2, s2);
 
       colors = colorOne.concat(colorTwo);
 
@@ -186,6 +236,7 @@ export default {
             }
           ]
         },
+        /*
         plugins: {
           zoom: {
             zoom: {
@@ -198,36 +249,8 @@ export default {
             }
           }
         }
+        */
       };
-    },
-    // Funktionen interpolateColor und interpolateColors für die Farben im gestapelten Balkendiagramm
-    // https://github.com/ondras/rot.js
-    interpolateColor(color1, color2, factor) {
-      if (arguments.length < 3) {
-        factor = 0.5;
-      }
-      const result = color1.slice();
-      for (let i = 0; i < 3; i++) {
-        result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
-      }
-      return result;
-    },
-
-    interpolateColors(color1, color2, steps) {
-      const stepFactor = 1 / (steps - 1);
-      const interpolatedColorArray = [];
-
-      // \d => einfache Stelle (56 => 5,6) \d+ => zwei Stellen (56=>56)
-      // Number Konstruktor stellt Konvertierung in eine Zahl sicher
-      color1 = color1.match(/\d+/g).map(Number);
-      color2 = color2.match(/\d+/g).map(Number);
-
-      for (let i = 0; i < steps; i++) {
-        interpolatedColorArray.push(
-          this.interpolateColor(color1, color2, stepFactor * i)
-        );
-      }
-      return interpolatedColorArray;
     }
   },
   mounted() {

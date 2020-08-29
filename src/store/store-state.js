@@ -1,6 +1,6 @@
 const state = {
   tab: "intern",
-  menuTab: "all"
+  menuTab: "intern"
 };
 
 const mutations = {

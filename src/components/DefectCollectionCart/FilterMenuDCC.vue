@@ -7,6 +7,19 @@
             <div class="col text-h6">Auswahl</div>
             <div class="col">
               <q-toggle
+                label="Report"
+                icon="description"
+                color="primary"
+                false-value="false"
+                true-value="true"
+                v-model="reportModel"
+                keep-color
+              ></q-toggle>
+            </div>
+            <div class="col">
+              <q-toggle
+                class="q-px-md"
+                v-show="reportModel=='true'"
                 :label="lanModel"
                 icon="g_translate"
                 color="primary"
@@ -28,28 +41,47 @@
                 { label: 'Extern', value: 'extern' }
               ]"
             ></q-btn-toggle>
+            <q-btn-toggle
+              v-show="model === 'extern'"
+              v-model="modelExtern"
+              toggle-color="primary"
+              unelevated
+              spread
+              :options="[{label:'Kunde', value:'kunde'},{label:'Lieferant',value:'lieferant'}]"
+            ></q-btn-toggle>
+            <q-select
+              v-model="textYear"
+              :options="yearOptions"
+              dense
+              square
+              outlined
+              maxlength="4"
+              style="width: 250px"
+              label="Jahr"
+            >
+              <template v-slot:append>
+                <q-icon
+                  v-show="textYear !== ''"
+                  class="cursor-pointer"
+                  name="clear"
+                  @click.stop="textYear = ''"
+                ></q-icon>
+              </template>
+            </q-select>
+            <div class="col">
+              <q-btn-toggle
+                v-model="timeModel"
+                toggle-color="primary"
+                unelevated
+                spread
+                :options="[
+                { label: 'Kalenderwoche', value: 'kw' },
+                { label: 'Monat', value: 'month' }
+              ]"
+              ></q-btn-toggle>
+            </div>
 
-            <div class="row">
-              <q-select
-                v-model="textYear"
-                :options="yearOptions"
-                dense
-                square
-                outlined
-                maxlength="4"
-                style="width: 250px"
-                label="Jahr"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    v-show="textYear !== ''"
-                    class="cursor-pointer"
-                    name="clear"
-                    @click.stop="textYear = ''"
-                  ></q-icon>
-                </template>
-              </q-select>
-
+            <div class="row" v-if="timeModel==='kw'">
               <q-input
                 v-model="textFromWeek"
                 dense
@@ -92,37 +124,87 @@
                 </template>
               </q-input>
             </div>
+
+            <div class="row" v-if="timeModel==='month'">
+              <q-select
+                v-model="modelMonthFrom"
+                :options="timeOptions"
+                dense
+                square
+                outlined
+                maxlength="2"
+                size="2"
+                label="Von Monat"
+                style="width: 100%"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    v-show="modelMonthFrom !== ''"
+                    class="cursor-pointer"
+                    name="clear"
+                    @click.stop="modelMonthFrom = ''"
+                  ></q-icon>
+                </template>
+              </q-select>
+              <q-select
+                v-model="modelMonthTo"
+                :options="OptionsMonthTo"
+                dense
+                square
+                outlined
+                maxlength="2"
+                size="2"
+                label="Bis Monat"
+                style="width: 100%"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    v-show="modelMonthTo !== ''"
+                    class="cursor-pointer"
+                    name="clear"
+                    @click.stop="modelMonthTo = ''"
+                  ></q-icon>
+                </template>
+              </q-select>
+            </div>
+
             <FilterSelect
               :stringOptions="Config.parts"
+              :savedModel="savedModel.parts"
               :multipleselect="true"
               :type="'Material'"
               ref="selectParts"
             />
             <FilterSelect
               :stringOptions="Config.orders"
+              :savedModel="savedModel.orders"
               :multipleselect="true"
               :type="'Auftrag'"
               ref="selectOrders"
             />
             <FilterSelect
-              :stringOptions="Config.process"
-              :multipleselect="true"
-              :type="'Vorgang'"
-              ref="selectProcess"
-            />
-            <FilterSelect
               :stringOptions="Config.machines"
+              :savedModel="savedModel.machines"
               :multipleselect="true"
               :type="'Maschine'"
               ref="selectMachines"
             />
             <FilterSelect
-              v-show="model === 'extern'"
+              v-show="model === 'extern' && modelExtern=='kunde'"
               :stringOptions="Config.customer"
-              :multipleselect="false"
+              :savedModel="savedModel.customer"
+              :multipleselect="true"
               :type="'Kunde'"
               ref="selectCustomer"
             />
+            <!--
+              <FilterSelect
+              :stringOptions="Config.process"
+              :multipleselect="true"
+              :type="'Vorgang'"
+              ref="selectProcess"
+            />
+            -->
           </div>
           <q-card-actions align="center">
             <q-btn
@@ -152,13 +234,38 @@ export default {
   data() {
     return {
       model: "intern",
+      modelExtern: "kunde",
+      timeModel: "kw",
+      timeOptions: [
+        { label: "Januar", value: 1 },
+        { label: "Februar", value: 2 },
+        { label: "März", value: 3 },
+        { label: "April", value: 4 },
+        { label: "Mai", value: 5 },
+        { label: "Juni", value: 6 },
+        { label: "Juli", value: 7 },
+        { label: "August", value: 8 },
+        { label: "September", value: 9 },
+        { label: "Oktober", value: 10 },
+        { label: "November", value: 11 },
+        { label: "Dezember", value: 12 }
+      ],
+      modelMonthFrom: "",
+      modelMonthTo: "",
       disabled: true,
       lanModel: "de",
+      reportModel: "false",
       modelYearWeek: "year",
       yearOptions: [],
       textYear: "",
       textFromWeek: "",
-      textToWeek: ""
+      textToWeek: "",
+      savedModel: {
+        parts: [],
+        orders: [],
+        machines: [],
+        customer: []
+      }
     };
   },
   watch: {
@@ -172,24 +279,81 @@ export default {
   },
 
   computed: {
+    Option() {
+      let option = "intern";
+      if (this.model !== "intern") {
+        option = this.modelExtern;
+      }
+      return option;
+    },
+    OptionsMonthTo() {
+      let options = this.timeOptions;
+      if (
+        Object.keys(this.modelMonthFrom).length > 0 &&
+        this.modelMonthFrom !== "null"
+      ) {
+        options = this.timeOptions.filter(
+          d => d.value >= this.modelMonthFrom.value
+        );
+      }
+      return options;
+    },
     ...mapGetters({
-      Config: "config/getCfg"
+      Config: "config/getCfg",
+      MenuData: "menuData/getMenuDefectCollection"
     })
   },
   methods: {
+    getModels() {
+      if (Object.keys(this.MenuData).length !== 0) {
+        this.savedModel.parts = this.MenuData.parts;
+        this.savedModel.orders = this.MenuData.orders;
+        this.savedModel.machines = this.MenuData.machines;
+        this.savedModel.customer = this.MenuData.customer;
+        this.modelMonthFrom = this.MenuData.months[0];
+        this.modelMonthTo = this.MenuData.months[1];
+        this.textFromWeek = this.MenuData.weeks[0];
+        this.textToWeek = this.MenuData.weeks[1];
+        this.textYear = this.MenuData.year;
+        this.timeModel = this.MenuData.timeOption;
+        this.model = this.MenuData.tab;
+        this.modelExtern = this.MenuData.modelExtern;
+        this.reportModel = this.MenuData.report
+        this.lanModel = this.MenuData.lang
+      }
+    },
     emitOptions() {
+      if (this.modelMonthFrom === "") {
+        this.modelMonthFrom = this.modelMonthTo;
+      }
+
+      if (this.modelMonthTo === "") {
+        this.modelMonthTo = this.modelMonthFrom;
+      }
+
       const options = {
         tab: this.model,
+        option: this.Option,
         year: this.textYear,
+        timeOption: this.timeModel,
         weeks: [this.textFromWeek, this.textToWeek],
+        months: [this.modelMonthFrom.value, this.modelMonthTo.value],
         parts: this.$refs.selectParts.emitModel(),
         orders: this.$refs.selectOrders.emitModel(),
-        process: this.$refs.selectProcess.emitModel(),
         machines: this.$refs.selectMachines.emitModel(),
         customer: this.$refs.selectCustomer.emitModel(),
-        lang: this.lanModel
+        lang: this.lanModel,
+        report: this.reportModel
+        // process: this.$refs.selectProcess.emitModel(),
       };
+
+      // neue Variable aus den Optionen für das gespeicherte Menü
+      const savedOptions = options;
+      savedOptions.modelExtern = this.modelExtern;
+      savedOptions.months = [this.modelMonthFrom, this.modelMonthTo];
+
       this.$emit("saveConfigEmit", options);
+      this.updateMenuDefectCollectionCard(savedOptions);
     },
     formatWeeks(week) {
       if (week === "") {
@@ -204,7 +368,6 @@ export default {
         year = this.year;
       }
       const fweek = year + "W" + week;
-      console.log(fweek);
       return fweek;
     },
     numericFromWeek() {
@@ -213,7 +376,8 @@ export default {
     numericToWeek() {
       this.textToWeek = this.textToWeek.replace(/\D/g, "");
     },
-    ...mapActions("states", ["updateMenuTab"])
+    ...mapActions("states", ["updateMenuTab"]),
+    ...mapActions("menuData", ["updateMenuDefectCollectionCard"])
   },
   mounted() {
     const startYear = new Date("01, 01, 2014").getFullYear();
@@ -221,6 +385,7 @@ export default {
     for (let index = startYear; index <= currentYear; index++) {
       this.yearOptions.push(index);
     }
+    this.getModels();
   }
 };
 </script>

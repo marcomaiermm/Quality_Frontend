@@ -2,7 +2,12 @@
   <div class="q-pa-md">
     <q-card class="hist-card" bordered>
       <q-card-section>
-        <div class="text-overline text-9">Pareto Merkmale</div>
+        <div class="row">
+          <div class="text-overline text-9 col-6">Pareto Merkmale</div>
+          <div class="col-6">
+            <TopSlider :maxValue="Object.keys(Pareto).length" @sliderRefreshEmit="slicedPareto" />
+          </div>
+        </div>
         <commit-chart-bar
           chart-id="canvas-pareto"
           :width="w"
@@ -17,14 +22,17 @@
 
 <script>
 import CommitChartBar from "../js/CommitChartBar.js";
+import TopSlider from "../TopSlider";
 import { mapGetters } from "vuex";
 export default {
   name: "DefectCollectionPareto",
   components: {
-    CommitChartBar
+    CommitChartBar,
+    TopSlider
   },
   data() {
     return {
+      plotLength: this.MaxValues,
       datacollection: {
         labels: [],
         datasets: []
@@ -36,20 +44,48 @@ export default {
     };
   },
   computed: {
+      MaxValues() {
+        let len = 0
+        if (Object.keys(this.Pareto).length > 0) {
+          len = Object.keys(this.Pareto).length;
+        }
+        return len
+      },
+      SlicedData(){
+        const data = this.Pareto
+        const sliced = Object.keys(data).slice(0, this.plotLength).reduce((result, key) => {
+                            result[key] = data[key];
+                            return result;
+                        }, {});
+        let result = {}
+        if(Object.keys(sliced).length>0){
+          result = sliced
+        } else {
+          result = data
+        }
+        return result
+    },
     ...mapGetters({
-      Pareto: "defectCollection/getPareto"
+      Pareto: "defectCollection/getPareto",
+      MenuData: "menuData/getMenuDefectCollection"
     })
   },
   methods: {
+    slicedPareto(value) {
+      this.plotLength = value;
+      this.fillPareto();
+    },
+    /*
     printChart() {
       const canvasEle = document.getElementById("canvas-pareto");
       const htmlString =
         "<br><img src='" + canvasEle.toDataURL("image/jpg") + "' />";
       return htmlString;
     },
+    */
     fillPareto() {
       let dataPareto = [];
-      dataPareto = this.Pareto;
+      dataPareto = this.SlicedData;
       const dataSet = [];
       const kumSet = [];
       Object.keys(dataPareto).forEach(element => {
@@ -127,8 +163,10 @@ export default {
               id: "P",
               position: "right",
               ticks: {
+                /*
                 max: 100,
                 min: 0,
+                */
                 callback: function(value) {
                   return value + "%";
                 }

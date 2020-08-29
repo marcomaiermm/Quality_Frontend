@@ -9,7 +9,7 @@
     :loading="loading"
     :filter="filter"
     row-key="index"
-    no-data-label="I didn't find anything for you"
+    no-data-label="Hier gibt es nichts zu sehen, bitte gehen Sie weiter..."
     virtual-scroll
     :pagination.sync="pagination"
     :rows-per-page-options="[0]"

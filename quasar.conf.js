@@ -37,7 +37,7 @@ module.exports = function(ctx) {
       //            (fastest compile time; minimum bundle size; most tedious)
       // * true   - Import everything from Quasar
       //            (not treeshaking Quasar; biggest bundle size; convenient)
-      all: "auto",
+      importStrategy: "auto",
 
       components: [
         "QLayout",
@@ -67,12 +67,12 @@ module.exports = function(ctx) {
     },
 
     // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie
-    supportIE: false,
+    // supportIE: false,
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
       vueRouterMode: "history", // available values: 'hash', 'history'
-
+      // mordern: true,
       // showProgress: false,
       // gzip: true,
       // analyze: true,
@@ -116,8 +116,8 @@ module.exports = function(ctx) {
       workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {}, // only for GenerateSW
       manifest: {
-        name: "Quality App",
-        short_name: "Quality App",
+        name: "QVue",
+        short_name: "QVue",
         description: "Quasar Framework fuer Qualitätstool",
         display: "standalone",
         orientation: "portrait",
@@ -125,27 +125,27 @@ module.exports = function(ctx) {
         theme_color: "#027be3",
         icons: [
           {
-            src: "statics/icons/icon-128x128.png",
+            src: "icons/icon-128x128.png",
             sizes: "128x128",
             type: "image/png"
           },
           {
-            src: "statics/icons/icon-192x192.png",
+            src: "icons/icon-192x192.png",
             sizes: "192x192",
             type: "image/png"
           },
           {
-            src: "statics/icons/icon-256x256.png",
+            src: "icons/icon-256x256.png",
             sizes: "256x256",
             type: "image/png"
           },
           {
-            src: "statics/icons/icon-384x384.png",
+            src: "icons/icon-384x384.png",
             sizes: "384x384",
             type: "image/png"
           },
           {
-            src: "statics/icons/icon-512x512.png",
+            src: "icons/icon-512x512.png",
             sizes: "512x512",
             type: "image/png"
           }
@@ -166,7 +166,7 @@ module.exports = function(ctx) {
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-electron-apps/configuring-electron
     electron: {
-      bundler: "packager", // 'packager' or 'builder'
+      bundler: "builder", // 'packager' or 'builder'
 
       packager: {
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
@@ -182,7 +182,20 @@ module.exports = function(ctx) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: "quality_frontend"
+        appId: "com.electron.qvue",
+        productName: "QVue",
+        copyright: "Copyright © 2020 ${Marco Maier}",
+        // NSIS Installer
+        // win: {
+        //   target: "nsis"
+        // },
+        // Updates benötigen squirrel wegen nupkg!
+        win: {
+          target: "squirrel"
+        },
+        squirrelWindows: {
+          loadingGif: "build/install-spinner.gif"
+        }
       },
 
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration

@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="row">
-      <div class="text-overline text-9">Kosten</div>
+      <div class="col text-overline text-9">Kostenaufschlüsselung in EUR</div>
+      <div class="col-6">
+        <TopSlider :maxValue="Object.keys(Data).length" @sliderRefreshEmit="slicedPie" />
+      </div>
       <q-space></q-space>
       <q-select
         borderless
@@ -11,7 +14,7 @@
         map-options
         emit-value
         label="Auswahl"
-        style="width: 100px"
+        style="width: 120px"
       ></q-select>
     </div>
     <commit-chart-pie :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-pie>
@@ -20,16 +23,57 @@
 
 <script>
 import CommitChartPie from "../js/CommitChartPie";
+import TopSlider from "../TopSlider";
+import { getCosts } from "../js/CalcCost";
+import { formatCost } from "../js/FormatCost";
+import { interpolateColors } from "../js/InterpolateColors";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
-  name: "ParetoChart",
-  props: ["dataset"],
+  name: "CostPieChart",
+  props: ["tab"],
   components: {
-    CommitChartPie
+    CommitChartPie,
+    TopSlider
+  },
+  computed: {
+    Data() {
+      let data = [];
+      switch (this.tab) {
+        case "intern":
+          data = this.DataIntern;
+          break;
+        case "extern":
+          data = this.DataExtern;
+          break;
+        case "all":
+          data = this.DataAll;
+          break;
+      }
+      return data;
+    },
+    MaxValues() {
+      let len = 0
+      if (Object.keys(this.Data).length > 0) {
+        len = Object.keys(this.Data).length;
+      }
+      return len
+    },
+    ...mapGetters({
+      DataIntern: "dataset/getData",
+      DataAll: "dataset/getDataAll",
+      DataExtern: "dataset/getDataExtern"
+    })
   },
   watch: {
     model() {
       this.fillPie();
+      this.updateSelect(this.model)
+    },
+    tab() {
+      if (this.Data.length > 0) {
+        this.fillPie();
+      }
     }
   },
   data() {
@@ -37,21 +81,37 @@ export default {
       model: "Material",
       selectOption: [
         "Auftrags-Nr.",
-        "Vorgangs-Nr.",
+        "Maschine",
+        "Material"
+        /*
         "Fehlermerkmal",
-        "Material",
-        "Maschine"
+        "Produktgruppe",
+        "Vorgangs-Nr.",
+        "Werkstoff"
+        */
       ],
       datacollection: {
         labels: [],
         datasets: []
       },
+      plotLength: 5,
       options: {},
       h: 370,
       w: 1000
     };
   },
   methods: {
+    slicedPie(value) {
+      this.plotLength = value;
+      this.updateSelect(this.model)
+      this.updateHead(this.plotLength)
+      this.fillPie();
+    },
+    sliceData(data){
+      let cost = data
+      cost = cost.slice(0,this.plotLength)
+      return cost
+    },
     fillPie() {
       let colors = [];
       let colorOne = [];
@@ -69,17 +129,23 @@ export default {
           }
         ]
       };
-      collection = this.calc_cost(this.dataset, this.model);
-
+      collection = getCosts(this.Data, this.model);
+      this.updateCosts(collection)
+      collection = this.sliceData(collection)
+      
       const steps = Object.keys(collection).length;
       const s1 = Math.floor(steps / 2);
       const s2 = steps - s1;
 
-      colorOne = this.interpolateColors(c1, c2, s1);
-      colorTwo = this.interpolateColors(cm, c2, s2);
+      colorOne = interpolateColors(c1, c2, s1);
+      colorTwo = interpolateColors(cm, c2, s2);
       colors = colorOne.concat(colorTwo);
 
+      
+
       collection.sort((a, b) => parseFloat(a.Kosten) - parseFloat(b.Kosten));
+      
+
       collection = collection.map(item => {
         return {
           label: item[this.model],
@@ -97,15 +163,6 @@ export default {
         this.datacollection.datasets[0].data.push(element.data);
         this.datacollection.datasets[0].backgroundColor.push(
           "rgba(" + color[0] + "," + color[1] + "," + color[2] + ",0.8)"
-          /*
-          "rgba(" +
-            colors[i][0] +
-            "," +
-            colors[i][1] +
-            "," +
-            colors[i][2] +
-            ",0.8)"
-          */
         );
         this.datacollection.labels.push(element.label);
       });
@@ -119,49 +176,27 @@ export default {
         },
         animation: {
           duration: 2000
+        },
+        tooltips: {
+          mode: "label",
+          callbacks: {
+            label: function(tooltipItem, data) {
+              const indice = tooltipItem.index;
+              return (
+                data.labels[indice] +
+                ": " +
+                formatCost(data.datasets[0].data[indice])
+              );
+            }
+          }
         }
       };
     },
-    calc_cost(data, option) {
-      const grouped = data.reduce(
-        (all, { [option]: c, Kosten: a }) => ({
-          ...all,
-          [c]: (all[c] || 0) + a
-        }),
-        {}
-      );
-      const result = Object.keys(grouped).map(k => ({
-        [option]: k,
-        Kosten: grouped[k]
-      }));
-      return result;
-    },
-    interpolateColor(color1, color2, factor) {
-      if (arguments.length < 3) {
-        factor = 0.5;
-      }
-      const result = color1.slice();
-      for (let i = 0; i < 3; i++) {
-        result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
-      }
-      return result;
-    },
-
-    interpolateColors(color1, color2, steps) {
-      const stepFactor = 1 / (steps - 1);
-      const interpolatedColorArray = [];
-
-      // \d => einfache Stelle (56 => 5,6) \d+ => zwei Stellen (56=>56)
-      // Number Konstruktor stellt Konvertierung in eine Zahl sicher
-      color1 = color1.match(/\d+/g).map(Number);
-      color2 = color2.match(/\d+/g).map(Number);
-
-      for (let i = 0; i < steps; i++) {
-        interpolatedColorArray.push(
-          this.interpolateColor(color1, color2, stepFactor * i)
-        );
-      }
-      return interpolatedColorArray;
+    ...mapActions("costOptions", ["updateSelect","updateHead","updateCosts"]),
+  },
+  mounted() {
+    if (this.Data.length > 0) {
+      this.fillPie();
     }
   }
 };

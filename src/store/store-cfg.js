@@ -1,6 +1,10 @@
 const state = {
   config: {
     year: ""
+  },
+  path: {
+    host: "AWWKS-004244.allweier.lcl",
+    port: "5000"
   }
 };
 
@@ -11,7 +15,9 @@ const mutations = {
 };
 
 const actions = {
-  updateConfig({ commit }, payload) {
+  updateConfig({
+    commit
+  }, payload) {
     commit("updateConfig", payload);
   }
 };
@@ -19,6 +25,9 @@ const actions = {
 const getters = {
   getCfg: state => {
     return state.config;
+  },
+  getPath: state => {
+    return state.path;
   }
 };
 

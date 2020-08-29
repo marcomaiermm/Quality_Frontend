@@ -6,9 +6,7 @@
 
     <q-item-section>
       <q-item-label>{{ title }}</q-item-label>
-      <q-item-label caption>
-        {{ caption }}
-      </q-item-label>
+      <q-item-label caption>{{ caption }}</q-item-label>
     </q-item-section>
   </q-item>
 </template>
@@ -41,6 +39,8 @@ export default {
 </script>
 
 <style lang="sass">
+.my-menu-link
+  background-color: $info
 .menu-link
   color: white
   background: #F2C037

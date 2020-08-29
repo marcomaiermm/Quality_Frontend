@@ -1,20 +1,65 @@
 <template>
   <div>
-    <div class="text-overline text-9">Pareto Diagramm</div>
+    <div class="row">
+      <div class="text-overline text-9 col-5">Reklamations Pareto Diagramm</div>
+      <div class="col-6">
+        <TopSlider :maxValue="Object.keys(Data).length" @sliderRefreshEmit="slicedPareto" />
+      </div>
+    </div>
     <commit-chart-bar :width="w" :height="h" :chartData="datacollection" :options="options"></commit-chart-bar>
   </div>
 </template>
 
 <script>
 import CommitChartBar from "../js/CommitChartBar";
+import TopSlider from "../TopSlider";
 import { mapGetters } from "vuex";
 
 export default {
   name: "ParetoChart",
   components: {
-    CommitChartBar
+    CommitChartBar,
+    TopSlider
   },
   computed: {
+    Data() {
+      // arr.slice(begin, end)
+      // Object.entries(obj).slice(begin, end)
+      let data = {}
+        switch (this.tab) {
+        case "intern":
+          data = this.Pareto;
+          break;
+        case "extern":
+          data = this.ParetoExtern;
+          break;
+        case "all":
+          data = this.ParetoAll;
+          break;
+      }
+      return data
+    },
+    MaxValues() {
+      let len = 0
+      if (Object.keys(this.Data).length > 0) {
+        len = Object.keys(this.Data).length;
+      }
+      return len
+    },
+    SlicedData(){
+      const data = this.Data
+      const sliced = Object.keys(data).slice(0, this.plotLength).reduce((result, key) => {
+                          result[key] = data[key];
+                          return result;
+                      }, {});
+      let result = {}
+      if(Object.keys(sliced).length>0){
+        result = sliced
+      } else {
+        result = data
+      }
+      return result
+    },
     ...mapGetters({
       Pareto: "dataset/getPareto",
       ParetoAll: "dataset/getParetoAll",
@@ -24,6 +69,7 @@ export default {
   props: ["tab"],
   data() {
     return {
+      plotLength: 10,
       datacollection: {
         labels: [],
         datasets: []
@@ -31,29 +77,30 @@ export default {
       dataset: {},
       options: {},
       h: 370,
-      w: 1000
+      w: 1000,
+      pointHoverRadiusVal: 4,
+      pointRadiusVal: 3
     };
   },
   methods: {
+    slicedPareto(value) {
+      this.plotLength = value;
+      this.fillPareto();
+    },
     fillPareto() {
-      let dataPareto = [];
-      switch (this.tab) {
-        case "intern":
-          dataPareto = this.Pareto;
-          break;
-        case "extern":
-          dataPareto = this.ParetoExtern;
-          break;
-        case "all":
-          dataPareto = this.ParetoAll;
-          break;
-      }
+      const dataPareto = this.SlicedData;
       const dataSet = [];
       const kumSet = [];
       Object.keys(dataPareto).forEach(element => {
         dataSet.push(dataPareto[element].Fehler);
         kumSet.push(dataPareto[element].Kummuliert);
       });
+
+      // Kummulierte Datenpunkte bei zuvielen Datenpunkten kleiner machen
+      if (kumSet.length >= 40) {
+        this.pointHoverRadiusVal = 0;
+        this.pointRadiusVal = 0;
+      }
 
       this.datacollection = {
         labels: Object.keys(dataPareto),
@@ -65,7 +112,9 @@ export default {
             backgroundColor: "rgba(190, 1, 74, 0.8)",
             borderColor: "rgba(190, 1, 74, 0.8)",
             fill: false,
-            type: "line"
+            type: "line",
+            pointRadius: this.pointRadiusVal,
+            pointHoverRadius: this.pointHoverRadiusVal
           },
           {
             label: "Fehler",
@@ -91,7 +140,7 @@ export default {
               if (tooltipItem.datasetIndex === 0) {
                 return "Kummuliert: " + tooltipItem.yLabel + "%";
               } else {
-                return "Reklamationen: " + tooltipItem.yLabel;
+                return "Teile: " + tooltipItem.yLabel;
               }
             }
           }
@@ -125,8 +174,10 @@ export default {
               id: "P",
               position: "right",
               ticks: {
+                /*
                 max: 100,
                 min: 0,
+                */
                 callback: function(value) {
                   return value + "%";
                 }

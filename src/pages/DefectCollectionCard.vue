@@ -4,12 +4,28 @@
     <div class="q-pa-md q-gutter-xs">
       <div class="row q-gutter-md justify-right">
         <div>
-          <q-btn dense flat icon="tune" @click="persistent = true">
-            <q-tooltip content-class="bg-accent" anchor="top left">Auswahl</q-tooltip>
+          <q-btn
+            dense
+            flat
+            icon="tune"
+            @click="persistent = true"
+            class="settings-btn"
+          >
+            <q-tooltip content-class="bg-accent" anchor="top left"
+              >Auswahl</q-tooltip
+            >
           </q-btn>
 
-          <q-dialog v-model="persistent" persistent transition-show="scale" transition-hide="scale">
-            <FilterMenu :savedConfig="configOption" @saveConfigEmit="saveConfig" />
+          <q-dialog
+            v-model="persistent"
+            no-backdrop-dismiss
+            transition-show="scale"
+            transition-hide="scale"
+          >
+            <FilterMenu
+              :savedConfig="configOption"
+              @saveConfigEmit="saveConfig"
+            />
           </q-dialog>
           <!--
           <q-toggle
@@ -26,11 +42,16 @@
             dense
             flat
             :disable="DisableButton"
-            class="q-ml-xs"
+            class="refresh-btn q-ml-xs"
             icon="refresh"
             @click="refreshData()"
           >
-            <q-tooltip v-if="!loading" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
+            <q-tooltip
+              v-if="!loading"
+              content-class="bg-accent"
+              anchor="top left"
+              >Aktualisieren</q-tooltip
+            >
           </q-btn>
         </div>
         <q-separator vertical inset></q-separator>
@@ -38,11 +59,13 @@
           dense
           flat
           :disable="DisableSave"
-          class="q-ml-xs"
+          class="save-btn"
           icon="save"
           @click="createReport()"
         >
-          <q-tooltip content-class="bg-accent" anchor="top left">Report speichern...</q-tooltip>
+          <q-tooltip content-class="bg-accent" anchor="top left"
+            >Report speichern...</q-tooltip
+          >
         </q-btn>
       </div>
       <q-separator></q-separator>
@@ -100,7 +123,10 @@ export default {
       }
     },
     DisableSave() {
-      if (Object.keys(this.Dataset).length > 0) {
+      if (
+        Object.keys(this.Dataset).length > 0 &&
+        this.configOption.report === "true"
+      ) {
         return false;
       } else {
         return true;
@@ -113,7 +139,8 @@ export default {
       Pareto: "defectCollection/getPareto",
       Summary: "defectCollection/getSummary",
       Report: "defectCollection/getReport",
-      Config: "config/getCfg"
+      Config: "config/getCfg",
+      Path: "config/getPath"
     })
   },
   data() {
@@ -129,7 +156,8 @@ export default {
       htmlTableSummary: "",
       errors: [],
       cancelToken: null,
-      source: null
+      source: null,
+      report: null
     };
   },
   methods: {
@@ -192,30 +220,42 @@ export default {
       this.source = this.cancelToken.source();
       this.updateDefectCollectionCard([]);
       this.updateSummary([]);
-
       this.$axios
-        .get("http://pc0547.allweier.lcl:5000/defectcollectioncard", {
-          cancelToken: this.source.token,
-          params: {
-            year: this.configOption.year,
-            weeks: JSON.stringify(this.configOption.weeks),
-            parts: JSON.stringify(this.configOption.parts),
-            orders: JSON.stringify(this.configOption.orders),
-            process: JSON.stringify(this.configOption.process),
-            machines: JSON.stringify(this.configOption.machines),
-            customer: JSON.stringify(this.configOption.customer),
-            tab: this.configOption.tab,
-            lang: this.configOption.lang
+        .get(
+          "http://" +
+            this.Path.host +
+            ":" +
+            this.Path.port +
+            "/defectcollectioncard",
+          {
+            cancelToken: this.source.token,
+            params: {
+              year: this.configOption.year,
+              weeks: JSON.stringify(this.configOption.weeks),
+              months: JSON.stringify(this.configOption.months),
+              parts: JSON.stringify(this.configOption.parts),
+              orders: JSON.stringify(this.configOption.orders),
+              process: JSON.stringify(this.configOption.process),
+              machines: JSON.stringify(this.configOption.machines),
+              customer: JSON.stringify(this.configOption.customer),
+              timeOption: this.configOption.timeOption,
+              tab: this.configOption.tab,
+              option: this.configOption.option,
+              lang: this.configOption.lang,
+              report: this.configOption.report
+            }
           }
-        })
+        )
         .then(response => {
           const seed = response.data;
           const chart = JSON.parse(seed.Chart);
           const defectCollectionCard = JSON.parse(seed.Fehlersammelkarte);
           const pareto = JSON.parse(seed.Pareto);
           const summary = JSON.parse(seed.Zusammenfassung);
-
           // Byte64 Images und HTML Tabellen
+          const report = seed.report;
+          console.log(report);
+
           this.svgBar = seed.bar;
           this.svgPareto = seed.pareto;
           this.base64Bg = seed.bg;
@@ -226,9 +266,9 @@ export default {
           this.updateDataset(seed);
           this.updateDefectCollectionCard(defectCollectionCard);
           this.updateSummary(summary);
-          this.updateChart(chart["Reklamationen pro eine million Teile"]);
+          this.updateChart(chart["Fehler pro eine million Teile"]);
           this.updatePareto(pareto);
-
+          this.updateReport(report);
           this.reportDoc();
 
           this.loading = false;
@@ -251,16 +291,28 @@ export default {
     reportDoc() {
       const englishTxt = {
         summary: "Summary",
-        paretoCW: "Complaints ppm per calendar week",
-        features: "Detailed view of complaints per calendar week",
+        paretoCW: "Defect ppm per calendar week",
+        features: "Detailed view of defects per calendar week",
         name: this.Dataset.Name_t
       };
       const germanTxt = {
         summary: "Zusammenfassung",
-        paretoCW: "Reklamationen ppm pro Kalenderwoche",
-        features: "Detailansicht Merkmal Reklamationen pro KW",
+        paretoCW: "Fehler ppm pro Kalenderwoche",
+        features: "Detailansicht Merkmal Fehler pro KW",
         name: this.Dataset.Name
       };
+
+      switch (this.configOption.timeOption) {
+        case "month":
+          englishTxt.paretoCW = "Defects ppm per month";
+          englishTxt.features = "Detailed view of defects per month";
+          germanTxt.paretoCW = "Fehler ppm pro Monat";
+          germanTxt.features = "Detailansicht Merkmal Fehler pro Monat";
+          break;
+        default:
+          break;
+      }
+
       let text = germanTxt;
       if (this.configOption.lang === "en") {
         text = englishTxt;
@@ -337,7 +389,7 @@ export default {
                             width: 21cm;
                             min-height: 29.7cm;
                             /*
-                            background-image: url('data:image/png;base64,${this.base64Bg}'); 
+                            background-image: url('data:image/png;base64,${this.Report.background_img}'); 
                             background-size: contain;
                             */
                           }
@@ -415,7 +467,7 @@ export default {
                             body {
                               background-color: #fff;
                               /*
-                              background-image: url('data:image/png;base64,${this.base64Bg}') !important;
+                              background-image: url('data:image/png;base64,${this.Report.background_img}') !important;
                               background-size: contain !important; 
                               */
                             }
@@ -445,27 +497,27 @@ export default {
                   <body class="document">
 
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <img class="bg" src='data:image/png;base64,${this.Report.background_img}' />
                         <div class="padded">
                           <h3 contenteditable="true">${text.summary} ${text.name}</h3>
-                          <p>${this.htmlTableSummary}</p>
+                          <p>${this.Report.html_tables.summary}</p>
                         </div>
                       </div>
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <img class="bg" src='data:image/png;base64,${this.Report.background_img}' />
                         <div class="padded">
                           <h3 contenteditable="true">${text.paretoCW}</h3>
-                          <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgBar}'/></p>
+                          <p><img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.Report.plots.Features}'/></p>
                           <h3 contenteditable="true">Pareto ppm</h3>
-                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.svgPareto}'/>
+                          <img style='width:100%;height:100%;' src='data:image/svg+xml;base64,${this.Report.plots.Pareto}'/>
                         </div>
                       </div>
 
                       <div class="page">
-                        <img class="bg" src='data:image/png;base64,${this.base64Bg}' />
+                        <img class="bg" src='data:image/png;base64,${this.Report.background_img}' />
                         <div class="padded">
                           <h3 contenteditable="true">${text.features}</h3>
-                          <p>${this.htmlTableFeatures}</p>
+                          <p>${this.Report.html_tables.features}</p>
                         </div>
                       </div>
                     </div>
@@ -505,23 +557,24 @@ export default {
       "updateReport"
     ])
   },
-  mounted() {},
   created() {
     // NUR  FÜR DEV ZWECKE! HOT RELOAD => REFERENZ index.vue
     if (Object.keys(this.Config).length < 2) {
       const config = {};
-      this.$axios.get("http://pc0547.allweier.lcl:5000/cfg").then(response => {
-        const seed = response.data;
+      this.$axios
+        .get("http://" + this.Path.host + ":" + this.Path.port + "/cfg")
+        .then(response => {
+          const seed = response.data;
 
-        Object.keys(seed).forEach(element => {
-          const set = JSON.parse(seed[element]);
-          const key = Object.keys(set[0]);
-          config[element] = Object.values(set)
-            .map(item => item[key])
-            .sort();
+          Object.keys(seed).forEach(element => {
+            const set = JSON.parse(seed[element]);
+            const key = Object.keys(set[0]);
+            config[element] = Object.values(set)
+              .map(item => item[key])
+              .sort();
+          });
+          this.updateConfig(config);
         });
-        this.updateConfig(config);
-      });
     }
   },
   beforeDestroy() {
@@ -531,3 +584,4 @@ export default {
   }
 };
 </script>
+<style lang="stylus" scoped></style>

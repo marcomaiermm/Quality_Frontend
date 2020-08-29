@@ -2,144 +2,169 @@
   <!-- css spacing classes q-[p|m][t|r|b|l|a|x|y]-[none|auto|xs|sm|md|lg|xl]
   type direction              size-->
   <!--<div class="q-mt-sm q-mr-md q-ml-md col">-->
-  <div class="col">
-    <q-table
-      class="my-sticky-dynamic"
-      title="Treats"
-      :dense="$q.screen.lt.md"
-      :data="Dataset"
-      :columns="columns"
-      :loading="load"
-      :filter="filter"
-      row-key="name"
-      no-data-label="I didn't find anything for you"
-      :pagination.sync="pagination"
-      :rows-per-page-options="[0]"
-      :visible-columns="visibleColumns"
-      :sort-method="customSort"
-    >
-      <template v-slot:top>
-        <div class="fit row wrap justify-between content-start">
-          <div class="q-pa-xs col" style="min-width: 150px">
-            <q-input
-              filled
-              dense
-              v-model="startDate"
-              mask="date"
-              :rules="['date']"
-              style="height: 50px"
-              label="Von:"
-              stack-label
-            >
-              <template v-slot:append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                    <q-date v-model="startDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
+  <div class="row">
+    <div class="col">
+      <q-table
+        class="my-sticky-dynamic"
+        title="Treats"
+        :dense="$q.screen.lt.md"
+        :data="Dataset"
+        :columns="columns"
+        :loading="load"
+        :filter="filter"
+        row-key="name"
+        no-data-label="Noch keine Daten angekommen..."
+        :pagination.sync="pagination"
+        :rows-per-page-options="[0]"
+        :visible-columns="visibleColumns"
+        :sort-method="customSort"
+      >
+        <template v-slot:top>
+          <div class="fit row wrap justify-between content-start">
+            <div class="q-pa-xs col-1" style="min-width: 150px">
+              <q-input
+                filled
+                dense
+                v-model="startDate"
+                mask="date"
+                :rules="['date']"
+                style="height: 50px"
+                label="Von:"
+                stack-label
+              >
+                <template v-slot:append>
+                  <q-icon name="event" class="cursor-pointer">
+                    <q-popup-proxy
+                      ref="qDateProxyStart"
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date
+                        v-model="startDate"
+                        today-btn
+                        @input="() => $refs.qDateProxyStart.hide()"
+                      ></q-date>
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
+            </div>
+            <div class="q-pa-xs col-1" style="min-width: 150px">
+              <q-input
+                filled
+                dense
+                v-model="endDate"
+                mask="date"
+                :rules="['date']"
+                style="height: 50px"
+                label="Bis:"
+                stack-label
+              >
+                <template v-slot:append>
+                  <q-icon name="event" class="cursor-pointer">
+                    <q-popup-proxy
+                      ref="qDateProxyEnd"
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date
+                        v-model="endDate"
+                        today-btn
+                        @input="() => $refs.qDateProxyEnd.hide()"
+                      ></q-date>
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
+            </div>
+            <div class="col-1">
+              <q-select
+                v-model="weekNumber"
+                dense
+                outlined
+                square
+                label="Kalenderwoche"
+                :options="calendarWeeks"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    v-if="weekNumber !== null"
+                    class="cursor-pointer"
+                    name="clear"
+                    @click.stop="weekNumber = null"
+                  ></q-icon>
+                </template>
+              </q-select>
+            </div>
+            <div class="col-1">
+              <q-btn
+                dense
+                flat
+                class="refresh-btn q-ml-xs"
+                icon="refresh"
+                :loading="load"
+                @click="update()"
+                :disable="load"
+              >
+                <q-tooltip
+                  v-if="!load"
+                  content-class="bg-accent"
+                  anchor="top left"
+                  >Aktualisieren</q-tooltip
+                >
+              </q-btn>
+              <q-btn dense flat class="settings-btn q-ml-xs" icon="settings">
+                <q-tooltip content-class="bg-accent" anchor="top left"
+                  >Einstellungen</q-tooltip
+                >
+                <FilterMenu :tab="tab" />
+              </q-btn>
+              <q-btn
+                dense
+                flat
+                class="save-btn q-ml-xs"
+                icon="save"
+                :disable="!Save"
+                @click="report()"
+              >
+                <q-tooltip content-class="bg-accent" anchor="top right"
+                  >Report erstellen..</q-tooltip
+                >
+              </q-btn>
+            </div>
+            <div class="col-2">
+              <div class="text-overline text-9" v-if="tab == 'extern'">
+                {{ ExtOption }}
+              </div>
+            </div>
+            <q-space></q-space>
+            <div class="col-2 q-mx-xs">
+              <q-input dense v-model="filter" placeholder="Suche">
+                <template v-slot:append>
+                  <q-icon name="search"></q-icon>
+                </template>
+              </q-input>
+            </div>
+            <div class="col-1 q-mx-xs">
+              <q-select
+                v-model="visibleColumns"
+                multiple
+                outlined
+                square
+                dense
+                options-dense
+                :display-value="$q.lang.table.columns"
+                emit-value
+                map-options
+                :options="columns"
+                option-value="name"
+                label="Ausblenden"
+              ></q-select>
+            </div>
           </div>
-          <div class="q-pa-xs col" style="min-width: 150px">
-            <q-input
-              filled
-              dense
-              v-model="endDate"
-              mask="date"
-              :rules="['date']"
-              style="height: 50px"
-              label="Bis:"
-              stack-label
-            >
-              <template v-slot:append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-                    <q-date v-model="endDate" today-btn @input="() => $refs.qDateProxy.hide()"></q-date>
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
-          </div>
-          <div class="col">
-            <q-select
-              v-model="weekNumber"
-              dense
-              outlined
-              square
-              label="Kalenderwoche"
-              :options="calendarWeeks"
-            >
-              <template v-slot:append>
-                <q-icon
-                  v-if="weekNumber !== null"
-                  class="cursor-pointer"
-                  name="clear"
-                  @click.stop="weekNumber = null"
-                ></q-icon>
-              </template>
-            </q-select>
-          </div>
-          <!--
-          <div v-if="$q.screen.gt.xs" class="col full-width">
-            <q-toggle
-              v-model="visibleColumns"
-              v-for="(cols, idx) in vCols"
-              :key="idx"
-              :val="cols.val"
-              :label="cols.label"
-            ></q-toggle>
-          </div>
-          v-else
-          -->
-          <div class="col">
-            <q-btn
-              dense
-              flat
-              class="q-ml-xs"
-              icon="refresh"
-              :loading="load"
-              @click="update()"
-              :disable="load"
-            >
-              <q-tooltip v-if="!load" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
-            </q-btn>
-            <q-btn dense flat class="q-ml-xs" icon="settings">
-              <q-tooltip content-class="bg-accent" anchor="top left">Einstellungen</q-tooltip>
-              <FilterMenu :tab="tab" />
-            </q-btn>
-            <q-btn dense flat class="q-ml-xs" icon="save" :disable="!Save" @click="report()">
-              <q-tooltip content-class="bg-accent" anchor="top right">Report erstellen..</q-tooltip>
-            </q-btn>
-          </div>
-          <div class="col"></div>
-          <div class="col">
-            <q-input dense v-model="filter" placeholder="Suche">
-              <template v-slot:append>
-                <q-icon name="search"></q-icon>
-              </template>
-            </q-input>
-          </div>
-          <div class="col"></div>
-          <div class="col"></div>
-          <div class="col">
-            <q-select
-              v-model="visibleColumns"
-              multiple
-              outlined
-              dense
-              options-dense
-              :display-value="$q.lang.table.columns"
-              emit-value
-              map-options
-              :options="columns"
-              option-value="name"
-              style="min-width: 150px"
-              label="Ausblenden"
-            ></q-select>
-          </div>
-        </div>
-      </template>
-    </q-table>
+        </template>
+      </q-table>
+    </div>
   </div>
 </template>
 
@@ -153,7 +178,6 @@ let begin = new Date();
 begin.setMonth(begin.getMonth() - 1);
 begin = date.formatDate(begin, "YYYY.MM.DD");
 
-// var moment = require("moment");
 export default {
   components: {
     FilterMenu: () => import("../FilterMenu")
@@ -188,7 +212,7 @@ export default {
       columns: []
     };
   },
-  props: ["tab", "load"],
+  props: ["tab", "load", "extOption"],
   computed: {
     Save() {
       if (
@@ -202,6 +226,13 @@ export default {
         return false;
       }
     },
+    ExtOption() {
+      let opt = "Lieferantenreklamationen";
+      if (this.MenuTab === "kunde") {
+        opt = "Kundenreklamationen";
+      }
+      return opt;
+    },
     data() {
       return Object.freeze(
         this.tableData.slice(0, pageSize * (this.nextPage - 1))
@@ -211,7 +242,7 @@ export default {
       MenuTab: "states/getMenuTab",
       History: "dataset/getHistory",
       Data: "dataset/getData",
-      DataAll: "dataset/getDataAll",
+      // DataAll: "dataset/getDataAll",
       DataExtern: "dataset/getDataExtern",
       Filter: "dataset/getFilter"
     }),
@@ -224,9 +255,11 @@ export default {
         case "extern":
           data = this.DataExtern;
           break;
+        /*
         case "all":
           data = this.DataAll;
           break;
+        */
       }
       return data;
     }
@@ -273,9 +306,13 @@ export default {
         orders: JSON.stringify(this.Filter.orders),
         parts: JSON.stringify(this.Filter.parts),
         process: JSON.stringify(this.Filter.process),
+        productgrp: JSON.stringify(this.Filter.productgrp),
+        material: JSON.stringify(this.Filter.material),
+        customer: JSON.stringify(this.Filter.customer),
         tab: this.tab,
         table: this.MenuTab,
-        report: report
+        report: report,
+        lang: this.Filter.lang
       };
       this.$emit("refreshEmmit", args);
     },
@@ -325,15 +362,17 @@ export default {
         case "extern":
           this.updateDataExtern(data);
           break;
+        /*
         case "all":
           this.updateDataAll(data);
           break;
+        */
       }
     },
     drawTable() {
       this.tableHead = Object.keys(this.Dataset[0]);
       this.tableHead.forEach(element => {
-        this.visibleColumns.push(element);
+        // this.visibleColumns.push(element);
         if (element === "Datum") {
           this.columns.push({
             name: element,
@@ -358,6 +397,17 @@ export default {
           val: element,
           label: element
         });
+        this.visibleColumns = [
+          "Datum",
+          "Auftrags-Nr.",
+          "Maschine",
+          "Material-Nr.",
+          "Material",
+          "Reklamierte Menge",
+          "Kosten pro Einheit",
+          "Kosten"
+        ];
+        // console.log(this.tableHead.map(d => d))
       });
       // this.loading = false;
     },
@@ -427,8 +477,8 @@ export default {
     ...mapActions("dataset", [
       "updateHistory",
       "updateData",
-      "updateDataExtern",
-      "updateDataAll"
+      "updateDataExtern"
+      // "updateDataAll"
     ])
   },
   mounted() {
@@ -451,6 +501,7 @@ export default {
           // this.update();
         }
         break;
+      /*
       case "all":
         if (this.DataAll.length > 0) {
           this.drawTable();
@@ -458,6 +509,7 @@ export default {
           // this.update();
         }
         break;
+      */
     }
   },
   created() {
