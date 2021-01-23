@@ -9,16 +9,8 @@
       narrow-indicator
       align="center"
     >
-      <q-tab
-        name="intern"
-        label="Interne Reklamationen"
-        @click="setTab('intern')"
-      ></q-tab>
-      <q-tab
-        name="extern"
-        label="Externe Reklamationen"
-        @click="setTab('extern')"
-      ></q-tab>
+      <q-tab name="intern" label="Interne Reklamationen" @click="setTab('intern')"></q-tab>
+      <q-tab name="extern" label="Externe Reklamationen" @click="setTab('extern')"></q-tab>
       <!--<q-tab name="all" label="Gesamte Reklamationen" @click="setTab('all')"></q-tab>-->
     </q-tabs>
     <div class="row q-pl-xs">
@@ -54,7 +46,7 @@
             @refreshEmmit="onClickRefresh"
             ref="dataTableAll"
           />
-        </q-tab-panel> -->
+        </q-tab-panel>-->
       </q-tab-panels>
     </div>
     <div class="row q-pa-md">
@@ -102,7 +94,7 @@ export default {
     HistChart: () => import("../components/Dashboard/HistoryChartStacked"),
     PieChart: () => import("../components/Dashboard/CostPieChart"),
     CostInfo: () => import("../components/Dashboard/CostInfo"),
-    CostHistoryChart: () => import("../components/Dashboard/CostHistory")
+    CostHistoryChart: () => import("../components/Dashboard/CostHistory"),
   },
   computed: {
     MenuData() {
@@ -152,8 +144,8 @@ export default {
       Config: "config/getCfg",
       Path: "config/getPath",
       MenuIntern: "menuData/getMenuIntern",
-      MenuExtern: "menuData/getMenuExtern"
-    })
+      MenuExtern: "menuData/getMenuExtern",
+    }),
   },
   data() {
     return {
@@ -170,9 +162,9 @@ export default {
           machine: [],
           part: [],
           order: [],
-          process: []
-        }
-      }
+          process: [],
+        },
+      },
     };
   },
   methods: {
@@ -199,7 +191,7 @@ export default {
       "updateReportAll",
       "updateReportIntern",
       "updateReportExtern",
-      "updateReport"
+      "updateReport",
     ]),
     setTab(tab) {
       this.tab = tab;
@@ -215,13 +207,13 @@ export default {
       this.$axios
         .get("http://" + this.Path.host + ":" + this.Path.port + "/datatable", {
           cancelToken: this.source.token,
-          params: parameter
+          params: parameter,
         })
-        .then(response => {
+        .then((response) => {
           const seed = response.data;
           this.update(seed);
         })
-        .catch(error => {
+        .catch((error) => {
           if (this.$axios.isCancel(error)) {
             console.log("Request canceled", error.message);
           }
@@ -282,7 +274,7 @@ export default {
         machines: "",
         orders: "",
         parts: "",
-        customer: ""
+        customer: "",
       };
       let customer = "";
       switch (this.tab) {
@@ -626,20 +618,20 @@ export default {
             new Date().getTime(),
           filters: [
             { name: "All Files", extensions: ["*"] },
-            { name: "Html", extensions: ["html"] }
+            { name: "Html", extensions: ["html"] },
           ],
-          properties: ["openFile"]
+          properties: ["openFile"],
         };
 
         dialog
           .showSaveDialog(null, options)
-          .then(result => {
+          .then((result) => {
             const filename = result.filePath;
             if (filename === undefined) {
               alert("Kein Name eingegeben.");
               return;
             }
-            fs.writeFile(filename, this.Report, err => {
+            fs.writeFile(filename, this.Report, (err) => {
               if (err) {
                 if (err.code !== "ENOENT") {
                   alert("Fehler: " + err.message);
@@ -650,7 +642,7 @@ export default {
               alert("Datei erfolgreich gespeichert");
             });
           })
-          .catch(err => {
+          .catch((err) => {
             alert(err);
           });
       } else {
@@ -662,13 +654,13 @@ export default {
         document.body.appendChild(a);
         a.click();
       }
-    }
+    },
   },
   beforeDestroy() {
     if (this.source) {
       this.source.cancel("Operation canceled by the user.");
     }
-  }
+  },
 };
 </script>
 <style lang="sass"></style>

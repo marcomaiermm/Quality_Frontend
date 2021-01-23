@@ -4,16 +4,8 @@
     <div class="q-pa-md q-gutter-xs">
       <div class="row q-gutter-md justify-right">
         <div>
-          <q-btn
-            dense
-            flat
-            icon="tune"
-            @click="persistent = true"
-            class="settings-btn"
-          >
-            <q-tooltip content-class="bg-accent" anchor="top left"
-              >Auswahl</q-tooltip
-            >
+          <q-btn dense flat icon="tune" @click="persistent = true" class="settings-btn">
+            <q-tooltip content-class="bg-accent" anchor="top left">Auswahl</q-tooltip>
           </q-btn>
 
           <q-dialog
@@ -22,10 +14,7 @@
             transition-show="scale"
             transition-hide="scale"
           >
-            <FilterMenu
-              :savedConfig="configOption"
-              @saveConfigEmit="saveConfig"
-            />
+            <FilterMenu :savedConfig="configOption" @saveConfigEmit="saveConfig" />
           </q-dialog>
           <!--
           <q-toggle
@@ -46,12 +35,7 @@
             icon="refresh"
             @click="refreshData()"
           >
-            <q-tooltip
-              v-if="!loading"
-              content-class="bg-accent"
-              anchor="top left"
-              >Aktualisieren</q-tooltip
-            >
+            <q-tooltip v-if="!loading" content-class="bg-accent" anchor="top left">Aktualisieren</q-tooltip>
           </q-btn>
         </div>
         <q-separator vertical inset></q-separator>
@@ -63,9 +47,7 @@
           icon="save"
           @click="createReport()"
         >
-          <q-tooltip content-class="bg-accent" anchor="top left"
-            >Report speichern...</q-tooltip
-          >
+          <q-tooltip content-class="bg-accent" anchor="top left">Report speichern...</q-tooltip>
         </q-btn>
       </div>
       <q-separator></q-separator>
@@ -254,7 +236,6 @@ export default {
           const summary = JSON.parse(seed.Zusammenfassung);
           // Byte64 Images und HTML Tabellen
           const report = seed.report;
-          console.log(report);
 
           this.svgBar = seed.bar;
           this.svgPareto = seed.pareto;
@@ -301,6 +282,14 @@ export default {
         features: "Detailansicht Merkmal Fehler pro KW",
         name: this.Dataset.Name
       };
+      const filters = {
+        machines: `<p style="font-weight: bold">Maschinen/Machines:</p><p>${this.configOption.machines.join(", ")}</p>`,
+        orders: `<p style="font-weight: bold">Auftrag/Orders:</p><p>${this.configOption.orders.join(", ")}</p>`,
+        parts: `<p style="font-weight: bold">Material/Parts:</p><p>${this.configOption.parts.join(", ")}</p>`,
+        customer: `<p style="font-weight: bold">Kunde/Customer:</p><p>${this.configOption.customer.join(", ")}</p>`,
+        time: `<p style="font-weight: bold">${this.configOption.year}<br>${Object.keys(this.Summary[0])[1]} - ${Object.keys(this.Summary[0]).pop()}</p>`,
+        option: `<h3 style="text-transform: capitalize">${this.configOption.option}</h3>`
+      };
 
       switch (this.configOption.timeOption) {
         case "month":
@@ -312,7 +301,6 @@ export default {
         default:
           break;
       }
-
       let text = germanTxt;
       if (this.configOption.lang === "en") {
         text = englishTxt;
@@ -332,7 +320,7 @@ export default {
                         <style>
                           html,
                           body {
-                            margin: 0;   
+                            margin: 0;
                             padding: 0;
                             font-family: "Roboto", -apple-system, "San Francisco", "Segoe UI",
                               "Helvetica Neue", sans-serif;
@@ -495,7 +483,17 @@ export default {
       `;
       const body = `
                   <body class="document">
-
+                      <div class="page">
+                        <img class="bg" src='data:image/png;base64,${this.Report.background_img}' />
+                        <div class="padded">
+                          <h3 contenteditable="true">Fehlersammelkarte / Defect Collection Card ${filters.option}</h3>
+                          ${filters.time}
+                          ${filters.machines}
+                          ${filters.orders}
+                          ${filters.parts}
+                          ${filters.customer}
+                        </div>
+                      </div>
                       <div class="page">
                         <img class="bg" src='data:image/png;base64,${this.Report.background_img}' />
                         <div class="padded">

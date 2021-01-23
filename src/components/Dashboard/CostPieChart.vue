@@ -34,9 +34,18 @@ export default {
   props: ["tab"],
   components: {
     CommitChartPie,
-    TopSlider
+    TopSlider,
   },
   computed: {
+    MaxCosts() {
+      let costs = [...this.Costs];
+      costs = costs.sort((a, b) => parseFloat(b.Kosten) - parseFloat(a.Kosten));
+      costs = costs.slice(0, this.SelectHead);
+      if (Object.keys(costs).length > 10) {
+        costs = costs.slice(0, 10);
+      }
+      return costs;
+    },
     Data() {
       let data = [];
       switch (this.tab) {
@@ -53,28 +62,30 @@ export default {
       return data;
     },
     MaxValues() {
-      let len = 0
+      let len = 0;
       if (Object.keys(this.Data).length > 0) {
         len = Object.keys(this.Data).length;
       }
-      return len
+      return len;
     },
     ...mapGetters({
       DataIntern: "dataset/getData",
       DataAll: "dataset/getDataAll",
-      DataExtern: "dataset/getDataExtern"
-    })
+      DataExtern: "dataset/getDataExtern",
+      SelectHead: "costOptions/getHead",
+      Costs: "costOptions/getCosts",
+    }),
   },
   watch: {
     model() {
       this.fillPie();
-      this.updateSelect(this.model)
+      this.updateSelect(this.model);
     },
     tab() {
       if (this.Data.length > 0) {
         this.fillPie();
       }
-    }
+    },
   },
   data() {
     return {
@@ -82,7 +93,7 @@ export default {
       selectOption: [
         "Auftrags-Nr.",
         "Maschine",
-        "Material"
+        "Material",
         /*
         "Fehlermerkmal",
         "Produktgruppe",
@@ -92,31 +103,40 @@ export default {
       ],
       datacollection: {
         labels: [],
-        datasets: []
+        datasets: [],
       },
       plotLength: 5,
       options: {},
       h: 370,
-      w: 1000
+      w: 1000,
     };
   },
   methods: {
     slicedPie(value) {
       this.plotLength = value;
-      this.updateSelect(this.model)
-      this.updateHead(this.plotLength)
+      this.updateSelect(this.model);
+      this.updateHead(this.plotLength);
       this.fillPie();
     },
-    sliceData(data){
-      let cost = data
-      cost = cost.slice(0,this.plotLength)
-      return cost
+    sliceData(data) {
+      let cost = data;
+      cost = cost.slice(0, this.plotLength);
+      return cost;
     },
+    // costSort(data) {
+    //   let costs = [...this.Costs];
+    //   costs = costs.sort((a, b) => parseFloat(b.Kosten) - parseFloat(a.Kosten));
+    //   costs = costs.slice(0, this.SelectHead);
+    //   if (Object.keys(costs).length > 10) {
+    //     costs = costs.slice(0, 10);
+    //   }
+    //   return costs;
+    // },
     fillPie() {
       let colors = [];
       let colorOne = [];
       let colorTwo = [];
-      let collection = null;
+      let cost = null;
       const c1 = "rgb(221, 3, 51)";
       const cm = "rgb(217, 221, 3)";
       const c2 = "rgb(0, 56, 113)";
@@ -125,31 +145,27 @@ export default {
         datasets: [
           {
             data: [],
-            backgroundColor: []
-          }
-        ]
+            backgroundColor: [],
+          },
+        ],
       };
-      collection = getCosts(this.Data, this.model);
-      this.updateCosts(collection)
-      collection = this.sliceData(collection)
-      
-      const steps = Object.keys(collection).length;
+      cost = getCosts(this.Data, this.model);
+      this.updateCosts(cost);
+      // collection = this.sliceData(collection);
+
+      const steps = Object.keys(cost).length;
       const s1 = Math.floor(steps / 2);
       const s2 = steps - s1;
 
       colorOne = interpolateColors(c1, c2, s1);
       colorTwo = interpolateColors(cm, c2, s2);
       colors = colorOne.concat(colorTwo);
+      // collection.sort((a, b) => parseFloat(a.Kosten) - parseFloat(b.Kosten));
 
-      
-
-      collection.sort((a, b) => parseFloat(a.Kosten) - parseFloat(b.Kosten));
-      
-
-      collection = collection.map(item => {
+      const collection = this.MaxCosts.reverse().map((item) => {
         return {
           label: item[this.model],
-          data: item.Kosten
+          data: item.Kosten,
         };
       });
       collection.forEach((element, i) => {
@@ -157,9 +173,9 @@ export default {
         const color = [
           colors[Math.floor(ridx * colors.length)][0],
           colors[Math.floor(ridx * colors.length)][1],
-          colors[Math.floor(ridx * colors.length)][2]
+          colors[Math.floor(ridx * colors.length)][2],
         ];
-        colors = colors.filter(item => !color.includes(item));
+        colors = colors.filter((item) => !color.includes(item));
         this.datacollection.datasets[0].data.push(element.data);
         this.datacollection.datasets[0].backgroundColor.push(
           "rgba(" + color[0] + "," + color[1] + "," + color[2] + ",0.8)"
@@ -172,33 +188,33 @@ export default {
       this.options = {
         responsive: true,
         legend: {
-          display: false
+          display: false,
         },
         animation: {
-          duration: 2000
+          duration: 2000,
         },
         tooltips: {
           mode: "label",
           callbacks: {
-            label: function(tooltipItem, data) {
+            label: function (tooltipItem, data) {
               const indice = tooltipItem.index;
               return (
                 data.labels[indice] +
                 ": " +
                 formatCost(data.datasets[0].data[indice])
               );
-            }
-          }
-        }
+            },
+          },
+        },
       };
     },
-    ...mapActions("costOptions", ["updateSelect","updateHead","updateCosts"]),
+    ...mapActions("costOptions", ["updateSelect", "updateHead", "updateCosts"]),
   },
   mounted() {
     if (this.Data.length > 0) {
       this.fillPie();
     }
-  }
+  },
 };
 </script>
 

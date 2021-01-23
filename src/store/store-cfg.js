@@ -3,8 +3,12 @@ const state = {
     year: ""
   },
   path: {
-    host: "AWWKS-004244.allweier.lcl",
-    port: "5000"
+    // host: "AWWKS-004244.allweier.lcl",
+    // port: "5000"
+    // host: "awslgit01.allweier.lcl",
+    // port: "5000"
+    host: process.env.HOST,
+    port: process.env.PORT
   }
 };
 

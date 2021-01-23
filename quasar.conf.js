@@ -1,7 +1,8 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
+const envparser = require('./src/config/envparser.js')
 
-module.exports = function(ctx) {
+module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
@@ -71,6 +72,7 @@ module.exports = function(ctx) {
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
+      env: envparser(),
       vueRouterMode: "history", // available values: 'hash', 'history'
       // mordern: true,
       // showProgress: false,
@@ -123,8 +125,7 @@ module.exports = function(ctx) {
         orientation: "portrait",
         background_color: "#ffffff",
         theme_color: "#027be3",
-        icons: [
-          {
+        icons: [{
             src: "icons/icon-128x128.png",
             sizes: "128x128",
             type: "image/png"
@@ -184,18 +185,18 @@ module.exports = function(ctx) {
 
         appId: "com.electron.qvue",
         productName: "QVue",
-        copyright: "Copyright © 2020 ${Marco Maier}",
+        copyright: "Copyright © 2020 Allweier Präzisionsteile GmbH - Author ${Marco Maier}",
         // NSIS Installer
-        // win: {
-        //   target: "nsis"
-        // },
-        // Updates benötigen squirrel wegen nupkg!
         win: {
-          target: "squirrel"
+          target: "nsis"
         },
-        squirrelWindows: {
-          loadingGif: "build/install-spinner.gif"
-        }
+        // Updates benötigen squirrel wegen nupkg!
+        // win: {
+        //   target: "squirrel"
+        // },
+        // squirrelWindows: {
+        //   loadingGif: "build/install-spinner.gif"
+        // }
       },
 
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration

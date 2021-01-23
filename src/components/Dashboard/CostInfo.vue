@@ -1,8 +1,8 @@
 <template>
   <q-card class="hist-card" flat>
-    <div class="text-overline text-12">
-      Größte Kostenverursacher Top {{ Object.keys(MaxCosts).length }}
-    </div>
+    <div
+      class="text-overline text-12"
+    >Größte Kostenverursacher Top {{ Object.keys(MaxCosts).length }}</div>
     <!-- <div class="text-overline text-12">Größte Kostenverursacher nach Kategorie</div> -->
     <q-card-section>
       <table class="costTable">
@@ -19,9 +19,9 @@
           </tr>
         </tbody>
       </table>
-      <div class="alligner-item aligner-item--bottom text-overline text-9">
-        Gesamtkosten: {{ format(allCosts) }}
-      </div>
+      <div
+        class="alligner-item aligner-item--bottom text-overline text-9"
+      >Gesamtkosten: {{ format(allCosts) }}</div>
     </q-card-section>
   </q-card>
 </template>
@@ -38,7 +38,7 @@ export default {
       if (this.Data.length > 0) {
         this.fillData();
       }
-    }
+    },
   },
   computed: {
     MaxCosts() {
@@ -77,8 +77,8 @@ export default {
       DataExtern: "dataset/getDataExtern",
       SelectOption: "costOptions/getSelect",
       SelectHead: "costOptions/getHead",
-      Costs: "costOptions/getCosts"
-    })
+      Costs: "costOptions/getCosts",
+    }),
   },
   data() {
     return {
@@ -86,7 +86,7 @@ export default {
       options: [
         "Auftrags-Nr.",
         "Maschine",
-        "Material"
+        "Material",
         /*
         "Fehlermerkmal",
         "Produktgruppe",
@@ -97,7 +97,7 @@ export default {
       costs: {
         order: [],
         part: [],
-        machine: []
+        machine: [],
         /*
         process: [],
         feature: [],
@@ -108,7 +108,7 @@ export default {
       maxCosts: {
         order: {},
         part: {},
-        machine: {}
+        machine: {},
         /*
         feature: {},
         process: {},
@@ -116,7 +116,7 @@ export default {
         material: {}
         */
       },
-      allCosts: ""
+      allCosts: "",
     };
   },
   methods: {
@@ -125,27 +125,28 @@ export default {
         const key = Object.keys(this.costs)[i];
         const costObj = getCosts(this.Data, option);
         this.costs[key] = costObj;
-        this.maxCosts[key] = costObj.reduce(function(prev, current) {
+        this.maxCosts[key] = costObj.reduce(function (prev, current) {
           return prev.Kosten > current.Kosten ? prev : current;
         });
       });
+
       // ES6 Funktion zum summieren der Kosten mittels Reduce
       const sum = (a, b) => Math.round((a + b + Number.EPSILON) * 100) / 100;
 
       // Aufsummieren der Kosten mittels reduce mit der oben definierten summenfunktion
-      this.allCosts = this.Data.map(item => {
+      this.allCosts = this.Data.map((item) => {
         return item.Kosten;
       }).reduce(sum);
     },
     format(a) {
       return formatCost(a);
-    }
+    },
   },
   mounted() {
     if (this.Data.length > 0) {
       this.fillData();
     }
-  }
+  },
 };
 </script>
 
