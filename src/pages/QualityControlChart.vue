@@ -172,19 +172,20 @@ export default {
       this.cancelToken = this.$axios.CancelToken;
       this.source = this.cancelToken.source();
       this.$axios
-        .get(
+        .post(
           "http://" +
             this.Path.host +
             ":" +
             this.Path.port +
             "/qualitycontrolchart",
-          {
-            cancelToken: this.source.token,
-            params: {
-              part: this.modelPart
-              // months: this.modelTime
-            }
-          }
+            {part:this.modelPart},
+          // {
+          //   cancelToken: this.source.token,
+          //   params: {
+          //     part: this.modelPart
+          //     // months: this.modelTime
+          //   }
+          // }
         )
         .then(response => {
           const seed = response.data;

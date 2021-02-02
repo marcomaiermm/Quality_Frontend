@@ -201,14 +201,16 @@ export default {
       }
     },
     getData(parameter) {
+      // {
+      //   cancelToken: this.source.token,
+      //   params: parameter,
+      // }
       this.cancelToken = this.$axios.CancelToken;
       this.source = this.cancelToken.source();
       this.loading = true;
+
       this.$axios
-        .get("http://" + this.Path.host + ":" + this.Path.port + "/datatable", {
-          cancelToken: this.source.token,
-          params: parameter,
-        })
+        .post("http://" + this.Path.host + ":" + this.Path.port + "/datatable/", parameter)
         .then((response) => {
           const seed = response.data;
           this.update(seed);
@@ -220,6 +222,7 @@ export default {
           console.log(error);
           this.loading = false;
         });
+
     },
     report() {},
     update(seed) {
