@@ -18,6 +18,6 @@ RUN rm /etc/nginx/conf.d/default.conf \
     && rm /etc/nginx/sites-enabled/dummy \
     && ln -s /etc/nginx/sites-available/client.conf /etc/nginx/sites-enabled/
 
-COPY --from=builder /app/dist /app
+COPY --from=builder /app/dist/spa /app
 
 EXPOSE 80
